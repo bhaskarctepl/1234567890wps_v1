@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import com.hillspet.wearables.dao.BaseDaoImpl;
 import com.hillspet.wearables.dao.timerLog.TimerLogDao;
 import com.hillspet.wearables.dto.TimerLog;
 import com.hillspet.wearables.dto.filter.TimerLogFilter;
-import com.hillspet.wearables.security.Authentication;
 
 @Repository
 public class TimerLogDaoImpl extends BaseDaoImpl implements TimerLogDao {
@@ -29,14 +27,11 @@ public class TimerLogDaoImpl extends BaseDaoImpl implements TimerLogDao {
 	private static final Logger LOGGER = LogManager.getLogger(TimerLogDaoImpl.class);
 
 	@Autowired
-	private Authentication authentication;
-
-	@Autowired
 	private ObjectMapper mapper;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getTimerLogListCount(TimerLogFilter filter) throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getTimerLogListCount called");
@@ -44,7 +39,7 @@ public class TimerLogDaoImpl extends BaseDaoImpl implements TimerLogDao {
 
 			counts = selectForObject(SQLConstants.TIMER_LOG_GET_LIST_COUNT, String.class,
 					// filter.getFilterType(), filter.getFilterValue(),
-					filter.getSearchText(), filter.getStartDate(), filter.getEndDate(), filter.getCategory());
+					filter.getSearchText(), filter.getStartDate(), filter.getEndDate(), filter.getCategory(), filter.getPetName(), filter.getPetParentName());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getTimerLogListCount", e);
@@ -75,12 +70,13 @@ public class TimerLogDaoImpl extends BaseDaoImpl implements TimerLogDao {
 					timerLog.setRecordName(rs.getString("REC_NAME"));
 					timerLog.setTimerDate(rs.getString("TIMER_DATE"));
 					timerLog.setIsActive(rs.getBoolean("IS_ACTIVE"));
+					timerLog.setIsPetVip(rs.getBoolean("IS_VIP_PET"));
 
 					timerLogList.add(timerLog);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getSortBy(), filter.getOrder(), filter.getSearchText(),
 					// filter.getFilterType(), filter.getFilterValue()
-					filter.getStartDate(), filter.getEndDate(), filter.getCategory());
+					filter.getStartDate(), filter.getEndDate(), filter.getCategory(), filter.getPetName(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getTimerLogList", e);

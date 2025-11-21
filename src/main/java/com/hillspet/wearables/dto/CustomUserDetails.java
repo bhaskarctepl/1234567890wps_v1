@@ -1,19 +1,11 @@
 package com.hillspet.wearables.dto;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CustomUserDetails extends org.springframework.security.core.userdetails.User {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class CustomUserDetails  {
 
 	private Integer userId;
 	private String userName;
@@ -27,10 +19,9 @@ public class CustomUserDetails extends org.springframework.security.core.userdet
 	private Boolean isActive;
 	private Boolean needChangePwd;
 	private Boolean isSuperAdmin;
+	private boolean hasIssueTrackerAccess;
 
 	public CustomUserDetails(User user) {
-		super(user.getUserName(), user.getPassword(), user.getRoles().stream()
-				.map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName())).collect(Collectors.toList()));
 		this.userId = user.getUserId();
 		this.userName = user.getUserName();
 		this.fullName = user.getFullName();
@@ -43,6 +34,7 @@ public class CustomUserDetails extends org.springframework.security.core.userdet
 		this.isActive = user.getIsActive();
 		this.needChangePwd = user.getNeedChangePwd();
 		this.isSuperAdmin = user.getIsSuperAdmin();
+		this.hasIssueTrackerAccess = user.isHasIssueTrackerAccess();
 	}
 
 	public Integer getUserId() {
@@ -125,11 +117,6 @@ public class CustomUserDetails extends org.springframework.security.core.userdet
 		this.isActive = isActive;
 	}
 
-	@Override
-	public boolean isEnabled() {
-		return this.isActive;
-	}
-
 	public Boolean getNeedChangePwd() {
 		return needChangePwd;
 	}
@@ -144,6 +131,14 @@ public class CustomUserDetails extends org.springframework.security.core.userdet
 
 	public void setIsSuperAdmin(Boolean isSuperAdmin) {
 		this.isSuperAdmin = isSuperAdmin;
+	}
+
+	public boolean isHasIssueTrackerAccess() {
+		return hasIssueTrackerAccess;
+	}
+
+	public void setHasIssueTrackerAccess(boolean hasIssueTrackerAccess) {
+		this.hasIssueTrackerAccess = hasIssueTrackerAccess;
 	}
 
 }

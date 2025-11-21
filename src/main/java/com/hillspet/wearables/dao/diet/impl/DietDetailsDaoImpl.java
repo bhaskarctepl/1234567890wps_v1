@@ -128,8 +128,10 @@ public class DietDetailsDaoImpl extends BaseDaoImpl implements DietDetailsDao {
         inputParams.put("p_user_id", userId);
         inputParams.put("p_audit_id", auditId);
         try {
+            LOGGER.info("DietDetailsDaoImpl validateBulkDietList inputParams {}", inputParams);
             Map<String, Object> outParams = callStoredProcedure(SQLConstants.DIET_INFO_BULK_VALIDATION_STAGING,
                     inputParams);
+            LOGGER.info("DietDetailsDaoImpl validateBulkDietList outParams {}", outParams);
             String errorMsg = (String) outParams.get("out_error_msg");
             if (StringUtils.isNotEmpty(errorMsg) || (int) outParams.get("out_flag") < NumberUtils.INTEGER_ONE) {
                 throw new ServiceExecutionException(errorMsg);
@@ -151,7 +153,9 @@ public class DietDetailsDaoImpl extends BaseDaoImpl implements DietDetailsDao {
         inputParams.put("P_STATUS", "Pending");
         inputParams.put("P_DATASOURCE_ID", dataSourceId);
         try {
+            LOGGER.info("DietDetailsDaoImpl createAuditRecord inputParams {}", inputParams);
             Map<String, Object> outParams = callStoredProcedure(SQLConstants.CREATE_DIET_UPLOAD_AUDIT, inputParams);
+            LOGGER.info("DietDetailsDaoImpl createAuditRecord outParams {}", inputParams);
             String errorMsg = (String) outParams.get("out_error_msg");
             int statusFlag = (int) outParams.get("out_flag");
             if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
@@ -177,7 +181,9 @@ public class DietDetailsDaoImpl extends BaseDaoImpl implements DietDetailsDao {
         inputParams.put("P_USER_ID", userId);
         inputParams.put("P_STATUS", status);
         try {
+            LOGGER.info("DietDetailsDaoImpl updateAuditRecord inputParams {}", inputParams);
             Map<String, Object> outParams = callStoredProcedure(SQLConstants.UPDATE_DIET_UPLOAD_AUDIT, inputParams);
+            LOGGER.info("DietDetailsDaoImpl updateAuditRecord outParams {}", outParams);
             String errorMsg = (String) outParams.get("out_error_msg");
             int statusFlag = (int) outParams.get("out_flag");
             if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
@@ -267,7 +273,9 @@ public class DietDetailsDaoImpl extends BaseDaoImpl implements DietDetailsDao {
         inputParams.put("p_selected_staging_ids", request.getId());
         int dietID = 0;
         try {
+            LOGGER.info("DietDetailsDaoImpl updateAuditRecord inputParams {}", inputParams);
             Map<String, Object> outParams = callStoredProcedure(SQLConstants.DIET_INFO_BULK_SAVE, inputParams);
+            LOGGER.info("DietDetailsDaoImpl updateAuditRecord output {}", outParams);
             String errorMsg = (String) outParams.get("out_error_msg");
             int statusFlag = (int) outParams.get("out_flag");
             LOGGER.info("saveBulkUploadDietInfo :: "+errorMsg );
@@ -344,9 +352,9 @@ public class DietDetailsDaoImpl extends BaseDaoImpl implements DietDetailsDao {
 			//inputParams.put("p_pdm_density_value", null);
 			inputParams.put("p_user_id", dietRequest.getUserId());
 			inputParams.put("p_datasource_id", 20);
-
+            LOGGER.info("DietDetailsDaoImpl addDiet inputParams {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.DIET_INFO_INSERT, inputParams);
-
+            LOGGER.info("DietDetailsDaoImpl addDiet outParams {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 
@@ -391,8 +399,9 @@ public class DietDetailsDaoImpl extends BaseDaoImpl implements DietDetailsDao {
 			//inputParams.put("p_pdm_uom", dietRequest.getPdmUom());
 			//inputParams.put("p_pdm_density_value", null);
 			inputParams.put("p_user_id", dietRequest.getUserId());
-
+            LOGGER.info("DietDetailsDaoImpl addDiet inputParams {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.DIET_INFO_UPDATE, inputParams);
+            LOGGER.info("DietDetailsDaoImpl addDiet outParams {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isNotEmpty(errorMsg) || statusFlag < NumberUtils.INTEGER_ONE) {

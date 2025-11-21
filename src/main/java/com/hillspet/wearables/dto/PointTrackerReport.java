@@ -3,6 +3,7 @@ package com.hillspet.wearables.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+@SuppressWarnings("serial")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PointTrackerReport extends BaseDTO {
@@ -15,6 +16,8 @@ public class PointTrackerReport extends BaseDTO {
 	private String behavior;
 	private String status;
 	private String date;
+	private String petParentName;
+	private Boolean isPetVip;
 
 	public String getStudy() {
 		return study;
@@ -79,5 +82,23 @@ public class PointTrackerReport extends BaseDTO {
 	public void setDate(String date) {
 		this.date = date;
 	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
+	}
+
+	public Boolean getIsPetVip() {
+		return isPetVip;
+	}
+
+	public void setIsPetVip(Boolean isPetVip) {
+		this.isPetVip = isPetVip;
+	}
+	
+	
 
 }

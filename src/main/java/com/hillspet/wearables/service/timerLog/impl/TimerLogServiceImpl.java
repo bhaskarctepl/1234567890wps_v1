@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 import com.hillspet.wearables.dao.timerLog.TimerLogDao;
 import com.hillspet.wearables.dto.TimerLog;
-import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.dto.filter.TimerLogFilter;
 import com.hillspet.wearables.response.TimerLogResponse;
 import com.hillspet.wearables.service.timerLog.TimerLogService;

@@ -12,9 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 import org.apache.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +27,8 @@ import com.hillspet.wearables.request.UserRequest;
 import com.hillspet.wearables.response.UserResponse;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -38,13 +38,21 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "RESTful service that performs user related operations", tags = { "User Management" })
 @Produces({ MediaType.APPLICATION_JSON_VALUE, Constants.MEDIA_TYPE_APPLICATION_JSON_INITIAL_VERSION1 })
 @Consumes({ MediaType.APPLICATION_JSON_VALUE, Constants.MEDIA_TYPE_APPLICATION_JSON_INITIAL_VERSION1 })
+@ApiImplicitParams({
+    @ApiImplicitParam(name = "Authorization", value = "",
+        required = true, dataType = "string", paramType = "header", defaultValue = "") 
+    ,@ApiImplicitParam(name = "Accept", 
+        required = true, dataType = "string", paramType = "header", defaultValue = MediaType.APPLICATION_JSON_VALUE)
+    ,@ApiImplicitParam(name = "Content-Type", 
+    	required = true, dataType = "string", paramType = "header", defaultValue = MediaType.APPLICATION_JSON_VALUE)
+})
 public interface UserResource {
 
 	@GET
 	@Path("/session")
-	@ApiOperation(value = "Get Session Details of Logged in User", notes = "Get Session Details Logged in User by using Principal object")
+	@ApiOperation(value = "Get User Details of Logged in User", notes = "Get Session Details Logged in User")
 	@CrossOrigin(origins = "*")
-	public Response user(@Context SecurityContext securityContext);
+	public Response user();
 
 	@POST
 	@ApiOperation(value = "Add User", notes = "Creates a user in the application")
@@ -109,18 +117,6 @@ public interface UserResource {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response getAllUsers(@BeanParam UserFilter filter);
 
-	@POST
-	@Path("/logout")
-	@ApiOperation(value = "Logout User", notes = "Logout the user from application")
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
-			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
-			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
-	public Response logoutUser(@HeaderParam("Authorization") String authorization,
-			@ApiParam(name = "userId", required = true) @QueryParam("userId") String userId, @HeaderParam("platform") String platform);
-
 	@PUT
 	@Path("/forgotPassword")
 	@ApiOperation(value = "Forgot Password", notes = "User should get an email with generated passoword")
@@ -132,7 +128,8 @@ public interface UserResource {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response forgotPassword(
 			@ApiParam(name = "userName", required = true) @QueryParam("userName") String userName,
-			@ApiParam(name = "modifiedBy", required = false) @QueryParam("modifiedBy") String modifiedBy, @HeaderParam("platform") String platform);
+			@ApiParam(name = "modifiedBy", required = false) @QueryParam("modifiedBy") String modifiedBy,
+			@HeaderParam("platform") String platform);
 
 	@PUT
 	@Path("/updatePassword")
@@ -144,7 +141,8 @@ public interface UserResource {
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response updatePassword(
-			@Valid @ApiParam(name = "updatePasswordRequest", required = true) UpdatePasswordRequest updatePasswordRequest, @HeaderParam("platform") String platform);
+			@Valid @ApiParam(name = "updatePasswordRequest", required = true) UpdatePasswordRequest updatePasswordRequest,
+			@HeaderParam("platform") String platform);
 
 	@PUT
 	@Path("/updateUserProfile")
@@ -167,7 +165,7 @@ public interface UserResource {
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response getUserDetails(@PathParam("userId") int userId);
-	
+
 	@POST
 	@Path("/loginSuccess")
 	@ApiOperation(value = "Login Success", notes = "Login Success")
@@ -178,11 +176,11 @@ public interface UserResource {
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response loginSuccess(@HeaderParam("platform") String platform);
-	
+
 	@GET
 	@Path("/validateUser")
 	public Response validateUser();
-	
+
 	@GET
 	@Path("/generateIssueTrackerUrl")
 	public Response generateIssueTrackerUrl(@HeaderParam("Authorization") String authorization);

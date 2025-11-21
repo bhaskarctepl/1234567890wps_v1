@@ -1,34 +1,30 @@
 package com.hillspet.wearables.dto;
 
-public class TimerLog  {
+public class TimerLog {
 
 	private String recordName;
-	
+
 	private String category;
-	
+
 	private String duration;
-	
+
 	private String timerDate;
-	
+
 	private String petName;
-	
+
 	private int petId;
-	
+
 	private int petParentId;
-	
+
 	private String petParentName;
-	
+
 	private String assetNumber;
-	
+
 	private int petTimerLogId;
-	
+
 	private Boolean isActive;
-	
-	
 
-	
-
-	
+	private Boolean isPetVip;
 
 	public Boolean getIsActive() {
 		return isActive;
@@ -117,9 +113,13 @@ public class TimerLog  {
 	public void setAssetNumber(String assetNumber) {
 		this.assetNumber = assetNumber;
 	}
-	
-	
 
+	public Boolean getIsPetVip() {
+		return isPetVip;
+	}
 
-	
+	public void setIsPetVip(Boolean isPetVip) {
+		this.isPetVip = isPetVip;
+	}
+
 }

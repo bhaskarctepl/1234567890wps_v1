@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.hillspet.wearables.common.builders.JaxrsJsonResponseBuilder;
 import com.hillspet.wearables.common.response.SuccessResponse;
-import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.MobileAppSelfOnboardFilter;
 import com.hillspet.wearables.jaxrs.resource.MobileAppSelfOnboardingResource;
 import com.hillspet.wearables.objects.common.response.CommonResponse;
 import com.hillspet.wearables.response.MobileAppSelfOnboardingResponse;
@@ -48,7 +48,7 @@ public class MobileAppSelfOnboardingResourceImpl implements MobileAppSelfOnboard
 	private JaxrsJsonResponseBuilder responseBuilder;
 
 	@Override
-	public Response getMobileAppSelfOnboarding(BaseFilter filter) {
+	public Response getMobileAppSelfOnboarding(MobileAppSelfOnboardFilter filter) {
 		MobileAppSelfOnboardingResponse response = mobileAppSelfOnboardingService.getMobilAppSelfOnboarding(filter);
 		SuccessResponse<MobileAppSelfOnboardingResponse> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(response);

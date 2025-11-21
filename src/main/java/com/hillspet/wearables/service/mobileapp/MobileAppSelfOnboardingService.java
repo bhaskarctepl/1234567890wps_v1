@@ -14,7 +14,7 @@
 package com.hillspet.wearables.service.mobileapp;
 
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
-import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.MobileAppSelfOnboardFilter;
 import com.hillspet.wearables.response.MobileAppSelfOnboardingResponse;
 
 /**
@@ -23,7 +23,7 @@ import com.hillspet.wearables.response.MobileAppSelfOnboardingResponse;
  */
 public interface MobileAppSelfOnboardingService {
 
-	MobileAppSelfOnboardingResponse getMobilAppSelfOnboarding(BaseFilter filter) throws ServiceExecutionException;
+	MobileAppSelfOnboardingResponse getMobilAppSelfOnboarding(MobileAppSelfOnboardFilter filter) throws ServiceExecutionException;
 	
 	void assignStudyToPet(int petId, int studyId) throws ServiceExecutionException;
 	

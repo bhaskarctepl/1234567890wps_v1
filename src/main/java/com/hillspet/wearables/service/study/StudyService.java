@@ -13,6 +13,7 @@ import com.hillspet.wearables.dto.filter.FeedingScheduleResponseFilter;
 import com.hillspet.wearables.dto.filter.ImageScaleFilter;
 import com.hillspet.wearables.dto.filter.IntakeFilter;
 import com.hillspet.wearables.dto.filter.PhaseWisePetListFilter;
+import com.hillspet.wearables.dto.filter.QuestionnaireConfigFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.dto.filter.StudyDiaryFilter;
 import com.hillspet.wearables.dto.filter.StudyDietFilter;
@@ -32,6 +33,7 @@ import com.hillspet.wearables.request.StudyActivityFactorRequest;
 import com.hillspet.wearables.request.StudyDietRequest;
 import com.hillspet.wearables.request.StudyMobileAppConfigRequest;
 import com.hillspet.wearables.request.StudyNotesRequest;
+import com.hillspet.wearables.request.StudyNotificationConfigRequest;
 import com.hillspet.wearables.request.StudyNotificationRequest;
 import com.hillspet.wearables.request.StudyPlanRequest;
 import com.hillspet.wearables.request.StudyPreludeConfigRequest;
@@ -58,6 +60,7 @@ import com.hillspet.wearables.response.StudyImageScalesListResponse;
 import com.hillspet.wearables.response.StudyListResponse;
 import com.hillspet.wearables.response.StudyMobileAppConfigResponse;
 import com.hillspet.wearables.response.StudyNotesListResponse;
+import com.hillspet.wearables.response.StudyNotificationConfigResponse;
 import com.hillspet.wearables.response.StudyNotificationResponse;
 import com.hillspet.wearables.response.StudyPhaseQuestionnaireScheduleList;
 import com.hillspet.wearables.response.StudyPlanListResponse;
@@ -82,33 +85,35 @@ public interface StudyService {
 
 	StudyResponse getStudyBasicDetails(int studyId) throws ServiceExecutionException;
 
-	void addStudyDiet(StudyDietRequest studyDietRequest, int studyId, Integer userId) throws ServiceExecutionException;
+	StudyDietListResponse addStudyDiet(StudyDietRequest studyDietRequest, int studyId, Integer userId)
+			throws ServiceExecutionException;
 
 	StudyDietListResponse getStudyDiets(StudyDietFilter filter) throws ServiceExecutionException;
 
 	void validateStudyDiet(int studyId, int studyDietId, int modifiedBy) throws ServiceExecutionException;
 
-	void addStudyPlan(StudyPlanRequest studyPlanRequest, int studyId, Integer userId) throws ServiceExecutionException;
+	StudyPlanListResponse addStudyPlan(StudyPlanRequest studyPlanRequest, int studyId, Integer userId)
+			throws ServiceExecutionException;
 
 	StudyPlanListResponse getStudyPlans(int studyId) throws ServiceExecutionException;
 
-	void addStudyMobileAppConfig(StudyMobileAppConfigRequest studyMobileAppConfigRequest, int studyId, Integer userId)
-			throws ServiceExecutionException;
+	StudyMobileAppConfigResponse addStudyMobileAppConfig(StudyMobileAppConfigRequest studyMobileAppConfigRequest,
+			int studyId, Integer userId) throws ServiceExecutionException;
 
 	StudyMobileAppConfigResponse getStudyMobielAppConfigs(int studyId) throws ServiceExecutionException;
 
-	void addNotes(StudyNotesRequest studyNotesRequest, int studyId, int phaseId, int userId)
+	StudyNotesListResponse addNotes(StudyNotesRequest studyNotesRequest, int studyId, int phaseId, int userId)
 			throws ServiceExecutionException;
 
 	StudyNotesListResponse getStudyNotes(int studyId, int phaseId) throws ServiceExecutionException;
 
-	void addStudyPreludeConfig(StudyPreludeConfigRequest studyPreludeConfigRequest, int studyId, Integer userId)
-			throws ServiceExecutionException;
+	StudyPreludeConfigResponse addStudyPreludeConfig(StudyPreludeConfigRequest studyPreludeConfigRequest, int studyId,
+			Integer userId) throws ServiceExecutionException;
 
 	StudyPreludeConfigResponse getStudyPreludeConfig(int studyId) throws ServiceExecutionException;
 
-	void addStudyActivityFactorConfig(StudyActivityFactorRequest studyActivityFactorRequest, int studyId,
-			Integer userId) throws ServiceExecutionException;
+	StudyActivityFactorResponse addStudyActivityFactorConfig(StudyActivityFactorRequest studyActivityFactorRequest,
+			int studyId, Integer userId) throws ServiceExecutionException;
 
 	StudyActivityFactorResponse getStudyActivityFactorConfig(int studyId) throws ServiceExecutionException;
 
@@ -222,19 +227,24 @@ public interface StudyService {
 
 	FeedingSchedulesResponse getFeedingScheduleByPet(int feedingScheduleId) throws ServiceExecutionException;
 
-	void pushNotificationConfig(PushNotificationConfigRequest pushNotificationConfigRequest)
+	PushNotificationConfigResponse pushNotificationConfig(PushNotificationConfigRequest pushNotificationConfigRequest)
 			throws ServiceExecutionException;
 
 	public PushNotificationConfigResponse getPushNotificationConfig(int studyId, int phaseId)
 			throws ServiceExecutionException;
 
-	void imageScoringConfig(ImageScoringConfigRequest imageScoringConfigRequest) throws ServiceExecutionException;
+	ImageScoresConfigResponse imageScoringConfig(ImageScoringConfigRequest imageScoringConfigRequest)
+			throws ServiceExecutionException;
 
 	ImageScoresConfigResponse getImageScoringConfig(int studyId, int phaseId) throws ServiceExecutionException;
 
-	void questionnaireConfig(QuestionnaireConfigRequest questionnaireConfigRequest) throws ServiceExecutionException;
+	QuestionnaireConfigResponse questionnaireConfig(QuestionnaireConfigRequest questionnaireConfigRequest)
+			throws ServiceExecutionException;
 
 	QuestionnaireConfigResponse getQuestionnaireConfig(int studyId, int phaseId) throws ServiceExecutionException;
+
+	QuestionnaireConfigResponse getQuestionnaireConfigList(QuestionnaireConfigFilter filter, Boolean isQuesIdReq)
+			throws ServiceExecutionException;
 
 	ImageScoringScaleResponse getImageScoringResponse(ImageScaleFilter filter) throws ServiceExecutionException;
 
@@ -262,5 +272,13 @@ public interface StudyService {
 	int createCrossOverStudy(AddCrossOverStudyRequest addCrossOverStudyRequest) throws ServiceExecutionException;
 
 	List<PetBreed> getPetBreeds(int studyId, int phaseId) throws ServiceExecutionException;
+
+	void addStudyNotificationConfig(StudyNotificationConfigRequest studyNotificationConfigRequest, int studyId,
+			Integer userId) throws ServiceExecutionException;
+
+	StudyNotificationConfigResponse getStudyNotificationConfigs(int studyId) throws ServiceExecutionException;
+
+	void deleteQuestionnaireConfig(int studyId, int phaseId, int questionnaireConfigId, Integer userId)
+			throws ServiceExecutionException;
 
 }

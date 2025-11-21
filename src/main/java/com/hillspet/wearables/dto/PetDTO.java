@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModel;
  * @author vvodyaram
  *
  */
+@SuppressWarnings("serial")
 @ApiModel(description = "Contains all information that needed to create Pet", value = "PetRequest")
 @JsonInclude(value = Include.NON_NULL)
 public class PetDTO extends BaseDTO {
@@ -72,6 +73,8 @@ public class PetDTO extends BaseDTO {
 	private String weightString;
 	private String ibwString;
 	private String recommendedFoodQuantity;
+
+	private Boolean isPetVip;
 
 	private List<ExternalPetIdInfo> extPetIds;
 
@@ -465,6 +468,14 @@ public class PetDTO extends BaseDTO {
 
 	public void setRecommendedFoodQuantity(String recommendedFoodQuantity) {
 		this.recommendedFoodQuantity = recommendedFoodQuantity;
+	}
+
+	public Boolean getIsPetVip() {
+		return isPetVip;
+	}
+
+	public void setIsPetVip(Boolean isPetVip) {
+		this.isPetVip = isPetVip;
 	}
 
 }

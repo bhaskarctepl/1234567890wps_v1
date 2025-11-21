@@ -28,6 +28,8 @@ public class PointTrackerCampaignActivities {
 	private Integer questionnaireRespId;
 	private Integer behaviorId;
 	private Integer speciesId;
+	private String petParentName;
+	private Boolean isVipPet;
 
 	public Integer getQuestionnaireRespId() {
 		return questionnaireRespId;
@@ -187,6 +189,22 @@ public class PointTrackerCampaignActivities {
 
 	public void setSpeciesId(Integer speciesId) {
 		this.speciesId = speciesId;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
+	}
+
+	public Boolean getIsVipPet() {
+		return isVipPet;
+	}
+
+	public void setIsVipPet(Boolean isVipPet) {
+		this.isVipPet = isVipPet;
 	}
 
 }

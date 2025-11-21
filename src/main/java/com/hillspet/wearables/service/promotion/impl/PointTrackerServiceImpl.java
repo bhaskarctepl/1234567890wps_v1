@@ -137,7 +137,6 @@ public class PointTrackerServiceImpl implements PointTrackerService {
 
 		PointTrackerCampaignActivitiesResponse response = new PointTrackerCampaignActivitiesResponse();
 		response.setPointTrackerCampaignActivitiesList(pointTrackerCampaignActivitiesList);
-		;
 		response.setNoOfElements(pointTrackerCampaignActivitiesList.size());
 		response.setTotalRecords(totalCount);
 		response.setSearchElments(searchCount);

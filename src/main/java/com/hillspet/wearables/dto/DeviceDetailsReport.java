@@ -27,6 +27,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeviceDetailsReport extends BaseDTO {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private String deviceType;
 	private String deviceModel;
 	private String deviceNumber;
@@ -36,6 +41,11 @@ public class DeviceDetailsReport extends BaseDTO {
 	private String assetStatus;
 	private String assetStatusId;
 	private String startDate;
+
+	private String isWhiteListed;
+	private String boxNumber;
+	private String macAddress;
+	private String wifiSSId;
 
 	public String getAssetStatus() {
 		return assetStatus;
@@ -117,6 +127,38 @@ public class DeviceDetailsReport extends BaseDTO {
 
 	public void setStartDate(String startDate) {
 		this.startDate = startDate;
+	}
+
+	public String getIsWhiteListed() {
+		return isWhiteListed;
+	}
+
+	public void setIsWhiteListed(String isWhiteListed) {
+		this.isWhiteListed = isWhiteListed;
+	}
+
+	public String getBoxNumber() {
+		return boxNumber;
+	}
+
+	public void setBoxNumber(String boxNumber) {
+		this.boxNumber = boxNumber;
+	}
+
+	public String getMacAddress() {
+		return macAddress;
+	}
+
+	public void setMacAddress(String macAddress) {
+		this.macAddress = macAddress;
+	}
+
+	public String getWifiSSId() {
+		return wifiSSId;
+	}
+
+	public void setWifiSSId(String wifiSSId) {
+		this.wifiSSId = wifiSSId;
 	}
 
 }

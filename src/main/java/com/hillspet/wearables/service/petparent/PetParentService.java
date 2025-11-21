@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 import com.hillspet.wearables.dto.PetParentDTO;
-import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.PetParentFilter;
 import com.hillspet.wearables.request.PetParentRequest;
 import com.hillspet.wearables.request.PetParentValidateEmailRequest;
 import com.hillspet.wearables.response.PetParentAddressResponse;
@@ -20,7 +20,7 @@ public interface PetParentService {
 
 	PetParentListResponse getPetParents() throws ServiceExecutionException;
 
-	PetParentListResponse getPetParentList(BaseFilter filter) throws ServiceExecutionException;
+	PetParentListResponse getPetParentList(PetParentFilter filter) throws ServiceExecutionException;
 
 	void deletePetParent(int petParentId, int modifiedBy) throws ServiceExecutionException;
 

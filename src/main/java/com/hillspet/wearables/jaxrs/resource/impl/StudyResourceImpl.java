@@ -22,6 +22,7 @@ import com.hillspet.wearables.dto.filter.FeedingScheduleResponseFilter;
 import com.hillspet.wearables.dto.filter.ImageScaleFilter;
 import com.hillspet.wearables.dto.filter.IntakeFilter;
 import com.hillspet.wearables.dto.filter.PhaseWisePetListFilter;
+import com.hillspet.wearables.dto.filter.QuestionnaireConfigFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.dto.filter.StudyDiaryFilter;
 import com.hillspet.wearables.dto.filter.StudyDietFilter;
@@ -42,6 +43,7 @@ import com.hillspet.wearables.request.StudyActivityFactorRequest;
 import com.hillspet.wearables.request.StudyDietRequest;
 import com.hillspet.wearables.request.StudyMobileAppConfigRequest;
 import com.hillspet.wearables.request.StudyNotesRequest;
+import com.hillspet.wearables.request.StudyNotificationConfigRequest;
 import com.hillspet.wearables.request.StudyNotificationRequest;
 import com.hillspet.wearables.request.StudyPlanRequest;
 import com.hillspet.wearables.request.StudyPreludeConfigRequest;
@@ -69,6 +71,7 @@ import com.hillspet.wearables.response.StudyImageScalesListResponse;
 import com.hillspet.wearables.response.StudyListResponse;
 import com.hillspet.wearables.response.StudyMobileAppConfigResponse;
 import com.hillspet.wearables.response.StudyNotesListResponse;
+import com.hillspet.wearables.response.StudyNotificationConfigResponse;
 import com.hillspet.wearables.response.StudyNotificationResponse;
 import com.hillspet.wearables.response.StudyPhaseQuestionnaireScheduleList;
 import com.hillspet.wearables.response.StudyPlanListResponse;
@@ -145,10 +148,11 @@ public class StudyResourceImpl implements StudyResource {
 	public Response addStudyDiet(StudyDietRequest studyDietRequest, int studyId) {
 		// Step 1: process
 		Integer userId = authentication.getAuthUserDetails().getUserId();
-		studyService.addStudyDiet(studyDietRequest, studyId, userId);
+		StudyDietListResponse response = studyService.addStudyDiet(studyDietRequest, studyId, userId);
 
 		// Step 2: build a successful response
-		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
+		SuccessResponse<StudyDietListResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
 
@@ -177,10 +181,11 @@ public class StudyResourceImpl implements StudyResource {
 	public Response addStudyPlan(StudyPlanRequest studyPlanRequest, int studyId) {
 		// Step 1: process
 		Integer userId = authentication.getAuthUserDetails().getUserId();
-		studyService.addStudyPlan(studyPlanRequest, studyId, userId);
+		StudyPlanListResponse response = studyService.addStudyPlan(studyPlanRequest, studyId, userId);
 
 		// Step 2: build a successful response
-		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
+		SuccessResponse<StudyPlanListResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
 
@@ -196,10 +201,12 @@ public class StudyResourceImpl implements StudyResource {
 	public Response addStudyMobileAppConfig(StudyMobileAppConfigRequest studyMobileAppConfigRequest, int studyId) {
 		// Step 1: process
 		Integer userId = authentication.getAuthUserDetails().getUserId();
-		studyService.addStudyMobileAppConfig(studyMobileAppConfigRequest, studyId, userId);
+		StudyMobileAppConfigResponse response = studyService.addStudyMobileAppConfig(studyMobileAppConfigRequest,
+				studyId, userId);
 
 		// Step 2: build a successful response
-		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
+		SuccessResponse<StudyMobileAppConfigResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
 
@@ -215,10 +222,11 @@ public class StudyResourceImpl implements StudyResource {
 	public Response addNotes(StudyNotesRequest studyNotesRequest, int studyId, int phaseId) {
 		// Step 1: process
 		Integer userId = authentication.getAuthUserDetails().getUserId();
-		studyService.addNotes(studyNotesRequest, studyId, phaseId, userId);
+		StudyNotesListResponse response = studyService.addNotes(studyNotesRequest, studyId, phaseId, userId);
 
 		// Step 2: build a successful response
-		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
+		SuccessResponse<StudyNotesListResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
 
@@ -234,10 +242,12 @@ public class StudyResourceImpl implements StudyResource {
 	public Response addStudyPreludeConfig(StudyPreludeConfigRequest studyPreludeConfigRequest, int studyId) {
 		// Step 1: process
 		Integer userId = authentication.getAuthUserDetails().getUserId();
-		studyService.addStudyPreludeConfig(studyPreludeConfigRequest, studyId, userId);
+		StudyPreludeConfigResponse response = studyService.addStudyPreludeConfig(studyPreludeConfigRequest, studyId,
+				userId);
 
 		// Step 2: build a successful response
-		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
+		SuccessResponse<StudyPreludeConfigResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
 
@@ -253,10 +263,12 @@ public class StudyResourceImpl implements StudyResource {
 	public Response addStudyActivityFactorConfig(StudyActivityFactorRequest studyActivityFactorRequest, int studyId) {
 		// Step 1: process
 		Integer userId = authentication.getAuthUserDetails().getUserId();
-		studyService.addStudyActivityFactorConfig(studyActivityFactorRequest, studyId, userId);
+		StudyActivityFactorResponse response = studyService.addStudyActivityFactorConfig(studyActivityFactorRequest,
+				studyId, userId);
 
 		// Step 2: build a successful response
-		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
+		SuccessResponse<StudyActivityFactorResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
 
@@ -577,7 +589,6 @@ public class StudyResourceImpl implements StudyResource {
 	}
 
 	public Response getThresholdByCount(FlaggedRecommendationRequest flaggedRecommendationRequest) {
-		int userId = authentication.getAuthUserDetails().getUserId();
 		FRThresholdByCountResponse response = studyService.getThresholdByCount(flaggedRecommendationRequest);
 		SuccessResponse<FRThresholdByCountResponse> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(response);
@@ -593,7 +604,6 @@ public class StudyResourceImpl implements StudyResource {
 	}
 
 	public Response getFRFilterData(FlaggedRecommendationRequest flaggedRecommendationRequest) {
-		int userId = authentication.getAuthUserDetails().getUserId();
 		FRLookUpResponse response = studyService.getFRFilterData(flaggedRecommendationRequest);
 		SuccessResponse<FRLookUpResponse> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(response);
@@ -661,8 +671,8 @@ public class StudyResourceImpl implements StudyResource {
 	}
 
 	/*
-	* Get food intake values for give time period,studyId and petId
-	* */
+	 * Get food intake values for give time period,studyId and petId
+	 */
 	@Override
 	public Response getFoodIntake(IntakeFilter intakeFilter) {
 		FoodIntakeResponse response = studyService.getFoodIntake(intakeFilter);
@@ -775,11 +785,10 @@ public class StudyResourceImpl implements StudyResource {
 		pushNotificationConfigRequest.setStudyId(studyId);
 		pushNotificationConfigRequest.setPhaseId(phaseId);
 		pushNotificationConfigRequest.setUserId(authentication.getAuthUserDetails().getUserId());
-		studyService.pushNotificationConfig(pushNotificationConfigRequest);
+		PushNotificationConfigResponse response = studyService.pushNotificationConfig(pushNotificationConfigRequest);
 
 		// Step 5: build a successful response
-		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
-		CommonResponse response = new CommonResponse();
+		SuccessResponse<PushNotificationConfigResponse> successResponse = new SuccessResponse<>();
 		response.setMessage("Study Push Notification Config saved successfully");
 		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
@@ -799,11 +808,10 @@ public class StudyResourceImpl implements StudyResource {
 		imageScoringConfigRequest.setStudyId(studyId);
 		imageScoringConfigRequest.setPhaseId(phaseId);
 		imageScoringConfigRequest.setUserId(authentication.getAuthUserDetails().getUserId());
-		studyService.imageScoringConfig(imageScoringConfigRequest);
+		ImageScoresConfigResponse response = studyService.imageScoringConfig(imageScoringConfigRequest);
 
 		// Step 5: build a successful response
-		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
-		CommonResponse response = new CommonResponse();
+		SuccessResponse<ImageScoresConfigResponse> successResponse = new SuccessResponse<>();
 		response.setMessage("Study Image Scoring Config saved successfully");
 		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
@@ -824,12 +832,25 @@ public class StudyResourceImpl implements StudyResource {
 		questionnaireConfigRequest.setStudyId(studyId);
 		questionnaireConfigRequest.setPhaseId(phaseId);
 		questionnaireConfigRequest.setUserId(authentication.getAuthUserDetails().getUserId());
-		studyService.questionnaireConfig(questionnaireConfigRequest);
+		QuestionnaireConfigResponse response = studyService.questionnaireConfig(questionnaireConfigRequest);
 
 		// Step 5: build a successful response
-		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
-		CommonResponse response = new CommonResponse();
+		SuccessResponse<QuestionnaireConfigResponse> successResponse = new SuccessResponse<>();
 		response.setMessage("Study Questionnaire Config saved successfully");
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response deleteQuestionnaireConfig(int studyId, int phaseId, int questionnaireConfigId) {
+		// Step 2: process
+		studyService.deleteQuestionnaireConfig(studyId, phaseId, questionnaireConfigId,
+				authentication.getAuthUserDetails().getUserId());
+
+		// Step 2: build a successful response
+		CommonResponse response = new CommonResponse();
+		response.setMessage("Study Questionnaire Config deleted successfully");
+		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
@@ -840,6 +861,30 @@ public class StudyResourceImpl implements StudyResource {
 		QuestionnaireConfigResponse response = studyService.getQuestionnaireConfig(studyId, phaseId);
 
 		// Step 5: build a successful response
+		SuccessResponse<QuestionnaireConfigResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getQuestionnaireConfigList(int studyId, int phaseId, QuestionnaireConfigFilter filter) {
+		filter.setStudyId(studyId);
+		filter.setPhaseId(phaseId);
+
+		QuestionnaireConfigResponse response = studyService.getQuestionnaireConfigList(filter, Boolean.FALSE);
+		SuccessResponse<QuestionnaireConfigResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getQuestionnaireConfigListByQuestionnaire(int studyId, int phaseId, int questionnaireId,
+			QuestionnaireConfigFilter filter) {
+		filter.setStudyId(studyId);
+		filter.setPhaseId(phaseId);
+		filter.setQuestionnaireId(String.valueOf(questionnaireId));
+
+		QuestionnaireConfigResponse response = studyService.getQuestionnaireConfigList(filter, Boolean.TRUE);
 		SuccessResponse<QuestionnaireConfigResponse> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
@@ -935,6 +980,24 @@ public class StudyResourceImpl implements StudyResource {
 		PetBreedResponse response = new PetBreedResponse();
 		response.setBreeds(breeds);
 		SuccessResponse<PetBreedResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response addStudyNotificationConfig(StudyNotificationConfigRequest studyNotificationConfigRequest,
+			int studyId) {
+		Integer userId = authentication.getAuthUserDetails().getUserId();
+		studyService.addStudyNotificationConfig(studyNotificationConfigRequest, studyId, userId);
+
+		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getStudyNotificationConfigs(int studyId) {
+		StudyNotificationConfigResponse response = studyService.getStudyNotificationConfigs(studyId);
+		SuccessResponse<StudyNotificationConfigResponse> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}

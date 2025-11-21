@@ -41,6 +41,7 @@ import com.hillspet.wearables.dto.PointTracker;
 import com.hillspet.wearables.dto.PointTrackerAssociatedDTO;
 import com.hillspet.wearables.dto.PointTrackerCampaignActivities;
 import com.hillspet.wearables.dto.PointTrackerMetricAssociatedDTO;
+import com.hillspet.wearables.dto.PointTrackerQuestionnaire;
 import com.hillspet.wearables.dto.TrackerActivityStatusNotes;
 import com.hillspet.wearables.dto.filter.PointTrackerFilter;
 import com.hillspet.wearables.request.PointTrackerActivityRequest;
@@ -200,7 +201,7 @@ public class PointTrackerDaoImpl extends BaseDaoImpl implements PointTrackerDao 
 			inputParams.put("p_start_date", pointTracker.getStartDate());
 			inputParams.put("p_end_date", pointTracker.getEndDate());
 			inputParams.put("p_status", pointTracker.getStatus());
-
+			
 			inputParams.put("p_point_tracker_activity_json",
 					mapper.writeValueAsString(pointTracker.getPointTrackerSubscribed()));
 			inputParams.put("p_point_tracker_metric_json", null);
@@ -221,8 +222,11 @@ public class PointTrackerDaoImpl extends BaseDaoImpl implements PointTrackerDao 
 			inputParams.put("activityIds", activityIds);
 			inputParams.put("metricIds", metricIds);
 			inputParams.put("p_modified_by", pointTracker.getUserId());
-
+			LOGGER.info("updatePointTracker input params are {}", inputParams);
+			LOGGER.debug("updatePointTracker input param are {}",  inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.POINT_TRACKER_UPDATE, inputParams);
+			LOGGER.info("updatePointTracker output params are {}", outParams);
+			LOGGER.debug("updatePointTracker output param are {}",  outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
@@ -265,6 +269,7 @@ public class PointTrackerDaoImpl extends BaseDaoImpl implements PointTrackerDao 
 
 			List<PointTrackerAssociatedDTO> PointTrackerAssociatedList = new LinkedList<>();
 			List<PointTrackerMetricAssociatedDTO> PointTrackerMetricAssociatedList = new LinkedList<>();
+			List<PointTrackerQuestionnaire> pointTrackerQuestionnaireList = new ArrayList<>();
 
 			while (itr.hasNext()) {
 				Map.Entry<String, Object> entry = (Map.Entry<String, Object>) itr.next();
@@ -289,6 +294,11 @@ public class PointTrackerDaoImpl extends BaseDaoImpl implements PointTrackerDao 
 						pointTracker.setStatus((Integer) pointTrackerObj.get("STATUS"));
 						pointTracker
 								.setIsPublished(((Integer) pointTrackerObj.get("IS_PUBLISHED") == 1) ? true : false);
+						
+						pointTracker.setStudyConfigId((String) pointTrackerObj.get("STUDY_QUESTIONNAIRE_CONFIG_ID"));
+						
+						pointTracker.setPhaseId((String) pointTrackerObj.get("STUDY_PHASE_ID"));
+											
 					});
 				}
 
@@ -324,6 +334,24 @@ public class PointTrackerDaoImpl extends BaseDaoImpl implements PointTrackerDao 
 					pointTracker.setPointTrackerMetricAssociatedObject(PointTrackerMetricAssociatedList);
 					pointTracker.setPointTrackerAssociatedObject(PointTrackerAssociatedList);
 				}
+				if (key.equals(SQLConstants.RESULT_SET_3)) {
+	                List<Map<String, Object>> list = (List<Map<String, Object>>) entry.getValue();
+	                list.forEach(questionnaireObj -> {
+	                    PointTrackerQuestionnaire questionnaire = new PointTrackerQuestionnaire();
+	                    String startDate = (String) questionnaireObj.get("START_DATE");
+	                    questionnaire.setStartDate(startDate);
+	                    String endDate = (String) questionnaireObj.get("END_DATE");
+	                    questionnaire.setEndDate(endDate);
+	                    questionnaire.setPhaseId((Integer) questionnaireObj.get("STUDY_PHASE_ID"));
+	                    questionnaire.setQuestionnaireId((Integer) questionnaireObj.get("QUESTIONNAIRE_ID"));
+	                    questionnaire.setQuestionnaireConfigId((Integer) questionnaireObj.get("STUDY_QUESTIONNAIRE_CONFIG_ID"));
+	                    questionnaire.setPhaseName((String) questionnaireObj.get("STUDY_PHASE"));
+	                    questionnaire.setQuestionnaireName((String) questionnaireObj.get("QUESTIONNAIRE_NAME"));
+	                    questionnaire.setPhaseDays((String)questionnaireObj.get("PHASE_DAYS"));
+	                    pointTrackerQuestionnaireList.add(questionnaire);
+	                });
+	                pointTracker.setPointTrackerQuestionnaire(pointTrackerQuestionnaireList);
+				}
 			}
 
 		} catch (Exception e) {
@@ -341,7 +369,7 @@ public class PointTrackerDaoImpl extends BaseDaoImpl implements PointTrackerDao 
 		try {
 			counts = selectForObject(SQLConstants.POINT_TRACKER_ACTIVITIES_GET_LIST_COUNT, String.class, pointTrackerId,
 					filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(), filter.getStartDate(),
-					filter.getEndDate());
+					filter.getEndDate(), filter.getPetName(), filter.getPetParentName());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPointTrackerActiviesListCount", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -353,7 +381,7 @@ public class PointTrackerDaoImpl extends BaseDaoImpl implements PointTrackerDao 
 	public List<PointTrackerCampaignActivities> getPointTrackerActiviesList(PointTrackerFilter filter,
 			int pointTrackerId) throws ServiceExecutionException {
 //		List<PlanListDTO> planList = new ArrayList<>();
-		List<PointTrackerCampaignActivities> PointTrackerCampaignActivitiesList = new ArrayList<>();
+		List<PointTrackerCampaignActivities> pointTrackerCampaignActivitiesList = new ArrayList<>();
 		LOGGER.debug("getPointTrackerActiviesList called");
 		try {
 			jdbcTemplate.query(SQLConstants.POINT_TRACKER_ACTIVITIES_GET_LIST, new RowCallbackHandler() {
@@ -363,6 +391,7 @@ public class PointTrackerDaoImpl extends BaseDaoImpl implements PointTrackerDao 
 //					PlanListDTO planListDTO = new PlanListDTO();
 					pointTrackerCampaignActivities.setTrackerPetPointsId(rs.getInt("TRACKER_PET_POINTS_ID"));
 					pointTrackerCampaignActivities.setPetId(rs.getInt("PET_ID"));
+					pointTrackerCampaignActivities.setIsVipPet(rs.getBoolean("IS_VIP_PET"));
 					pointTrackerCampaignActivities.setPetName(rs.getString("PET_NAME"));
 					pointTrackerCampaignActivities.setStudyName(rs.getString("STUDY_NAME"));
 //					PET_ID, PET_NAME, STUDY_ID, STUDY_NAME, CREATED_DATE, OBSERVATION, ACTIVITY_ID, ACTIVITY, METRIC_ID,
@@ -413,17 +442,19 @@ public class PointTrackerDaoImpl extends BaseDaoImpl implements PointTrackerDao 
 					}
 
 					pointTrackerCampaignActivities.setQuestionnaireRespId(rs.getInt("QUESTIONNARE_RESPONSE_ID"));
-					PointTrackerCampaignActivitiesList.add(pointTrackerCampaignActivities);
+					pointTrackerCampaignActivities.setPetParentName(rs.getString("PET_PARENT_NAME"));
+					
+					pointTrackerCampaignActivitiesList.add(pointTrackerCampaignActivities);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), pointTrackerId,
 					filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(), filter.getStartDate(),
-					filter.getEndDate());
+					filter.getEndDate(), filter.getPetName(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPointTrackerActiviesList", e);
 			throw new ServiceExecutionException(e.getMessage());
 		}
-		return PointTrackerCampaignActivitiesList;
+		return pointTrackerCampaignActivitiesList;
 	}
 
 	@Override

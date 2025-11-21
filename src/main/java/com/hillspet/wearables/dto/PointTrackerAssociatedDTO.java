@@ -15,7 +15,17 @@ public class PointTrackerAssociatedDTO {
 	private String eligibleForPointsAccumulation;
 	private LocalDate startDate;
 	private LocalDate endDate;
+	private String studyConfigId;
 
+	
+	
+	public String getStudyConfigId() {
+		return studyConfigId;
+	}
+
+	public void setStudyConfigId(String studyConfigId) {
+		this.studyConfigId = studyConfigId;
+	}
 	public Integer getId() {
 		return id;
 	}

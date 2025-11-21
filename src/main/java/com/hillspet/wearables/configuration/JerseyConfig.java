@@ -51,6 +51,7 @@ public class JerseyConfig extends ResourceConfig {
 		register(SwaggerSerializers.class);
 		BeanConfig beanConfig = new BeanConfig();
 		beanConfig.setContact("HPN");
+		beanConfig.setTitle("Wearables App REST API");
 		beanConfig.setVersion("1.0");
 		beanConfig.setSchemes(new String[] { "http", "https" });
 		beanConfig.setBasePath(Constants.CONTEXT_PATH.concat(Constants.APPLICATION_PATH));

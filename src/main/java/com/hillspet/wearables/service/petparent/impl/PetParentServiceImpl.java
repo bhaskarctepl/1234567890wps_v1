@@ -16,6 +16,7 @@ import com.hillspet.wearables.dao.petparent.PetParentDao;
 import com.hillspet.wearables.dto.PetParentDTO;
 import com.hillspet.wearables.dto.PetParentListDTO;
 import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.PetParentFilter;
 import com.hillspet.wearables.request.PetParentRequest;
 import com.hillspet.wearables.request.PetParentValidateEmailRequest;
 import com.hillspet.wearables.response.PetParentAddressResponse;
@@ -72,8 +73,9 @@ public class PetParentServiceImpl implements PetParentService {
 		return response;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public PetParentListResponse getPetParentList(BaseFilter filter) throws ServiceExecutionException {
+	public PetParentListResponse getPetParentList(PetParentFilter filter) throws ServiceExecutionException {
 		LOGGER.debug("getPetParentList called");
 
 		BaseFilter baseFilter = new BaseFilter();

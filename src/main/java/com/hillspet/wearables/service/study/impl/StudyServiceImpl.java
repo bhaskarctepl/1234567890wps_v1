@@ -42,6 +42,7 @@ import com.hillspet.wearables.dto.filter.FeedingScheduleResponseFilter;
 import com.hillspet.wearables.dto.filter.ImageScaleFilter;
 import com.hillspet.wearables.dto.filter.IntakeFilter;
 import com.hillspet.wearables.dto.filter.PhaseWisePetListFilter;
+import com.hillspet.wearables.dto.filter.QuestionnaireConfigFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.dto.filter.StudyDiaryFilter;
 import com.hillspet.wearables.dto.filter.StudyDietFilter;
@@ -64,6 +65,7 @@ import com.hillspet.wearables.request.StudyActivityFactorRequest;
 import com.hillspet.wearables.request.StudyDietRequest;
 import com.hillspet.wearables.request.StudyMobileAppConfigRequest;
 import com.hillspet.wearables.request.StudyNotesRequest;
+import com.hillspet.wearables.request.StudyNotificationConfigRequest;
 import com.hillspet.wearables.request.StudyNotificationRequest;
 import com.hillspet.wearables.request.StudyPlanRequest;
 import com.hillspet.wearables.request.StudyPreludeConfigRequest;
@@ -90,6 +92,7 @@ import com.hillspet.wearables.response.StudyImageScalesListResponse;
 import com.hillspet.wearables.response.StudyListResponse;
 import com.hillspet.wearables.response.StudyMobileAppConfigResponse;
 import com.hillspet.wearables.response.StudyNotesListResponse;
+import com.hillspet.wearables.response.StudyNotificationConfigResponse;
 import com.hillspet.wearables.response.StudyNotificationResponse;
 import com.hillspet.wearables.response.StudyPhaseQuestionnaireScheduleList;
 import com.hillspet.wearables.response.StudyPlanListResponse;
@@ -131,11 +134,18 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void addStudyDiet(StudyDietRequest studyDietRequest, int studyId, Integer userId)
+	public StudyDietListResponse addStudyDiet(StudyDietRequest studyDietRequest, int studyId, Integer userId)
 			throws ServiceExecutionException {
 		LOGGER.debug("addStudyDiet called");
 		studyDao.addStudyDiet(studyDietRequest, studyId, userId);
 		LOGGER.debug("addStudyDiet completed successfully");
+
+		StudyDietFilter filter = new StudyDietFilter();
+		filter.setUserId(userId);
+		filter.setStudyId(studyId);
+		filter.setStartIndex(0);
+		filter.setLimit(1000);
+		return getStudyDiets(filter);
 	}
 
 	@Override
@@ -163,11 +173,14 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void addStudyPlan(StudyPlanRequest studyPlanRequest, int studyId, Integer userId)
+	public StudyPlanListResponse addStudyPlan(StudyPlanRequest studyPlanRequest, int studyId, Integer userId)
 			throws ServiceExecutionException {
 		LOGGER.debug("addStudyPlan called");
-		studyDao.addStudyPlan(studyPlanRequest, studyId, userId);
+		List<PlanSubscribed> studyPlanList = studyDao.addStudyPlan(studyPlanRequest, studyId, userId);
+		StudyPlanListResponse response = new StudyPlanListResponse();
+		response.setPlansSubscribed(studyPlanList);
 		LOGGER.debug("addStudyPlan completed successfully");
+		return response;
 	}
 
 	@Override
@@ -181,11 +194,13 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void addStudyMobileAppConfig(StudyMobileAppConfigRequest studyMobileAppConfigRequest, int studyId,
-			Integer userId) throws ServiceExecutionException {
+	public StudyMobileAppConfigResponse addStudyMobileAppConfig(StudyMobileAppConfigRequest studyMobileAppConfigRequest,
+			int studyId, Integer userId) throws ServiceExecutionException {
 		LOGGER.debug("addStudyMobileAppConfig called");
-		studyDao.addStudyMobileAppConfig(studyMobileAppConfigRequest, studyId, userId);
+		StudyMobileAppConfigResponse response = studyDao.addStudyMobileAppConfig(studyMobileAppConfigRequest, studyId,
+				userId);
 		LOGGER.debug("addStudyMobileAppConfig completed successfully");
+		return response;
 	}
 
 	@Override
@@ -197,11 +212,12 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void addNotes(StudyNotesRequest studyNotesRequest, int studyId, int phaseId, int userId)
+	public StudyNotesListResponse addNotes(StudyNotesRequest studyNotesRequest, int studyId, int phaseId, int userId)
 			throws ServiceExecutionException {
 		LOGGER.debug("addNotes called");
 		studyDao.addNotes(studyNotesRequest, studyId, phaseId, userId);
 		LOGGER.debug("addNotes completed successfully");
+		return getStudyNotes(studyId, phaseId);
 	}
 
 	@Override
@@ -213,11 +229,13 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void addStudyPreludeConfig(StudyPreludeConfigRequest studyPreludeConfigRequest, int studyId, Integer userId)
-			throws ServiceExecutionException {
+	public StudyPreludeConfigResponse addStudyPreludeConfig(StudyPreludeConfigRequest studyPreludeConfigRequest,
+			int studyId, Integer userId) throws ServiceExecutionException {
 		LOGGER.debug("addStudyPreludeConfig called");
-		studyDao.addStudyPreludeConfig(studyPreludeConfigRequest, studyId, userId);
+		StudyPreludeConfigResponse response = studyDao.addStudyPreludeConfig(studyPreludeConfigRequest, studyId,
+				userId);
 		LOGGER.debug("addStudyPreludeConfig completed successfully");
+		return response;
 	}
 
 	@Override
@@ -229,11 +247,14 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void addStudyActivityFactorConfig(StudyActivityFactorRequest studyActivityFactorRequest, int studyId,
-			Integer userId) throws ServiceExecutionException {
+	public StudyActivityFactorResponse addStudyActivityFactorConfig(
+			StudyActivityFactorRequest studyActivityFactorRequest, int studyId, Integer userId)
+			throws ServiceExecutionException {
 		LOGGER.debug("addStudyActivityFactorConfig called");
-		studyDao.addStudyActivityFactorConfig(studyActivityFactorRequest, studyId, userId);
+		StudyActivityFactorResponse response = studyDao.addStudyActivityFactorConfig(studyActivityFactorRequest,
+				studyId, userId);
 		LOGGER.debug("addStudyActivityFactorConfig completed successfully");
+		return response;
 	}
 
 	@Override
@@ -722,11 +743,13 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void pushNotificationConfig(PushNotificationConfigRequest pushNotificationConfigRequest)
-			throws ServiceExecutionException {
+	public PushNotificationConfigResponse pushNotificationConfig(
+			PushNotificationConfigRequest pushNotificationConfigRequest) throws ServiceExecutionException {
 		LOGGER.debug("pushNotificationConfig called");
 		studyDao.pushNotificationConfig(pushNotificationConfigRequest);
 		LOGGER.debug("pushNotificationConfig completed successfully");
+		return getPushNotificationConfig(pushNotificationConfigRequest.getStudyId(),
+				pushNotificationConfigRequest.getPhaseId());
 	}
 
 	@Override
@@ -742,11 +765,12 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void imageScoringConfig(ImageScoringConfigRequest imageScoringConfigRequest)
+	public ImageScoresConfigResponse imageScoringConfig(ImageScoringConfigRequest imageScoringConfigRequest)
 			throws ServiceExecutionException {
 		LOGGER.debug("imageScoringConfig called");
 		studyDao.imageScoringConfig(imageScoringConfigRequest);
 		LOGGER.debug("imageScoringConfig completed successfully");
+		return getImageScoringConfig(imageScoringConfigRequest.getStudyId(), imageScoringConfigRequest.getPhaseId());
 	}
 
 	@Override
@@ -760,11 +784,21 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void questionnaireConfig(QuestionnaireConfigRequest questionnaireConfigRequest)
+	public QuestionnaireConfigResponse questionnaireConfig(QuestionnaireConfigRequest questionnaireConfigRequest)
 			throws ServiceExecutionException {
 		LOGGER.debug("questionnaireConfig called");
 		studyDao.questionnaireConfig(questionnaireConfigRequest);
 		LOGGER.debug("questionnaireConfig completed successfully");
+		return getQuestionnaireConfig(questionnaireConfigRequest.getStudyId(), questionnaireConfigRequest.getPhaseId());
+	}
+
+	@Override
+	public void deleteQuestionnaireConfig(int studyId, int phaseId, int questionnaireConfigId, Integer userId)
+			throws ServiceExecutionException {
+		LOGGER.debug("deleteQuestionnaireConfig called");
+		studyDao.deleteQuestionnaireConfig(studyId, phaseId, questionnaireConfigId, userId);
+		LOGGER.debug("deleteQuestionnaireConfig completed successfully");
+
 	}
 
 	@Override
@@ -775,6 +809,26 @@ public class StudyServiceImpl implements StudyService {
 		QuestionnaireConfigResponse response = new QuestionnaireConfigResponse();
 		response.setQuestionnaireConfigs(questionnaireAssociateds);
 		LOGGER.debug("getQuestionnaireConfig completed successfully");
+		return response;
+	}
+
+	@Override
+	public QuestionnaireConfigResponse getQuestionnaireConfigList(QuestionnaireConfigFilter filter, Boolean isQuesIdReq)
+			throws ServiceExecutionException {
+		LOGGER.debug("getQuestionnaireConfigList called");
+		Map<String, Integer> mapper = studyDao.getQuestionnaireConfigListCount(filter, isQuesIdReq);
+		int searchCount = mapper.get("count");
+		int totalCount = mapper.get("totalCount");
+		List<QuestionnaireAssociated> questionnaireAssociatedScaleList = searchCount > 0
+				? studyDao.getQuestionnaireConfigList(filter)
+				: new ArrayList<>();
+		QuestionnaireConfigResponse response = new QuestionnaireConfigResponse();
+		response.setQuestionnaireConfigsList(questionnaireAssociatedScaleList);
+		response.setNoOfElements(questionnaireAssociatedScaleList.size());
+		response.setTotalRecords(totalCount);
+		response.setSearchElments(searchCount);
+		LOGGER.debug("getQuestionnaireConfigList  count is {}", questionnaireAssociatedScaleList);
+		LOGGER.debug("getQuestionnaireConfigList completed successfully");
 		return response;
 	}
 
@@ -871,8 +925,8 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	/*
-	* To get food intake
-	* */
+	 * To get food intake
+	 */
 	@Override
 	public FoodIntakeResponse getFoodIntake(IntakeFilter intakeFilter) throws ServiceExecutionException {
 		LOGGER.debug("getFoodIntake start");
@@ -880,10 +934,13 @@ public class StudyServiceImpl implements StudyService {
 		List<FoodIntakeDetails> intakeDetailsList = countMap.get("count") > 0 ? studyDao.getFoodIntake(intakeFilter)
 				: new ArrayList<>();
 		intakeDetailsList.forEach(System.out::println);
-		/*List<FoodIntakeFormatted> foodIntakeFormattedList= this.processForTableFormat2(intakeDetailsList);
-		FoodIntakeResponse response = new FoodIntakeResponse();
-		response.setFoodIntakeDetails(foodIntakeFormattedList);
-		response.setNoOfElements(foodIntakeFormattedList.size());*/
+		/*
+		 * List<FoodIntakeFormatted> foodIntakeFormattedList=
+		 * this.processForTableFormat2(intakeDetailsList); FoodIntakeResponse response =
+		 * new FoodIntakeResponse();
+		 * response.setFoodIntakeDetails(foodIntakeFormattedList);
+		 * response.setNoOfElements(foodIntakeFormattedList.size());
+		 */
 		FoodIntakeResponse response = new FoodIntakeResponse();
 		response.setIntakeDetailsList(intakeDetailsList);
 		response.setNoOfElements(intakeDetailsList.size());
@@ -895,8 +952,9 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	/*
-	* To process the records as per desired response
-	* */
+	 * To process the records as per desired response
+	 */
+	@SuppressWarnings("unused")
 	private List<FoodIntakeFormatted> processForTableFormat(List<FoodIntakeDetails> intakeDetailsList) {
 		HashMap<String, FoodIntakeFormatted> map = new HashMap<>(intakeDetailsList.size());
 		intakeDetailsList.forEach(x -> {
@@ -1010,7 +1068,8 @@ public class StudyServiceImpl implements StudyService {
 
 	/*
 	 * To process the records as per desired response
-	 * */
+	 */
+	@SuppressWarnings("unused")
 	private List<FoodIntakeFormatted> processForTableFormat2(List<FoodIntakeDetails> intakeDetailsList) {
 		// STUDY PAGE: DATE PET ---- DIET NAME,DIET NUMBER, OFFERED AMOUNT,CONSUMED
 		// AMOUNT, RECOMMENDED AMOUNT
@@ -1119,4 +1178,21 @@ public class StudyServiceImpl implements StudyService {
 		LOGGER.debug("getPetBreeds list", breeds);
 		return breeds;
 	}
+
+	@Override
+	public void addStudyNotificationConfig(StudyNotificationConfigRequest studyNotificationConfigRequest, int studyId,
+			Integer userId) throws ServiceExecutionException {
+		LOGGER.debug("addStudyNotificationConfig called");
+		studyDao.addStudyNotificationConfig(studyNotificationConfigRequest, studyId, userId);
+		LOGGER.debug("addStudyNotificationConfig completed successfully");
+	}
+
+	@Override
+	public StudyNotificationConfigResponse getStudyNotificationConfigs(int studyId) throws ServiceExecutionException {
+		LOGGER.debug("getStudyNotificationConfigs called");
+		StudyNotificationConfigResponse response = studyDao.getStudyNotificationConfigs(studyId);
+		LOGGER.debug("getStudyNotificationConfigs completed successfully");
+		return response;
+	}
+
 }

@@ -30,6 +30,7 @@ import com.hillspet.wearables.dto.SupportListDTO;
 import com.hillspet.wearables.dto.TotalAssetsByStausWidgetFilter;
 import com.hillspet.wearables.dto.TotalAssetsListDTO;
 import com.hillspet.wearables.dto.TotalAssetsbyStatusListDTO;
+import com.hillspet.wearables.dto.filter.AssetReportFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.dto.filter.IssueByStudyWidgetFilter;
 import com.hillspet.wearables.dto.filter.IssueWidgetFilter;
@@ -64,7 +65,7 @@ public class ReportServiceImpl implements ReportService {
 	private ReportDao reportDao;
 
 	@Override
-	public DeviceDetailsReportResponse getDeviceDetailsReport(BaseFilter filter) throws ServiceExecutionException {
+	public DeviceDetailsReportResponse getDeviceDetailsReport(AssetReportFilter filter) throws ServiceExecutionException {
 		LOGGER.debug("getDeviceDetailsReport called");
 		Map<String, Integer> mapper = reportDao.getDeviceDetailsReportCount(filter);
 		int total = mapper.get("count");
@@ -83,7 +84,7 @@ public class ReportServiceImpl implements ReportService {
 	}
 
 	@Override
-	public DeviceHistoryReportResponse getDeviceHistoryReport(BaseFilter filter) throws ServiceExecutionException {
+	public DeviceHistoryReportResponse getDeviceHistoryReport(AssetReportFilter filter) throws ServiceExecutionException {
 		LOGGER.debug("getDeviceHistoryReport called");
 		Map<String, Integer> mapper = reportDao.getDeviceHistoryReportCount(filter);
 		int total = mapper.get("count");
@@ -122,7 +123,7 @@ public class ReportServiceImpl implements ReportService {
 	}
 
 	@Override
-	public DeviceMalfunctionReportResponse getDeviceMalfunctionReport(BaseFilter filter)
+	public DeviceMalfunctionReportResponse getDeviceMalfunctionReport(AssetReportFilter filter)
 			throws ServiceExecutionException {
 		LOGGER.debug("getDeviceMalfunctionReport called");
 		Map<String, Integer> mapper = reportDao.getDeviceMalfunctionReportCount(filter);
@@ -144,7 +145,7 @@ public class ReportServiceImpl implements ReportService {
 	}
 
 	@Override
-	public DeviceTrackingReportResponse getDeviceTrackingReport(BaseFilter filter) throws ServiceExecutionException {
+	public DeviceTrackingReportResponse getDeviceTrackingReport(AssetReportFilter filter) throws ServiceExecutionException {
 		LOGGER.debug("getDeviceTrackingReport called");
 		Map<String, Integer> mapper = reportDao.getDeviceTrackingReportCount(filter);
 		int total = mapper.get("count");

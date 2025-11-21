@@ -13,12 +13,14 @@ import com.hillspet.wearables.dao.lookup.LookupDao;
 import com.hillspet.wearables.dto.AgentAction;
 import com.hillspet.wearables.dto.Algorithm;
 import com.hillspet.wearables.dto.AssignedUser;
+import com.hillspet.wearables.dto.BehaviorType;
 import com.hillspet.wearables.dto.BfiScorer;
 import com.hillspet.wearables.dto.CategoryTimer;
 import com.hillspet.wearables.dto.ContactMethod;
 import com.hillspet.wearables.dto.Country;
 import com.hillspet.wearables.dto.CustomerContactMethod;
 import com.hillspet.wearables.dto.CustomerContactReason;
+import com.hillspet.wearables.dto.DataQuality;
 import com.hillspet.wearables.dto.DefectiveSensorAction;
 import com.hillspet.wearables.dto.DeviceLocation;
 import com.hillspet.wearables.dto.DeviceStatus;
@@ -29,6 +31,7 @@ import com.hillspet.wearables.dto.FeedingScheduleConfig;
 import com.hillspet.wearables.dto.Frequency;
 import com.hillspet.wearables.dto.ImageScoringType;
 import com.hillspet.wearables.dto.InventoryStatus;
+import com.hillspet.wearables.dto.IsdCode;
 import com.hillspet.wearables.dto.Issue;
 import com.hillspet.wearables.dto.MaterialCategory;
 import com.hillspet.wearables.dto.MaterialType;
@@ -38,6 +41,7 @@ import com.hillspet.wearables.dto.MenuAction;
 import com.hillspet.wearables.dto.MobileAppConfig;
 import com.hillspet.wearables.dto.MobileAppFBPhoneModel;
 import com.hillspet.wearables.dto.MobileAppFeedbackPage;
+import com.hillspet.wearables.dto.NotificationConfig;
 import com.hillspet.wearables.dto.Occurance;
 import com.hillspet.wearables.dto.PetBreed;
 import com.hillspet.wearables.dto.PetFeedingTime;
@@ -47,6 +51,7 @@ import com.hillspet.wearables.dto.PetParent;
 import com.hillspet.wearables.dto.PetParentNameTimer;
 import com.hillspet.wearables.dto.PetSpecies;
 import com.hillspet.wearables.dto.PetStatus;
+import com.hillspet.wearables.dto.PetStudyAction;
 import com.hillspet.wearables.dto.Phase;
 import com.hillspet.wearables.dto.PhaseDays;
 import com.hillspet.wearables.dto.PointTracker;
@@ -65,6 +70,7 @@ import com.hillspet.wearables.dto.QuestionValidityPeriod;
 import com.hillspet.wearables.dto.QuestionnaireCategory;
 import com.hillspet.wearables.dto.QuestionnaireListDTO;
 import com.hillspet.wearables.dto.QuestionnaireType;
+import com.hillspet.wearables.dto.QuestionnariesByStudy;
 import com.hillspet.wearables.dto.Role;
 import com.hillspet.wearables.dto.RoleType;
 import com.hillspet.wearables.dto.RootCause;
@@ -82,6 +88,8 @@ import com.hillspet.wearables.dto.TicketPriority;
 import com.hillspet.wearables.dto.TicketStatus;
 import com.hillspet.wearables.dto.TicketType;
 import com.hillspet.wearables.dto.TimeZone;
+import com.hillspet.wearables.dto.WifiSsIdResponse;
+import com.hillspet.wearables.dto.filter.PointTrackFilter;
 import com.hillspet.wearables.jaxrs.resource.impl.PushNotificationListResponse;
 import com.hillspet.wearables.response.EatingEnthusiasmScaleResponse;
 import com.hillspet.wearables.response.PetFeedingTimeResponse;
@@ -394,6 +402,14 @@ public class LookupServiceImpl implements LookupService {
 		return response;
 	}
 
+	@Override
+	public List<QuestionnariesByStudy> getQuestionnairesList(PointTrackFilter filter) throws ServiceExecutionException {
+		LOGGER.debug("getQuestionnairesList called");
+		List<QuestionnariesByStudy> QuestionnariesByStudy = lookupDao.getQuestionnairesList(filter);
+		LOGGER.debug("getQuestionnairesList end");
+		return QuestionnariesByStudy;
+	}
+
 	/* ------------ PointTracker Lookup Services Start ---------------- */
 	@Override
 	public List<PointTrackerActivity> getPointTrackerActivities() throws ServiceExecutionException {
@@ -401,6 +417,14 @@ public class LookupServiceImpl implements LookupService {
 		List<PointTrackerActivity> pointTrackerActivities = lookupDao.getPointTrackerActivities();
 		LOGGER.debug("getPointTrackerActivities list", pointTrackerActivities.size());
 		return pointTrackerActivities;
+	}
+
+	@Override
+	public List<PointTrackerMetric> getUniquePetBehaviors() throws ServiceExecutionException {
+		LOGGER.debug("getPetBehaviors called");
+		List<PointTrackerMetric> pointTrackerMetrics = lookupDao.getUniquePetBehaviors();
+		LOGGER.debug("getPetBehaviors list", pointTrackerMetrics.size());
+		return pointTrackerMetrics;
 	}
 
 	@Override
@@ -602,7 +626,8 @@ public class LookupServiceImpl implements LookupService {
 	}
 
 	@Override
-	public EatingEnthusiasmScaleResponse getPetEatingEnthusiasmScales(String speciesId) throws ServiceExecutionException {
+	public EatingEnthusiasmScaleResponse getPetEatingEnthusiasmScales(String speciesId)
+			throws ServiceExecutionException {
 		LOGGER.debug("getPetEatingEnthusiasmScale called");
 		List<EatingEnthusiasmScale> eatingEnthusiasmScales = lookupDao.getPetEatingEnthusiasmScales(speciesId);
 		EatingEnthusiasmScaleResponse response = new EatingEnthusiasmScaleResponse();
@@ -726,6 +751,7 @@ public class LookupServiceImpl implements LookupService {
 		return statuses;
 	}
 
+	@Override
 	public List<ProductType> getProductTypeList() throws ServiceExecutionException {
 		LOGGER.debug("getProductTypeList called");
 		List<ProductType> productTypeList = lookupDao.getProductTypeList();
@@ -777,4 +803,84 @@ public class LookupServiceImpl implements LookupService {
 		LOGGER.debug("getPetsByStudy list", petNameList.size());
 		return petNameList;
 	}
+
+	@Override
+	public List<DataQuality> getStudiesWithAlerts() throws ServiceExecutionException {
+		LOGGER.debug("getStudiesWithAlerts called");
+		List<DataQuality> bfiScorerList = lookupDao.getStudiesWithAlerts();
+		LOGGER.debug("getStudiesWithAlerts end");
+		return bfiScorerList;
+	}
+
+	@Override
+	public List<DataQuality> getAlertTypes() throws ServiceExecutionException {
+		LOGGER.debug("getAlertTypes called");
+		List<DataQuality> bfiScorerList = lookupDao.getAlertTypes();
+		LOGGER.debug("getAlertTypes end");
+		return bfiScorerList;
+	}
+
+	@Override
+	public List<DataQuality> getDevicesWithAlerts() throws ServiceExecutionException {
+		LOGGER.debug("getStudiesWithAlerts called");
+		List<DataQuality> bfiScorerList = lookupDao.getDevicesWithAlerts();
+		LOGGER.debug("getStudiesWithAlerts end");
+		return bfiScorerList;
+	}
+
+	@Override
+	public List<DataQuality> getAlertActions() throws ServiceExecutionException {
+		LOGGER.debug("getAlertActions called");
+		List<DataQuality> bfiScorerList = lookupDao.getAlertActions();
+		LOGGER.debug("getAlertActions end");
+		return bfiScorerList;
+	}
+
+	@Override
+	public List<Frequency> getFrequencies(String frequencyType) throws ServiceExecutionException {
+		LOGGER.debug("getFrequencies called");
+		List<Frequency> frequencies = lookupDao.getFrequencies(frequencyType);
+		LOGGER.debug("getFrequencies list", frequencies.size());
+		return frequencies;
+	}
+
+	@Override
+	public List<IsdCode> getIsdCodes() throws ServiceExecutionException {
+		LOGGER.debug("getIsdCodes called");
+		List<IsdCode> isdCodes = lookupDao.getIsdCodes();
+		LOGGER.debug("getIsdCodes end");
+		return isdCodes;
+	}
+
+	public List<NotificationConfig> getNotificationConfig(String studyId) throws ServiceExecutionException {
+		LOGGER.debug("getNotificationConfig called");
+		List<NotificationConfig> notificationConfig = lookupDao.getNotificationConfig(studyId);
+		LOGGER.debug("getNotificationConfig list", notificationConfig);
+		return notificationConfig;
+	}
+
+	@Override
+	public List<PetStudyAction> getPetStudyActions() throws ServiceExecutionException {
+		LOGGER.debug("getPetStudyActions called");
+		List<PetStudyAction> PetStudyActions = lookupDao.getPetStudyActions();
+		LOGGER.debug("getPetStudyActions end");
+		return PetStudyActions;
+	}
+
+	@Override
+	public List<WifiSsIdResponse> getWifiSsIdList() throws ServiceExecutionException {
+		LOGGER.debug("getWifiSsIdList called");
+		List<WifiSsIdResponse> WifiSsIdResponse = lookupDao.getWifiSsIdList();
+		LOGGER.debug("getWifiSsIdList end");
+		return WifiSsIdResponse;
+	}
+
+	@Override
+	public List<BehaviorType> getPetBehaviorTypes() throws ServiceExecutionException {
+		LOGGER.debug("getPetBehaviorTypes called");
+		List<BehaviorType> behaviorTypes = lookupDao.getPetBehaviorTypes();
+		LOGGER.debug("getPetBehaviorTypes end");
+		return behaviorTypes;
+	}
+
 }

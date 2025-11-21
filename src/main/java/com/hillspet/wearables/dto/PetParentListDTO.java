@@ -7,16 +7,23 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PetParentListDTO extends BaseDTO {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private Integer petParentId;
 	private String petParentName;
 	private String email;
+	private Integer isdCodeId;
+	private String isdCode;
 	private String phoneNumber;
 	private String petNames;
 	private String studyNames;
 	private Integer numberOfPets;
 	private boolean isOnStudyPetExist;
-	private String petParentFirstName;
-	private String petParentLastName;
+	private String firstName;
+	private String lastName;
 
 	private String secondaryEmail;
 	private Boolean isNotifySecondaryEmail;
@@ -30,6 +37,8 @@ public class PetParentListDTO extends BaseDTO {
 	private String preferredFoodUnit;
 	private Integer preferredWeightUnitId;
 	private String preferredWeightUnit;
+
+	private Boolean isVipPetParent;
 
 	public String getSecondaryEmail() {
 		return secondaryEmail;
@@ -55,20 +64,20 @@ public class PetParentListDTO extends BaseDTO {
 		this.isOnStudyPetExist = isOnStudyPetExist;
 	}
 
-	public String getPetParentFirstName() {
-		return petParentFirstName;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setPetParentFirstName(String petParentFirstName) {
-		this.petParentFirstName = petParentFirstName;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
-	public String getPetParentLastName() {
-		return petParentLastName;
+	public String getLastName() {
+		return lastName;
 	}
 
-	public void setPetParentLastName(String petParentLastName) {
-		this.petParentLastName = petParentLastName;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public Integer getPetParentId() {
@@ -93,6 +102,22 @@ public class PetParentListDTO extends BaseDTO {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Integer getIsdCodeId() {
+		return isdCodeId;
+	}
+
+	public void setIsdCodeId(Integer isdCodeId) {
+		this.isdCodeId = isdCodeId;
+	}
+
+	public String getIsdCode() {
+		return isdCode;
+	}
+
+	public void setIsdCode(String isdCode) {
+		this.isdCode = isdCode;
 	}
 
 	public String getPhoneNumber() {
@@ -181,6 +206,14 @@ public class PetParentListDTO extends BaseDTO {
 
 	public void setPreferredWeightUnit(String preferredWeightUnit) {
 		this.preferredWeightUnit = preferredWeightUnit;
+	}
+
+	public Boolean getIsVipPetParent() {
+		return isVipPetParent;
+	}
+
+	public void setIsVipPetParent(Boolean isVipPetParent) {
+		this.isVipPetParent = isVipPetParent;
 	}
 
 }

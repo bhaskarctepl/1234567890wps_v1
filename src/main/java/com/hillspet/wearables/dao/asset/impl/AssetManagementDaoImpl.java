@@ -53,11 +53,13 @@ import com.hillspet.wearables.dto.DeviceUnAssignReason;
 import com.hillspet.wearables.dto.FirmwareVersion;
 import com.hillspet.wearables.dto.PetStudyDevice;
 import com.hillspet.wearables.dto.filter.AssetFirmwareVersionsFilter;
+import com.hillspet.wearables.dto.filter.AssetParam;
 import com.hillspet.wearables.dto.filter.AssetUpdateFirmwareFilter;
 import com.hillspet.wearables.dto.filter.AssetsFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.request.AssetStudyMappingRequest;
 import com.hillspet.wearables.request.BulkAssetUploadRequest;
+import com.hillspet.wearables.request.BulkWhiteListingRequest;
 import com.hillspet.wearables.request.UnassignAssetRequest;
 import com.hillspet.wearables.response.DeviceResponse;
 
@@ -109,11 +111,17 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 		inputParams.put("p_tracking_number", deviceInfo.getTrackingNumber());
 		inputParams.put("p_created_by", deviceInfo.getCreatedBy());
 		inputParams.put("p_study_id", deviceInfo.getStudyId());
+		inputParams.put("p_is_whiteListed", deviceInfo.getIsWhiteListed());
+		inputParams.put("p_wifi_ss", deviceInfo.getWifiSS());
+		inputParams.put("p_wifi_ssid", deviceInfo.getWifiSSID());
+		inputParams.put("p_box_number", deviceInfo.getBoxNumber());
 		// inputParams.put("p_other_asset_type", deviceInfo.getOtherAssetType());
 		// inputParams.put("p_other_asset_model", deviceInfo.getOtherAssetModel());
 
 		try {
+			LOGGER.info("addDeviceInfo : inputParams {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.DEVICE_INFO_INSERT, inputParams);
+			LOGGER.info("addDeviceInfo : outParams {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
@@ -179,8 +187,14 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 		inputParams.put("p_tracking_number", deviceInfo.getTrackingNumber());
 		inputParams.put("p_modified_by", deviceInfo.getModifiedBy());
 		inputParams.put("p_study_id", deviceInfo.getStudyId());
+		inputParams.put("p_is_whiteListed", deviceInfo.getIsWhiteListed());
+		inputParams.put("p_wifi_ssid", deviceInfo.getWifiSSID());
+		inputParams.put("p_wifi_ss", deviceInfo.getWifiSS());
+		inputParams.put("p_box_number", deviceInfo.getBoxNumber());
 		try {
+			LOGGER.info("updateDeviceInfo : inputParams {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.DEVICE_INFO_UPDATE, inputParams);
+			LOGGER.info("updateDeviceInfo : outParams {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isNotEmpty(errorMsg) || statusFlag < NumberUtils.INTEGER_ONE) {
@@ -265,7 +279,7 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 			LOGGER.info("updateDeviceFirmware outParams ", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
-			
+
 			if (StringUtils.isNotEmpty(errorMsg) || statusFlag < NumberUtils.INTEGER_ONE) {
 				if (statusFlag == -2) {
 					throw new ServiceExecutionException(
@@ -327,6 +341,10 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 					deviceInfo.setTrackingNumber(rs.getString("tracking_number"));
 					deviceInfo.setStudyId(rs.getInt("STUDY_ID"));
 					deviceInfo.setStudyName(rs.getString("STUDY_NAME"));
+					deviceInfo.setWifiSSID(rs.getInt("WIFI_SSID_ID"));
+					deviceInfo.setWifiSS(rs.getString("WIFI_SSID"));
+					deviceInfo.setIsWhiteListed(rs.getInt("IS_WHITELISTED"));
+					deviceInfo.setBoxNumber(rs.getString("BOX_NUMBER"));
 				}
 			}, deviceId);
 
@@ -673,7 +691,8 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 		try {
 			counts = selectForObject(SQLConstants.ASSET_LIST_COUNT, String.class, filter.getSearchText(),
 					filter.getStudyId(), filter.getAssetType(), filter.getStatusId(), filter.getUserId(),
-					filter.getRoleTypeId());
+					filter.getRoleTypeId(), filter.getAssetModel(), filter.getAssetNumber(), filter.getAssetLocation(),
+					filter.getIsWhiteListed(), filter.getBoxNumber());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getAssetCount", e);
@@ -687,6 +706,7 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 		List<Asset> assetsList = new ArrayList<>();
 
 		LOGGER.debug("getAssetList called");
+		LOGGER.debug(filter.getSearchText());
 		try {
 			jdbcTemplate.query(SQLConstants.ASSET_GET_LIST, new RowCallbackHandler() {
 				@Override
@@ -708,11 +728,15 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 						asset.setModifiedDate(rs.getTimestamp("modified_date").toLocalDateTime());
 					}
 					asset.setMfgfirm(rs.getString("MFG_FIRMWARE") == null ? "" : rs.getString("MFG_FIRMWARE"));
+					asset.setIswhiteListed(rs.getString("IS_WHITELISTED"));
+					asset.setWifiSSID(rs.getString("WIFI_SSID"));
+					asset.setBoxNumber(rs.getString("BOX_NUMBER"));
 					assetsList.add(asset);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
 					filter.getStudyId(), filter.getAssetType(), filter.getStatusId(), filter.getUserId(),
-					filter.getRoleTypeId());
+					filter.getRoleTypeId(), filter.getAssetModel(), filter.getAssetNumber(), filter.getAssetLocation(),
+					filter.getIsWhiteListed(), filter.getBoxNumber());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getAssetList", e);
@@ -769,9 +793,9 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 							ps.setString(10, info.getTrackingNumber());
 							ps.setInt(11, info.getStudyId() == null ? 0 : info.getStudyId());
 							ps.setString(12, info.getStudyName());
-							ps.setString(13, attachmentName);
-							ps.setString(14, info.getExceptionMsg());
-
+							ps.setString(13, info.getWifiSSID());
+							ps.setString(14, info.getBoxNumber());
+							ps.setString(15, info.getAttachmentName());
 						}
 
 						@Override
@@ -811,7 +835,8 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 				deviceInfo.setDeviceId(deviceID);
 			} else {
 				if (statusFlag == -2) {
-					throw new ServiceExecutionException("AddPetParent service validation failed cannot proceed further",
+					throw new ServiceExecutionException(
+							"saveBulkUploadDevicesInfo service validation failed cannot proceed further",
 							Status.BAD_REQUEST.getStatusCode(),
 							Arrays.asList(new WearablesError(WearablesErrorCode.DEVICE_ALREADY_EXISTS, errorMsg)));
 				} else {
@@ -886,6 +911,8 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 					device.setTrackingNumber(rs.getString("TRACKING_NUMBER"));
 					device.setStudyId(rs.getInt("STUDY_ID"));
 					device.setStudyName(rs.getString("STUDY_NAME"));
+					device.setWifiSSID(rs.getString("WIFI_SSID"));
+					device.setBoxNumber(rs.getString("BOX_NUMBER"));
 					device.setExceptionMsg(rs.getString("EXCEPTION_TYPE"));
 
 					deviceList.add(device);
@@ -1050,10 +1077,12 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
 			inputParams.put("p_unassign_request", mapper.writeValueAsString(request.getPetUnAssignAssets()));
-
 			inputParams.put("p_modified_by", request.getUserId());
 
+			LOGGER.info("unassignAsset inputParams are {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.PET_UNASSIGN_ASSET, inputParams);
+			LOGGER.info("unassignAsset inputParams are {}", outParams);
+
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
@@ -1200,5 +1229,120 @@ public class AssetManagementDaoImpl extends BaseDaoImpl implements AssetManageme
 			throw new ServiceExecutionException(e.getMessage());
 		}
 
+	}
+
+	@Override
+	public List<Asset> getSensorsListBySsId(String ssId) throws ServiceExecutionException {
+		List<Asset> assetList = new ArrayList<>();
+
+		try {
+			jdbcTemplate.query(SQLConstants.ASSET_GET_ASSET_BY_SSID, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					Asset asset = new Asset();
+					asset.setDeviceId(rs.getInt("DEVICE_ID"));
+					asset.setDeviceNumber(rs.getString("DEVICE_NUMBER"));
+					asset.setBoxNumber(rs.getString("BOX_NUMBER"));
+					assetList.add(asset);
+				}
+			}, ssId);
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getSensorsListBySsId", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return assetList;
+	}
+
+	@Override
+	public List<Asset> getSensorsList(AssetParam filter) throws ServiceExecutionException {
+
+		List<Asset> assetList = new ArrayList<>();
+
+		try {
+			jdbcTemplate.query(SQLConstants.ASSET_GET_ASSET_BY_STUDY, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					Asset asset = new Asset();
+					asset.setDeviceId(rs.getInt("DEVICE_ID"));
+					asset.setDeviceNumber(rs.getString("DEVICE_NUMBER"));
+					asset.setTotalCount(rs.getInt("TOTAL_COUNT"));
+					asset.setBoxNumber(rs.getString("BOX_NUMBER"));
+					assetList.add(asset);
+				}
+			}, filter.getStatus(), filter.getStudyId(), filter.getSsId(), filter.getQuery(), filter.getStartIndex(),
+					filter.getLimit(), filter.getUserId(), filter.getRoleTypeId(), filter.getAssetNumber(),
+					filter.getBoxNumber());
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getSensorsList", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return assetList;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Integer> getSensorsListCount(AssetParam filter) throws ServiceExecutionException {
+		LOGGER.debug("getSensorsListCount called");
+		String counts;
+		HashMap<String, Integer> map = new HashMap<>();
+		try {
+			counts = selectForObject(SQLConstants.ASSET_GET_ASSET_BY_STUDY_COUNT, String.class, filter.getStatus(),
+					filter.getStudyId(), filter.getSsId(), filter.getQuery(), filter.getStartIndex(), filter.getLimit(),
+					filter.getUserId(), filter.getRoleTypeId(), filter.getAssetNumber(), filter.getBoxNumber());
+			map = mapper.readValue(counts, HashMap.class);
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getSensorsListCount", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return map;
+	}
+
+	@Override
+	public List<com.hillspet.wearables.dto.Status> getAssetStatus() throws ServiceExecutionException {
+
+		List<com.hillspet.wearables.dto.Status> statusList = new ArrayList<>();
+
+		try {
+			jdbcTemplate.query(SQLConstants.ASSET_GET_ASSET_STATUS, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					com.hillspet.wearables.dto.Status status = new com.hillspet.wearables.dto.Status();
+					status.setStatusId(rs.getInt("DEVICE_STATUS_ID"));
+					status.setStatusName(rs.getString("STATUS_NAME"));
+					statusList.add(status);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getSensorsList", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return statusList;
+	}
+
+	@Override
+	public void bulkWhiteListing(BulkWhiteListingRequest request, Integer userId) throws ServiceExecutionException {
+		try {
+			Map<String, Object> inputParams = new HashMap<>();
+			ObjectMapper objectMapper = new ObjectMapper();
+			inputParams.put("p_asset_json", objectMapper.writeValueAsString(request));
+			inputParams.put("p_modified_by", userId);
+
+			LOGGER.info("Executing bulkWhiteListing with params: {}", inputParams);
+
+			Map<String, Object> outParams = callStoredProcedure(SQLConstants.ASSET_BULK_WHITELISTING, inputParams);
+
+			LOGGER.info("bulkWhiteListing output: {}", outParams);
+
+			int statusFlag = (int) outParams.get("out_flag");
+			String errorMsg = (String) outParams.get("out_error_msg");
+
+			if (statusFlag <= 0 || errorMsg != null) {
+				throw new ServiceExecutionException("Error during bulkWhiteListing: " + errorMsg);
+			}
+
+		} catch (Exception e) {
+			LOGGER.error("Error in bulkWhiteListing", e);
+			throw new ServiceExecutionException(e.getMessage(), e);
+		}
 	}
 }

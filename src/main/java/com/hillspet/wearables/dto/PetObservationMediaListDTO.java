@@ -10,6 +10,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PetObservationMediaListDTO extends BaseDTO {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private int petId;
 	private String petName;
 	private String petPhoto;
@@ -38,6 +43,7 @@ public class PetObservationMediaListDTO extends BaseDTO {
 	private Integer isPrimaryPet;
 	private String petParentNames;
 	private List<ObservationVideo> observationVideos;
+	private Boolean isVipPet;
 
 	public String getVideoThumbnailURL() {
 		return videoThumbnailURL;
@@ -263,6 +269,14 @@ public class PetObservationMediaListDTO extends BaseDTO {
 
 	public void setObservationVideos(List<ObservationVideo> observationVideos) {
 		this.observationVideos = observationVideos;
+	}
+
+	public Boolean getIsVipPet() {
+		return isVipPet;
+	}
+
+	public void setIsVipPet(Boolean isVipPet) {
+		this.isVipPet = isVipPet;
 	}
 
 }

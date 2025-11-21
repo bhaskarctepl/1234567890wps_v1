@@ -24,6 +24,9 @@ public class RecommendationDetails {
     private Integer studyId;
     private short isLatestRecord;
     private short afRecommendationException;
+    private Float previousValuesInGrams;
+    private Float previousValuesInCups;
+
     public Integer getPetId() {
         return petId;
     }
@@ -192,6 +195,22 @@ public class RecommendationDetails {
         this.afRecommendationException = afRecommendationException;
     }
 
+    public Float getPreviousValuesInGrams() {
+        return previousValuesInGrams;
+    }
+
+    public void setPreviousValuesInGrams(Float previousValuesInGrams) {
+        this.previousValuesInGrams = previousValuesInGrams;
+    }
+
+    public Float getPreviousValuesInCups() {
+        return previousValuesInCups;
+    }
+
+    public void setPreviousValuesInCups(Float previousValuesInCups) {
+        this.previousValuesInCups = previousValuesInCups;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", RecommendationDetails.class.getSimpleName() + "[", "]")
@@ -216,6 +235,8 @@ public class RecommendationDetails {
                 .add("studyId=" + studyId)
                 .add("isLatestRecord=" + isLatestRecord)
                 .add("afRecommendationException=" + afRecommendationException)
+                .add("previousValuesInGrams=" + previousValuesInGrams)
+                .add("previousValuesInCups=" + previousValuesInCups)
                 .toString();
     }
 }

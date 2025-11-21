@@ -18,7 +18,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import com.hillspet.wearables.response.*;
 import org.apache.http.HttpStatus;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -41,9 +40,30 @@ import com.hillspet.wearables.request.BehaviorHistoryRequest;
 import com.hillspet.wearables.request.BulkExtPetIdsUploadRequest;
 import com.hillspet.wearables.request.DownloadMediaRequest;
 import com.hillspet.wearables.request.ManualRecommendationRequest;
+import com.hillspet.wearables.request.PetNotificationRequest;
 import com.hillspet.wearables.request.PetRequest;
 import com.hillspet.wearables.request.UpdatePetIBWRequest;
 import com.hillspet.wearables.request.ValidateDuplicatePetRequest;
+import com.hillspet.wearables.response.ActivityFactorResultResponseList;
+import com.hillspet.wearables.response.BaseResultCollection;
+import com.hillspet.wearables.response.BehaviorHistoryResponse;
+import com.hillspet.wearables.response.BehaviorVisualizationResponse;
+import com.hillspet.wearables.response.BulkExtPetIdsUploadResponse;
+import com.hillspet.wearables.response.PetAddressResponse;
+import com.hillspet.wearables.response.PetDevicesResponse;
+import com.hillspet.wearables.response.PetFeedingEnthusiasmScaleResponse;
+import com.hillspet.wearables.response.PetImageScaleResponse;
+import com.hillspet.wearables.response.PetLegLengthResponse;
+import com.hillspet.wearables.response.PetNotesResponse;
+import com.hillspet.wearables.response.PetObservationMediaListResponse;
+import com.hillspet.wearables.response.PetObservationsResponse;
+import com.hillspet.wearables.response.PetParentsResponse;
+import com.hillspet.wearables.response.PetRedemptionHistoryResponse;
+import com.hillspet.wearables.response.PetResponse;
+import com.hillspet.wearables.response.PetWeightHistoryResponse;
+import com.hillspet.wearables.response.PetsResponse;
+import com.hillspet.wearables.response.PointsAccumulatedReportResponse;
+import com.hillspet.wearables.response.TotalAssetsByStatusReportResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -651,4 +671,26 @@ public interface PetResource {
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response getPetThresholdDetails(@PathParam("afId") int afId);
+	
+	@PUT
+	@Path("/updatePetNotification")
+	@ApiOperation(value = "Update Pet Notifications Status", notes = "Updates a Pet's Notifications Status ")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = PetNotificationRequest.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response updatePetNotification(@Valid @ApiParam(name = "petNotificationRequest", required = false) PetNotificationRequest petNotificationRequest);
+	
+	@GET
+	@Path("/getActivePets")
+	@ApiOperation(value = "Get Active Pets", notes = "Get the Active Pets list based on filters")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = PetsResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getActivePetList(@BeanParam PetFilter filter);
 }

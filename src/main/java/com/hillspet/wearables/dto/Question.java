@@ -33,6 +33,8 @@ public class Question {
 	private String questionCode;
 	private Integer validityPeriodId;
 	private String validityPeriod;
+	private Integer noOfDays;
+	
 
 	private List<QuestionCategory> questionCategories;
 
@@ -196,4 +198,13 @@ public class Question {
 		this.shuffleOptionOrder = shuffleOptionOrder;
 	}
 
+	public Integer getNoOfDays() {
+		return noOfDays;
+	}
+
+	public void setNoOfDays(Integer noOfDays) {
+		this.noOfDays = noOfDays;
+	}
+
+	
 }

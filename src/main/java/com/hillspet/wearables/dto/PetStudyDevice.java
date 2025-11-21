@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+@SuppressWarnings("serial")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PetStudyDevice extends BaseDTO {
@@ -26,7 +27,6 @@ public class PetStudyDevice extends BaseDTO {
 	private int petStudyDeviceId;
 	private String deviceType;
 	private int petStudyId;
-	private Integer unAssignReasonId;
 	private String externalPetInfoId;
 	private String externalPetValue;
 	private boolean isStudyActive;
@@ -35,7 +35,9 @@ public class PetStudyDevice extends BaseDTO {
 	private LocalDate studyAssignedOn;
 	private LocalDate studyEndDate;
 	private String studyAssignedOnDate;
-	private String unassignedReason;
+
+	private Integer reasonId;
+	private String unAssignReason;
 
 	private LocalDate dateOfDeath;
 	private Boolean isApproximateDateOfDeath;
@@ -88,12 +90,20 @@ public class PetStudyDevice extends BaseDTO {
 		this.batteryPercentage = batteryPercentage;
 	}
 
-	public Integer getUnAssignReasonId() {
-		return unAssignReasonId;
+	public String getUnAssignReason() {
+		return unAssignReason;
 	}
 
-	public void setUnAssignReasonId(Integer unAssignReasonId) {
-		this.unAssignReasonId = unAssignReasonId;
+	public void setUnAssignReason(String unAssignReason) {
+		this.unAssignReason = unAssignReason;
+	}
+
+	public Integer getReasonId() {
+		return reasonId;
+	}
+
+	public void setReasonId(Integer reasonId) {
+		this.reasonId = reasonId;
 	}
 
 	public boolean isStudyActive() {
@@ -254,14 +264,6 @@ public class PetStudyDevice extends BaseDTO {
 
 	public void setLastSync(String lastSync) {
 		this.lastSync = lastSync;
-	}
-
-	public String getUnassignedReason() {
-		return unassignedReason;
-	}
-
-	public void setUnassignedReason(String unassignedReason) {
-		this.unassignedReason = unassignedReason;
 	}
 
 	public LocalDate getStudyEndDate() {

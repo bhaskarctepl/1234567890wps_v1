@@ -28,6 +28,7 @@ import com.hillspet.wearables.common.response.ErrorResponse;
 import com.hillspet.wearables.common.response.ResponseStatus;
 import com.hillspet.wearables.common.response.SuccessResponse;
 import com.hillspet.wearables.common.validation.ValidationResult;
+import com.hillspet.wearables.dto.Asset;
 import com.hillspet.wearables.dto.AssetHistory;
 import com.hillspet.wearables.dto.AssetType;
 import com.hillspet.wearables.dto.CustomUserDetails;
@@ -37,6 +38,7 @@ import com.hillspet.wearables.dto.DeviceUnAssignReason;
 import com.hillspet.wearables.dto.FirmwareVersion;
 import com.hillspet.wearables.dto.PetStudyDevice;
 import com.hillspet.wearables.dto.filter.AssetFirmwareVersionsFilter;
+import com.hillspet.wearables.dto.filter.AssetParam;
 import com.hillspet.wearables.dto.filter.AssetUpdateFirmwareFilter;
 import com.hillspet.wearables.dto.filter.AssetsFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
@@ -47,9 +49,11 @@ import com.hillspet.wearables.jaxrs.resource.AssetManagementResource;
 import com.hillspet.wearables.objects.common.response.CommonResponse;
 import com.hillspet.wearables.request.AssetStudyMappingRequest;
 import com.hillspet.wearables.request.BulkAssetUploadRequest;
+import com.hillspet.wearables.request.BulkWhiteListingRequest;
 import com.hillspet.wearables.request.UnassignAssetRequest;
 import com.hillspet.wearables.response.AssetHistoryResponse;
 import com.hillspet.wearables.response.AssetResponse;
+import com.hillspet.wearables.response.AssetResponseList;
 import com.hillspet.wearables.response.AssetTypeResponse;
 import com.hillspet.wearables.response.BulkAssetUploadResponse;
 import com.hillspet.wearables.response.DeviceInfoListResponse;
@@ -60,6 +64,7 @@ import com.hillspet.wearables.response.DeviceUnAssignResponse;
 import com.hillspet.wearables.response.FirmwareVersionListResponse;
 import com.hillspet.wearables.response.FirmwareVersionResponse;
 import com.hillspet.wearables.response.PetDevicesResponse;
+import com.hillspet.wearables.response.StatusResponse;
 import com.hillspet.wearables.security.Authentication;
 import com.hillspet.wearables.service.asset.AssetManagementService;
 
@@ -476,6 +481,49 @@ public class AssetManagementResourceImpl implements AssetManagementResource {
 		assetManagementService.manageAssetStudyMapping(request, userId);
 		CommonResponse commonResponse = new CommonResponse();
 		commonResponse.setMessage("Asset Study mapping has been successful");
+		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getSensorsListBySsId(String ssId) {
+		
+		List<Asset> Asset = assetManagementService.getSensorsListBySsId(ssId);
+		AssetResponseList response = new AssetResponseList();
+		response.setAsset(Asset);
+		SuccessResponse<AssetResponseList> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getSensorsList(AssetParam filter) {
+		CustomUserDetails userDetails = authentication.getAuthUserDetails();
+		filter.setUserId(userDetails.getUserId());
+		filter.setRoleTypeId(userDetails.getRoleTypeId());
+		AssetResponseList response = assetManagementService.getSensorsList(filter);
+		SuccessResponse<AssetResponseList> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getAssetStatus() {
+		
+		List<com.hillspet.wearables.dto.Status> status = assetManagementService.getAssetStatus();
+		StatusResponse response = new StatusResponse();
+		response.setStatusList(status);
+		SuccessResponse<StatusResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+	
+	@Override
+	public Response bulkWhiteListing(BulkWhiteListingRequest request) {
+		Integer userId = authentication.getAuthUserDetails().getUserId();
+		assetManagementService.bulkWhiteListing(request, userId);
+		CommonResponse commonResponse = new CommonResponse();
+		commonResponse.setMessage("bulkWhiteListing has been successful");
 		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
 		return responseBuilder.buildResponse(successResponse);
 	}

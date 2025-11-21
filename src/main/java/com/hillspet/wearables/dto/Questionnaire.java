@@ -27,6 +27,9 @@ public class Questionnaire {
 	private String questionnaireImageName;
 	private String questionnaireImageUrl;
 
+	// Added as part of enhancements 2024
+	private Integer parentQuestionnaireId;
+
 	public Integer getQuestionnaireId() {
 		return questionnaireId;
 	}
@@ -171,4 +174,11 @@ public class Questionnaire {
 		this.questionnaireImageUrl = questionnaireImageUrl;
 	}
 
+	public Integer getParentQuestionnaireId() {
+		return parentQuestionnaireId;
+	}
+
+	public void setParentQuestionnaireId(Integer parentQuestionnaireId) {
+		this.parentQuestionnaireId = parentQuestionnaireId;
+	}
 }

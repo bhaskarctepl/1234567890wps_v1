@@ -27,6 +27,7 @@ import com.hillspet.wearables.dao.lookup.LookupDao;
 import com.hillspet.wearables.dto.AgentAction;
 import com.hillspet.wearables.dto.Algorithm;
 import com.hillspet.wearables.dto.AssignedUser;
+import com.hillspet.wearables.dto.BehaviorType;
 import com.hillspet.wearables.dto.BfiScorer;
 import com.hillspet.wearables.dto.CategoryTimer;
 import com.hillspet.wearables.dto.ContactMethod;
@@ -34,6 +35,7 @@ import com.hillspet.wearables.dto.Country;
 import com.hillspet.wearables.dto.CustomUserDetails;
 import com.hillspet.wearables.dto.CustomerContactMethod;
 import com.hillspet.wearables.dto.CustomerContactReason;
+import com.hillspet.wearables.dto.DataQuality;
 import com.hillspet.wearables.dto.DefectiveSensorAction;
 import com.hillspet.wearables.dto.DeviceLocation;
 import com.hillspet.wearables.dto.DeviceStatus;
@@ -43,6 +45,7 @@ import com.hillspet.wearables.dto.ExtractFileCategory;
 import com.hillspet.wearables.dto.Frequency;
 import com.hillspet.wearables.dto.ImageScoringType;
 import com.hillspet.wearables.dto.InventoryStatus;
+import com.hillspet.wearables.dto.IsdCode;
 import com.hillspet.wearables.dto.Issue;
 import com.hillspet.wearables.dto.MaterialCategory;
 import com.hillspet.wearables.dto.MaterialType;
@@ -52,6 +55,7 @@ import com.hillspet.wearables.dto.MenuAction;
 import com.hillspet.wearables.dto.MobileAppConfig;
 import com.hillspet.wearables.dto.MobileAppFBPhoneModel;
 import com.hillspet.wearables.dto.MobileAppFeedbackPage;
+import com.hillspet.wearables.dto.NotificationConfig;
 import com.hillspet.wearables.dto.Occurance;
 import com.hillspet.wearables.dto.PetBreed;
 import com.hillspet.wearables.dto.PetFeedingTime;
@@ -61,6 +65,7 @@ import com.hillspet.wearables.dto.PetParent;
 import com.hillspet.wearables.dto.PetParentNameTimer;
 import com.hillspet.wearables.dto.PetSpecies;
 import com.hillspet.wearables.dto.PetStatus;
+import com.hillspet.wearables.dto.PetStudyAction;
 import com.hillspet.wearables.dto.Phase;
 import com.hillspet.wearables.dto.PointTracker;
 import com.hillspet.wearables.dto.PointTrackerActivity;
@@ -80,6 +85,7 @@ import com.hillspet.wearables.dto.QuestionValidityPeriod;
 import com.hillspet.wearables.dto.QuestionnaireCategory;
 import com.hillspet.wearables.dto.QuestionnaireListDTO;
 import com.hillspet.wearables.dto.QuestionnaireType;
+import com.hillspet.wearables.dto.QuestionnariesByStudy;
 import com.hillspet.wearables.dto.Role;
 import com.hillspet.wearables.dto.RoleType;
 import com.hillspet.wearables.dto.RootCause;
@@ -97,6 +103,8 @@ import com.hillspet.wearables.dto.TicketPriority;
 import com.hillspet.wearables.dto.TicketStatus;
 import com.hillspet.wearables.dto.TicketType;
 import com.hillspet.wearables.dto.TimeZone;
+import com.hillspet.wearables.dto.WifiSsIdResponse;
+import com.hillspet.wearables.dto.filter.PointTrackFilter;
 import com.hillspet.wearables.security.Authentication;
 
 @Repository
@@ -1133,6 +1141,28 @@ public class LookupDaoImpl extends BaseDaoImpl implements LookupDao {
 	}
 
 	@Override
+	public List<PointTrackerMetric> getUniquePetBehaviors() throws ServiceExecutionException {
+		List<PointTrackerMetric> pointTrackerMetrics = new ArrayList<>();
+		LOGGER.debug("getUniquePetBehaviors called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_PET_UNIQUE_BEHAVIORS, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet resultSet) throws SQLException {
+					PointTrackerMetric pointTrackerMetric = new PointTrackerMetric();
+					// set the column values to fields like below
+					pointTrackerMetric.setMetricId(resultSet.getInt("METRIC_ID"));
+					pointTrackerMetric.setMetricName(resultSet.getString("METRIC_NAME"));
+					pointTrackerMetrics.add(pointTrackerMetric);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getUniquePetBehaviors ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return pointTrackerMetrics;
+	}
+
+	@Override
 	public List<PointTrackerMetric> getPetBehaviors(int speciesId, int behaviorTypeId)
 			throws ServiceExecutionException {
 		List<PointTrackerMetric> pointTrackerMetrics = new ArrayList<>();
@@ -2005,4 +2035,248 @@ public class LookupDaoImpl extends BaseDaoImpl implements LookupDao {
 		}
 		return petNameList;
 	}
+
+	@Override
+	public List<DataQuality> getAlertTypes() throws ServiceExecutionException {
+		List<DataQuality> dataQualityList = new ArrayList<>();
+		LOGGER.debug("getAlertTypes called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_ALERT_TYPE_LIST, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					DataQuality dataQuality = new DataQuality();
+					dataQuality.setAlertTypeId(rs.getInt("ALERT_TYPE_ID"));
+					dataQuality.setAlertName(rs.getString("DESCRIPTION"));
+					dataQualityList.add(dataQuality);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getAlertTypes", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return dataQualityList;
+
+	}
+
+	@Override
+	public List<DataQuality> getStudiesWithAlerts() throws ServiceExecutionException {
+		List<DataQuality> dataQualityList = new ArrayList<>();
+		LOGGER.debug("getStudiesWithAlerts called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_ALERT_STYDY_LIST, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					DataQuality dataQuality = new DataQuality();
+					dataQuality.setStudyId(rs.getInt("STUDY_ID"));
+					dataQuality.setStudyName(rs.getString("STUDY_NAME"));
+					dataQualityList.add(dataQuality);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getStudiesWithAlerts", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return dataQualityList;
+	}
+
+	@Override
+	public List<DataQuality> getDevicesWithAlerts() throws ServiceExecutionException {
+		List<DataQuality> dataQualityList = new ArrayList<>();
+		LOGGER.debug("getStudiesWithAlerts called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_ALERT_DEVICE_LIST, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					DataQuality dataQuality = new DataQuality();
+					dataQuality.setDeviceId(rs.getString("DEVICE_ID"));
+					dataQuality.setDeviceNumber(rs.getString("DEVICE_NUMBER"));
+					dataQualityList.add(dataQuality);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getStudiesWithAlerts", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return dataQualityList;
+	}
+
+	@Override
+	public List<DataQuality> getAlertActions() throws ServiceExecutionException {
+		List<DataQuality> dataQualityList = new ArrayList<>();
+		LOGGER.debug("getAlertActions called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_ALERT_ACTION_LIST, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					DataQuality dataQuality = new DataQuality();
+					dataQuality.setAletActionId(rs.getString("ALERT_ACTION_PRIORITY_ID"));
+					dataQuality.setAlertName(rs.getString("ACTION"));
+					dataQualityList.add(dataQuality);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getAlertActions", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return dataQualityList;
+	}
+
+	@Override
+	public List<Frequency> getFrequencies(String frequencyType) throws ServiceExecutionException {
+		List<Frequency> frequencies = new ArrayList<>();
+		LOGGER.debug("getFrequencies called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_FREQUENCIES, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet resultSet) throws SQLException {
+					Frequency frequency = new Frequency();
+					frequency.setFrequencyId(resultSet.getInt("FREQUENCY_ID"));
+					frequency.setFrequencyName(resultSet.getString("FREQUENCY"));
+					frequencies.add(frequency);
+				}
+			}, frequencyType);
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getFrequencies ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return frequencies;
+	}
+
+	@Override
+	public List<NotificationConfig> getNotificationConfig(String studyId) throws ServiceExecutionException {
+		List<NotificationConfig> notificationConfigs = new ArrayList<>();
+		LOGGER.debug("getNotificationConfig called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_NOTIFICATION_CONFIG, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet resultSet) throws SQLException {
+					NotificationConfig notificationConfig = new NotificationConfig();
+					notificationConfig.setNotificationConfigId(resultSet.getInt("NOTIFICATION_NAME_ID"));
+					notificationConfig.setNotificationConfigName(resultSet.getString("NOTIFICATION_NAME"));
+					notificationConfig.setIsMandatory(resultSet.getInt("IS_MANDATORY"));
+					notificationConfigs.add(notificationConfig);
+				}
+			}, studyId);
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getNotificationConfig ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return notificationConfigs;
+	}
+
+	public List<IsdCode> getIsdCodes() throws ServiceExecutionException {
+		List<IsdCode> isdCodes = new ArrayList<>();
+		LOGGER.debug("getIsdCodes called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_ISD_CODES_LIST, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					IsdCode isdCode = new IsdCode();
+					isdCode.setIsdCodeId(rs.getInt("ISD_CODE_ID"));
+					isdCode.setIsdCode(rs.getString("ISD_CODE"));
+					isdCode.setCountryCode(rs.getString("COUNTRY_ISD_CODE"));
+					isdCodes.add(isdCode);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getIsdCodes", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return isdCodes;
+	}
+
+	public List<PetStudyAction> getPetStudyActions() throws ServiceExecutionException {
+		List<PetStudyAction> PetStudyActions = new ArrayList<>();
+		LOGGER.debug("getPetStudyActions called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_PET_STUDY_ACTION_LIST, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					PetStudyAction petStudyAction = new PetStudyAction();
+					petStudyAction.setPetStudyActionId(rs.getInt("ACTION_ID"));
+					petStudyAction.setPetStudyActionName(rs.getString("ACTION_NAME"));
+					petStudyAction.setColourCode(rs.getString("COLOR_CODE"));
+					PetStudyActions.add(petStudyAction);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getPetStudyActions", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return PetStudyActions;
+	}
+
+	@Override
+	public List<QuestionnariesByStudy> getQuestionnairesList(PointTrackFilter filter) throws ServiceExecutionException {
+
+		List<QuestionnariesByStudy> QuestionnariesByStudy = new ArrayList<>();
+		LOGGER.debug("getQuestionnairesList called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_QUESTIONNAIRE_BY_STUDY_PHASE, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					QuestionnariesByStudy questionnariesByStudy = new QuestionnariesByStudy();
+					questionnariesByStudy.setPhaseName(rs.getString("STUDY_PHASE"));
+					questionnariesByStudy.setQuestionnaire(rs.getString("QUESTIONNAIRE_NAME"));
+					questionnariesByStudy.setStartDate(rs.getString("FROM_DATE"));
+					questionnariesByStudy.setEndDate(rs.getString("TO_DATE"));
+					questionnariesByStudy.setStudyConfidId(rs.getInt("STUDY_QUESTIONNAIRE_CONFIG_ID"));
+					questionnariesByStudy.setStudyId(rs.getInt("STUDY_ID"));
+					questionnariesByStudy.setPhaseId(rs.getInt("STUDY_PHASE_ID"));
+					questionnariesByStudy.setPhaseId(rs.getInt("QUESTIONNAIRE_ID"));
+					questionnariesByStudy.setPhaseDays(rs.getString("PHASE_DAYS"));
+					QuestionnariesByStudy.add(questionnariesByStudy);
+				}
+			}, filter.getStudyId(), filter.getPhaseId(), filter.getStartDate().trim(), filter.getEndDate().trim());
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getQuestionnairesList", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+
+		return QuestionnariesByStudy;
+	}
+
+	@Override
+	public List<WifiSsIdResponse> getWifiSsIdList() throws ServiceExecutionException {
+		List<WifiSsIdResponse> WifiSsIdResponse = new ArrayList<>();
+		LOGGER.debug(" getWifiSsIdList called ");
+
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_WIFI_SSID, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					WifiSsIdResponse wifiSsIdResponse = new WifiSsIdResponse();
+					wifiSsIdResponse.setSsId(rs.getString("WIFI_SSID_NAME"));
+					wifiSsIdResponse.setId(rs.getInt("WIFI_SSID_ID"));
+					WifiSsIdResponse.add(wifiSsIdResponse);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error(" error while fetching getWifiSsIdList ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+
+		return WifiSsIdResponse;
+	}
+
+	public List<BehaviorType> getPetBehaviorTypes() throws ServiceExecutionException {
+		List<BehaviorType> behaviorTypes = new ArrayList<>();
+		LOGGER.debug("getPetBehaviorTypes called");
+		try {
+			jdbcTemplate.query(SQLConstants.LU_GET_BEHAVIOR_TYPES, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					BehaviorType behaviorType = new BehaviorType();
+					behaviorType.setBehaviorTypeId(rs.getInt("BEHAVIOR_TYPE_ID"));
+					behaviorType.setBehaviorType(rs.getString("BEHAVIOR_TYPE"));
+					behaviorTypes.add(behaviorType);
+				}
+			});
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getPetBehaviorTypes", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return behaviorTypes;
+	}
+
 }

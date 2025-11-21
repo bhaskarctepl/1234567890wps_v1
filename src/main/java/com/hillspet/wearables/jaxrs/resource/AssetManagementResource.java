@@ -25,15 +25,18 @@ import com.hillspet.wearables.common.response.Message;
 import com.hillspet.wearables.dto.DeviceInfo;
 import com.hillspet.wearables.dto.FirmwareVersion;
 import com.hillspet.wearables.dto.filter.AssetFirmwareVersionsFilter;
+import com.hillspet.wearables.dto.filter.AssetParam;
 import com.hillspet.wearables.dto.filter.AssetUpdateFirmwareFilter;
 import com.hillspet.wearables.dto.filter.AssetsFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.objects.common.response.CommonResponse;
 import com.hillspet.wearables.request.AssetStudyMappingRequest;
 import com.hillspet.wearables.request.BulkAssetUploadRequest;
+import com.hillspet.wearables.request.BulkWhiteListingRequest;
 import com.hillspet.wearables.request.UnassignAssetRequest;
 import com.hillspet.wearables.response.AssetHistoryResponse;
 import com.hillspet.wearables.response.AssetResponse;
+import com.hillspet.wearables.response.AssetResponseList;
 import com.hillspet.wearables.response.AssetTypeResponse;
 import com.hillspet.wearables.response.DeviceInfoListResponse;
 import com.hillspet.wearables.response.DeviceInfoResponse;
@@ -41,6 +44,7 @@ import com.hillspet.wearables.response.DeviceModelResponse;
 import com.hillspet.wearables.response.DeviceResponse;
 import com.hillspet.wearables.response.FirmwareVersionListResponse;
 import com.hillspet.wearables.response.FirmwareVersionResponse;
+import com.hillspet.wearables.response.StatusResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -226,9 +230,9 @@ public interface AssetManagementResource {
 	@Path("/bulkAssetUpload")
 	@Produces({ MediaType.APPLICATION_JSON_VALUE, Constants.MEDIA_TYPE_APPLICATION_JSON_INITIAL_VERSION1 })
 	@Consumes({ MediaType.MULTIPART_FORM_DATA_VALUE, Constants.MEDIA_TYPE_APPLICATION_JSON_INITIAL_VERSION1 })
-	@ApiOperation(value = "Add Firmware Version", notes = "Uploads Device Details Builk")
+	@ApiOperation(value = "Asset Bulk Upload", notes = "Uploads Device Details Builk")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = FirmwareVersionResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
@@ -240,7 +244,7 @@ public interface AssetManagementResource {
 	@Path("/saveBulkUploadDevicesInfo")
 	@ApiOperation(value = "Add Firmware Version", notes = "Uploads Device Details Builk")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = FirmwareVersionResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
@@ -253,7 +257,7 @@ public interface AssetManagementResource {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	@ApiOperation(value = "Get Bulk Upload Excel", notes = "Get the Firmware Version list")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = FirmwareVersionListResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
@@ -360,5 +364,50 @@ public interface AssetManagementResource {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response manageAssetStudyMapping(
 			@Valid @ApiParam(name = "assetStudyMappingRequest", required = true) AssetStudyMappingRequest request);
+
+	@GET
+	@Path("/getSensorsListBySsId")
+	@ApiOperation(value = "Get sensorsList", notes = "Get sensors list")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = AssetResponseList.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getSensorsListBySsId(@QueryParam("ssId") String ssId);
+
+	@GET
+	@Path("/getSensorsList")
+	@ApiOperation(value = "Get sensorsList based on filters", notes = "Get sensors list")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = AssetResponseList.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getSensorsList(@BeanParam AssetParam filter);
+
+	@GET
+	@Path("/getAssetStatus")
+	@ApiOperation(value = "Get getAssetStatus ", notes = "Get getAssetStatus list")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = StatusResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getAssetStatus();
+
+	@POST
+	@Path("/bulkWhiteListing")
+	@ApiOperation(value = "WhiteListing the assets with Wifi SSID", notes = "WhiteListing the assets with Wifi SSID")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response bulkWhiteListing(
+			@Valid @ApiParam(name = "bulkWhiteListingRequest", required = true) BulkWhiteListingRequest request);
 
 }

@@ -75,6 +75,7 @@ import com.hillspet.wearables.request.BehaviorHistoryRequest;
 import com.hillspet.wearables.request.BulkExtPetIdsUploadRequest;
 import com.hillspet.wearables.request.DownloadMediaRequest;
 import com.hillspet.wearables.request.ManualRecommendationRequest;
+import com.hillspet.wearables.request.PetNotificationRequest;
 import com.hillspet.wearables.request.PetRequest;
 import com.hillspet.wearables.request.UpdatePetIBWRequest;
 import com.hillspet.wearables.request.ValidateDuplicatePetRequest;
@@ -925,8 +926,8 @@ public class PetResourceImpl implements PetResource {
 	}
 
 	/*
-	* To save manual recommendation
-	* */
+	 * To save manual recommendation
+	 */
 	@Override
 	public Response saveManualEnterForRecommendation(ManualRecommendationRequest manualRecommendationRequest) {
 		petService.saveManualEnterForRecommendation(manualRecommendationRequest);
@@ -998,10 +999,10 @@ public class PetResourceImpl implements PetResource {
 
 	@Override
 	public Response getPetThresholdDetails(int afId) {
-		if (afId !=0 ) {
+		if (afId != 0) {
 			Integer userId = authentication.getAuthUserDetails().getUserId();
-			HashMap<String,String> response = petService.getPetThresholdDetails(afId, userId);
-			SuccessResponse<HashMap<String,String>> successResponse = new SuccessResponse<HashMap<String,String>>();
+			HashMap<String, String> response = petService.getPetThresholdDetails(afId, userId);
+			SuccessResponse<HashMap<String, String>> successResponse = new SuccessResponse<HashMap<String, String>>();
 			successResponse.setServiceResponse(response);
 			return responseBuilder.buildResponse(successResponse);
 		} else {
@@ -1010,4 +1011,27 @@ public class PetResourceImpl implements PetResource {
 			return responseBuilder.buildResponse(errorResponse);
 		}
 	}
+
+	@Override
+	public Response updatePetNotification(PetNotificationRequest petNotificationRequest) {
+		petService.updatePetNotification(petNotificationRequest);
+
+		CommonResponse response = new CommonResponse();
+		response.setMessage("Pet Notification request is updated successfully");
+		SuccessResponse<CommonResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getActivePetList(PetFilter filter) {
+		CustomUserDetails userDetails = authentication.getAuthUserDetails();
+		filter.setUserId(userDetails.getUserId());
+		filter.setRoleTypeId(userDetails.getRoleTypeId());
+		PetsResponse response = petService.getActivePetList(filter);
+		SuccessResponse<PetsResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
 }

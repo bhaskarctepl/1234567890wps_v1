@@ -18,6 +18,7 @@ public class PetQuestionnaireReccurrence {
 	private LocalDate dueDate;
 	private LocalDate submittedDate;
 	private String status;
+	private String petParentName;
 
 	public Integer getPetQuestionnaireScheduleId() {
 		return petQuestionnaireScheduleId;
@@ -81,6 +82,14 @@ public class PetQuestionnaireReccurrence {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
 	}
 
 }

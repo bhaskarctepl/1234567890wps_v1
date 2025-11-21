@@ -18,6 +18,7 @@ public class StudyBasicDetails {
 	private List<StudyTreatmentGroup> treatmentGroups;
 	private List<StudyPhase> studyPhases;
 	private Integer totalActivePets;
+	private Boolean isVipPetsPresent;
 
 	private Integer isExtetnal;
 	private String studyLocationName;
@@ -140,6 +141,14 @@ public class StudyBasicDetails {
 
 	public void setTotalActivePets(Integer totalActivePets) {
 		this.totalActivePets = totalActivePets;
+	}
+
+	public Boolean getIsVipPetsPresent() {
+		return isVipPetsPresent;
+	}
+
+	public void setIsVipPetsPresent(Boolean isVipPetsPresent) {
+		this.isVipPetsPresent = isVipPetsPresent;
 	}
 
 }

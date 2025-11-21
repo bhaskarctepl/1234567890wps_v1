@@ -31,6 +31,7 @@ import com.hillspet.wearables.request.AssociateNewStudyRequest;
 import com.hillspet.wearables.request.BehaviorHistoryRequest;
 import com.hillspet.wearables.request.BulkExtPetIdsUploadRequest;
 import com.hillspet.wearables.request.ManualRecommendationRequest;
+import com.hillspet.wearables.request.PetNotificationRequest;
 import com.hillspet.wearables.request.PetRequest;
 import com.hillspet.wearables.request.UpdatePetIBWRequest;
 import com.hillspet.wearables.request.ValidateDuplicatePetRequest;
@@ -159,5 +160,10 @@ public interface PetService {
 
 	public void saveManualEnterForRecommendation(ManualRecommendationRequest manualRecommendationRequest);
 
-	public HashMap<String, String> getPetThresholdDetails(int afId,int userId);
+	public HashMap<String, String> getPetThresholdDetails(int afId,int userId);	
+	
+	public void updatePetNotification(PetNotificationRequest petNotificationRequest)
+			throws ServiceExecutionException;
+	
+	PetsResponse getActivePetList(PetFilter filter) throws ServiceExecutionException;
 }

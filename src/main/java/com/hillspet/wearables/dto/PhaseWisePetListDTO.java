@@ -9,6 +9,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PhaseWisePetListDTO extends BaseDTO {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private Integer petId;
 	private String petName;
 	private Integer breedId;
@@ -35,6 +40,12 @@ public class PhaseWisePetListDTO extends BaseDTO {
 	private int petStudyId;
 	private int fromPhaseDay;
 	private LocalDate afEligibilityDate;
+
+	private Boolean isVipPet;
+
+	private Integer petStudyActionId;
+	private String petStudyActionName;
+	private String petStudyColourCode;
 
 	public int getPetStudyId() {
 		return petStudyId;
@@ -242,6 +253,38 @@ public class PhaseWisePetListDTO extends BaseDTO {
 
 	public void setAfEligibilityDate(LocalDate afEligibilityDate) {
 		this.afEligibilityDate = afEligibilityDate;
+	}
+
+	public Boolean getIsVipPet() {
+		return isVipPet;
+	}
+
+	public void setIsVipPet(Boolean isVipPet) {
+		this.isVipPet = isVipPet;
+	}
+
+	public Integer getPetStudyActionId() {
+		return petStudyActionId;
+	}
+
+	public void setPetStudyActionId(Integer petStudyActionId) {
+		this.petStudyActionId = petStudyActionId;
+	}
+
+	public String getPetStudyActionName() {
+		return petStudyActionName;
+	}
+
+	public void setPetStudyActionName(String petStudyActionName) {
+		this.petStudyActionName = petStudyActionName;
+	}
+
+	public String getPetStudyColourCode() {
+		return petStudyColourCode;
+	}
+
+	public void setPetStudyColourCode(String petStudyColourCode) {
+		this.petStudyColourCode = petStudyColourCode;
 	}
 
 }

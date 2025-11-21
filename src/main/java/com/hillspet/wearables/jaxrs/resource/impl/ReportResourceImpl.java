@@ -14,6 +14,7 @@ import com.hillspet.wearables.dto.CustomUserDetails;
 import com.hillspet.wearables.dto.CustomerSupportByCategory;
 import com.hillspet.wearables.dto.CustomerSupportIssuesByStudy;
 import com.hillspet.wearables.dto.TotalAssetsByStausWidgetFilter;
+import com.hillspet.wearables.dto.filter.AssetReportFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.dto.filter.IssueByStudyWidgetFilter;
 import com.hillspet.wearables.dto.filter.IssueWidgetFilter;
@@ -56,7 +57,7 @@ public class ReportResourceImpl implements ReportResource {
 	private Authentication authentication;
 
 	@Override
-	public Response getDeviceDetailsReport(BaseFilter filter) {
+	public Response getDeviceDetailsReport(AssetReportFilter filter) {
 		CustomUserDetails userDetails = authentication.getAuthUserDetails();
 		filter.setUserId(userDetails.getUserId());
 		filter.setRoleTypeId(userDetails.getRoleTypeId());
@@ -67,7 +68,7 @@ public class ReportResourceImpl implements ReportResource {
 	}
 
 	@Override
-	public Response getDeviceHistoryReport(BaseFilter filter) {
+	public Response getDeviceHistoryReport(AssetReportFilter filter) {
 		int userId = authentication.getAuthUserDetails().getUserId();
 		filter.setUserId(userId);
 		DeviceHistoryReportResponse response = reportService.getDeviceHistoryReport(filter);
@@ -87,7 +88,7 @@ public class ReportResourceImpl implements ReportResource {
 	}
 
 	@Override
-	public Response getDeviceMalfunctionReport(BaseFilter filter) {
+	public Response getDeviceMalfunctionReport(AssetReportFilter filter) {
 		CustomUserDetails userDetails = authentication.getAuthUserDetails();
 		filter.setUserId(userDetails.getUserId());
 		filter.setRoleTypeId(userDetails.getRoleTypeId());
@@ -98,7 +99,7 @@ public class ReportResourceImpl implements ReportResource {
 	}
 
 	@Override
-	public Response getDeviceTrackingReport(BaseFilter filter) {
+	public Response getDeviceTrackingReport(AssetReportFilter filter) {
 		int userId = authentication.getAuthUserDetails().getUserId();
 		filter.setUserId(userId);
 		DeviceTrackingReportResponse response = reportService.getDeviceTrackingReport(filter);

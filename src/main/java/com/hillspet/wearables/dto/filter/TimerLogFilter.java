@@ -18,6 +18,14 @@ public class TimerLogFilter extends BaseFilter {
 	@QueryParam("category")
 	private String category;
 
+	@QueryParam("petName")
+	@ApiParam(name = "petName", value = "Search pet by pet name", required = false)
+	private String petName;
+
+	@QueryParam("petParentName")
+	@ApiParam(name = "petParentName", value = "Search pet by Pet Parent Name", required = false)
+	private String petParentName;
+
 	public TimerLogFilter() {
 
 	}
@@ -50,6 +58,22 @@ public class TimerLogFilter extends BaseFilter {
 
 	public void setCategory(String category) {
 		this.category = category;
+	}
+
+	public String getPetName() {
+		return petName;
+	}
+
+	public void setPetName(String petName) {
+		this.petName = petName;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
 	}
 
 }

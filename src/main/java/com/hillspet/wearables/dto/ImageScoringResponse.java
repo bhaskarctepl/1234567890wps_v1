@@ -41,6 +41,8 @@ public class ImageScoringResponse extends BaseDTO {
 	private LocalDate dueDate;
 	private String status;
 
+	private Boolean isVipPetParent;
+
 	public Integer getPetId() {
 		return petId;
 	}
@@ -177,4 +179,11 @@ public class ImageScoringResponse extends BaseDTO {
 		this.status = status;
 	}
 
+	public Boolean getIsVipPetParent() {
+		return isVipPetParent;
+	}
+
+	public void setIsVipPetParent(Boolean isVipPetParent) {
+		this.isVipPetParent = isVipPetParent;
+	}
 }

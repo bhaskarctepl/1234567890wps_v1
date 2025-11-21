@@ -16,8 +16,7 @@ package com.hillspet.wearables.service.questionnaire.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.validation.Valid;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,12 +24,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
+import com.hillspet.wearables.concurrent.ExportQuestionnaireThread;
+import com.hillspet.wearables.concurrent.QuestionnaireThreadPoolExecutor;
 import com.hillspet.wearables.dao.questionnaire.QuestionnaireDao;
+import com.hillspet.wearables.dto.CustomUserDetails;
+import com.hillspet.wearables.dto.ExportQuestionnaireDTO;
 import com.hillspet.wearables.dto.PetQuestionnaireResponse;
 import com.hillspet.wearables.dto.Question;
 import com.hillspet.wearables.dto.Questionnaire;
 import com.hillspet.wearables.dto.QuestionnaireInstruction;
 import com.hillspet.wearables.dto.QuestionnaireListDTO;
+import com.hillspet.wearables.dto.QuestionnairePublishHistory;
 import com.hillspet.wearables.dto.QuestionnaireResponseByStudyListDTO;
 import com.hillspet.wearables.dto.QuestionnaireResponseListDTO;
 import com.hillspet.wearables.dto.filter.QuestionnaireFilter;
@@ -38,6 +42,8 @@ import com.hillspet.wearables.dto.filter.QuestionnaireResponseByStudyFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.request.QuestionnaireRequest;
 import com.hillspet.wearables.request.QuestionnaireSkipRequest;
+import com.hillspet.wearables.request.RepublishQuestionnaireRequest;
+import com.hillspet.wearables.response.ExportQuestionnaireResponse;
 import com.hillspet.wearables.response.PetQuestionnaireResponseList;
 import com.hillspet.wearables.response.QuestionnaireListResponse;
 import com.hillspet.wearables.response.QuestionnaireResponse;
@@ -69,22 +75,23 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Autowired
 	private QuestionnaireDao questionnaireDao;
-
+	 
 	@Override
-	public Integer addQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
+	public Questionnaire addQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
 			throws ServiceExecutionException {
 		LOGGER.debug("addQuestionnaire called");
-		Integer questionnaireId = questionnaireDao.addQuestionnaire(questionnaireRequest, userId);
+		Questionnaire questionnaire = questionnaireDao.addQuestionnaire(questionnaireRequest, userId);
 		LOGGER.debug("addQuestionnaire completed successfully");
-		return questionnaireId;
+		return questionnaire;
 	}
 
 	@Override
-	public void updateQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
+	public Questionnaire updateQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
 			throws ServiceExecutionException {
 		LOGGER.debug("updateQuestionnaire called");
-		questionnaireDao.updateQuestionnaire(questionnaireRequest, userId);
+		Questionnaire questionnaire = questionnaireDao.updateQuestionnaire(questionnaireRequest, userId);
 		LOGGER.debug("updateQuestionnaire completed successfully");
+		return questionnaire;
 	}
 
 	@Override
@@ -149,7 +156,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Override
 	public QuestionnaireListResponse getQuestionnaires(QuestionnaireFilter filter) throws ServiceExecutionException {
 		Map<String, Integer> mapper = questionnaireDao.getQuestionnairesCount(filter);
-		int total =	mapper.get("count");
+		int total = mapper.get("count");
 		int totalCount = mapper.get("totalCount");
 		List<QuestionnaireListDTO> supportList = total > 0 ? questionnaireDao.getQuestionnaires(filter)
 				: new ArrayList<>();
@@ -158,6 +165,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		response.setNoOfElements(supportList.size());
 		response.setTotalRecords(totalCount);
 		response.setSearchElments(total);
+		
 		return response;
 	}
 
@@ -181,13 +189,16 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		LOGGER.debug("getActiveQuestionnaires completed successfully");
 		return response;
 	}
-	
+
 	@Override
-	public QuestionnaireResponseListResponse getQuestionnaireResponseList(QuestionnaireResponseFilter filter) throws ServiceExecutionException {
+	public QuestionnaireResponseListResponse getQuestionnaireResponseList(QuestionnaireResponseFilter filter)
+			throws ServiceExecutionException {
 		Map<String, Integer> mapper = questionnaireDao.getQuestionnaireResponseCount(filter);
-		int total =	mapper.get("count");
+		int total = mapper.get("count");
 		int totalCount = mapper.get("totalCount");
-		List<QuestionnaireResponseListDTO> questionnaireResponseList = total > 0 ? questionnaireDao.getQuestionnaireResponseList(filter) : new ArrayList<>();
+		List<QuestionnaireResponseListDTO> questionnaireResponseList = total > 0
+				? questionnaireDao.getQuestionnaireResponseList(filter)
+				: new ArrayList<>();
 		QuestionnaireResponseListResponse response = new QuestionnaireResponseListResponse();
 		response.setQuestionnaireResponseList(questionnaireResponseList);
 		response.setNoOfElements(questionnaireResponseList.size());
@@ -197,11 +208,14 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	}
 
 	@Override
-	public QuestionnaireResponseByStudyListResponse getQuestionnaireResponseByStudyList(QuestionnaireResponseByStudyFilter filter) throws ServiceExecutionException {
+	public QuestionnaireResponseByStudyListResponse getQuestionnaireResponseByStudyList(
+			QuestionnaireResponseByStudyFilter filter) throws ServiceExecutionException {
 		Map<String, Integer> mapper = questionnaireDao.getQuestionnaireResponseByStudyCount(filter);
-		int total =	mapper.get("count");
+		int total = mapper.get("count");
 		int totalCount = mapper.get("totalCount");
-		List<QuestionnaireResponseByStudyListDTO> questionnaireResponseByStudyListDTOList = total > 0 ? questionnaireDao.getQuestionnaireResponseByStudyList(filter) : new ArrayList<>();
+		List<QuestionnaireResponseByStudyListDTO> questionnaireResponseByStudyListDTOList = total > 0
+				? questionnaireDao.getQuestionnaireResponseByStudyList(filter)
+				: new ArrayList<>();
 		QuestionnaireResponseByStudyListResponse response = new QuestionnaireResponseByStudyListResponse();
 		response.setQuestionnaireResponseByStudyList(questionnaireResponseByStudyListDTOList);
 		response.setNoOfElements(questionnaireResponseByStudyListDTOList.size());
@@ -211,28 +225,32 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	}
 
 	@Override
-	public QuestionnaireViewResponse getViewQuestionnaireResponse(int questionnaireResponseId, int studyId) throws ServiceExecutionException {
+	public QuestionnaireViewResponse getViewQuestionnaireResponse(int questionnaireResponseId, int studyId)
+			throws ServiceExecutionException {
 		LOGGER.debug("getViewQuestionnaireResponse called");
 		return questionnaireDao.getViewQuestionnaireResponse(questionnaireResponseId, studyId);
 	}
-	
+
 	@Override
-	public PetQuestionnaireResponseList getQuestionnaireResponseByPet(QuestionnaireResponseFilter filter) throws ServiceExecutionException {
+	public PetQuestionnaireResponseList getQuestionnaireResponseByPet(QuestionnaireResponseFilter filter)
+			throws ServiceExecutionException {
 		LOGGER.debug("getQuestionnaireResponseByPet called");
 
 		Map<String, Integer> mapper = questionnaireDao.getQuestionnaireResponseByPetCount(filter);
-		int total =	mapper.get("count");
+		int total = mapper.get("count");
 		int totalCount = mapper.get("totalCount");
-		List<PetQuestionnaireResponse> petQuestionnaireResponses = total > 0 ? questionnaireDao.getQuestionnaireResponseByPet(filter) : new ArrayList<>();
+		List<PetQuestionnaireResponse> petQuestionnaireResponses = total > 0
+				? questionnaireDao.getQuestionnaireResponseByPet(filter)
+				: new ArrayList<>();
 		PetQuestionnaireResponseList response = new PetQuestionnaireResponseList();
 		response.setPetQuestionnaireResponses(petQuestionnaireResponses);
 		response.setNoOfElements(petQuestionnaireResponses.size());
 		response.setTotalRecords(totalCount);
 		response.setSearchElments(total);
-		
+
 		LOGGER.debug("getQuestionnaireResponseByPet called");
 		return response;
-	
+
 	}
 
 	@Override
@@ -240,6 +258,90 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			throws ServiceExecutionException {
 		LOGGER.debug("implementSkipOnQuestionnaire called");
 		questionnaireDao.implementSkipOnQuestionnaire(questionnaireSkipRequest, modifiedBy);
-		LOGGER.debug("implementSkipOnQuestionnaire completed successfully");		
+		LOGGER.debug("implementSkipOnQuestionnaire completed successfully");
+	}
+
+	@Override
+	public void republishQuestionnaire(RepublishQuestionnaireRequest republishQuestionnaireRequest, Integer userId) {
+		LOGGER.debug("republishQuestionnaire called");
+		questionnaireDao.republishQuestionnaire(republishQuestionnaireRequest, userId);
+	}
+
+	@Override
+	public List<QuestionnairePublishHistory> getQuestionnairePublishHistory(int questionnaireId)
+			throws ServiceExecutionException {
+		LOGGER.debug("getQuestionnairePublishHistory called");
+		List<QuestionnairePublishHistory> publishHistory = questionnaireDao
+				.getQuestionnairePublishHistory(questionnaireId);
+
+		LOGGER.debug("getQuestionnairePublishHistory count is {}", publishHistory.size());
+		LOGGER.debug("getQuestionnairePublishHistory completed successfully");
+		return publishHistory;
+	}
+
+	@Override
+	public String getCopyQuestionnaireName(String questionnaireName) throws ServiceExecutionException {
+		LOGGER.debug("getCopyQuestionnaireName called");
+		String proposedQuestionnaireName = questionnaireDao.getCopyQuestionnaireName(questionnaireName);
+		LOGGER.debug("getCopyQuestionnaireName completed successfully");
+		return proposedQuestionnaireName;
+	}
+
+	 
+	@Override
+	public ExportQuestionnaireResponse getExportsRequestedList(QuestionnaireFilter filter)
+			throws ServiceExecutionException {
+		LOGGER.debug("getExportsRequestedList called");
+		Map<String, Integer> mapper = questionnaireDao.getExportsRequestedListCount(filter);
+		int total = mapper.get("totalCount");
+		List<ExportQuestionnaireDTO> list = total > 0
+				? questionnaireDao.getExportsRequestedList(filter)
+				: new ArrayList<>();
+		
+		ExportQuestionnaireResponse response = new ExportQuestionnaireResponse();
+		response.setExportList(list);
+		response.setNoOfElements(list.size());
+		response.setTotalRecords(total);
+		response.setSearchElments(total);
+		
+		LOGGER.debug("getExportsRequestedList completed successfully");
+		return response;
+	}
+
+	
+	@Override
+	public void exportQuestionaire(String questionnaireIds, CustomUserDetails userDetails) throws ServiceExecutionException {
+		LOGGER.info("exportQuestionaire called.");
+		//create questionnaire request
+		ExportQuestionnaireDTO exportQuestionnaire = questionnaireDao.exportQuestionaire(questionnaireIds,userDetails);
+		//parallel thread job with process
+		
+		ThreadPoolExecutor threadPoolExecutor = QuestionnaireThreadPoolExecutor.getExportThreadExecutor();
+		ExportQuestionnaireThread exportQuestionnaireThread = new ExportQuestionnaireThread(questionnaireIds, exportQuestionnaire.getQuestionnaireExportId(),userDetails);
+		threadPoolExecutor.submit(exportQuestionnaireThread);
+        
+	}
+
+	
+	@Override
+	public String downloadQuestionnaire(int exportId) throws ServiceExecutionException {
+		return questionnaireDao.downloadQuestionnaire(exportId);
+	}
+
+	@Override
+	public QuestionnaireListResponse getQuestionnairesForExport(QuestionnaireFilter filter)
+			throws ServiceExecutionException {
+		Map<String, Integer> mapper = questionnaireDao.getQuestionnairesForExportCount(filter);
+		int total = mapper.get("count");
+		int totalCount = mapper.get("totalCount");
+		List<QuestionnaireListDTO> supportList = total > 0 ? questionnaireDao.getQuestionnairesForExport(filter)
+				: new ArrayList<>();
+		QuestionnaireListResponse response = new QuestionnaireListResponse();
+		response.setQuestionnaireList(supportList);
+		response.setNoOfElements(supportList.size());
+		response.setTotalRecords(totalCount);
+		response.setSearchElments(total);
+		
+		return response;
 	}
 }

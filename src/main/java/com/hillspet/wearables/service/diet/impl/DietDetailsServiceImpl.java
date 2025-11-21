@@ -55,7 +55,7 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 
 	/*
 	 * To process and validate diet
-	 * */
+	 */
 	@Override
 	public HashMap<String, String> bulkAssetUpload(InputStream uploadedInputStream,
 			FormDataContentDisposition fileDetail, Integer userId) throws ServiceExecutionException {
@@ -81,8 +81,8 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 	}
 
 	/*
-	* to get uploaded list for review
-	* */
+	 * to get uploaded list for review
+	 */
 	@Override
 	public BulkDietUploadResponse getBulkUploadDietList(DietFilter filter) throws ServiceExecutionException {
 		LOGGER.debug("getBulkUploadDietList start");
@@ -103,8 +103,8 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 	}
 
 	/*
-	* To Save selected diets
-	* */
+	 * To Save selected diets
+	 */
 	@Override
 	public Integer saveBulkUploadDietInfo(BulkDietUploadRequest request) throws ServiceExecutionException {
 		LOGGER.debug("saveBulkUploadDietInfo called");
@@ -114,8 +114,8 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 	}
 
 	/*
-	* To download diet upload template
-	* */
+	 * To download diet upload template
+	 */
 	@Override
 	public Workbook generateBulkUploadExcel() throws ServiceExecutionException {
 		LOGGER.debug("generateBulkUploadExcel called");
@@ -124,9 +124,9 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 			Sheet sheet = workbook.createSheet("Diet Information");
 			String[] validHeaders = new String[] {
 					// "COMPANY_NAME","BRAND","SUB_BRAND","CATEGORY","DIET_NO","DESCRIPTION","MATERIAL_NUM","PRODUCT_TYPE","RECIPE_TYPE","DIET_NAME","CAL_DENSITY_KCAL_KG","PDM_DENSITY_VALUE","PDM_DENSITY_UOM","LATEST_MODIFIED_DATE"
-					"DIET_NO", "SPEC_TYPE", "PRODUCT_TYPE", "DIET_NAME", "DESCRIPTION", "IS_ACTIVE",
-					"BRAND", "SUB_BRAND", "COMPANY_NAME", "CATEGORY", "CAL_DENSITY", "PDM_DENSITY_VALUE",
-					"PDM_DENSITY_UOM", "LATEST_MODIFIED_DATE" };
+					"DIET_NO", "SPEC_TYPE", "PRODUCT_TYPE", "DIET_NAME", "DESCRIPTION", "IS_ACTIVE", "BRAND",
+					"SUB_BRAND", "COMPANY_NAME", "CATEGORY", "CAL_DENSITY", "PDM_DENSITY_VALUE", "PDM_DENSITY_UOM",
+					"LATEST_MODIFIED_DATE" };
 			DietLookUpResponse dietResponse = dietDetailsDao.getDietDetailsForLookUp();
 			String[] companyNameArray = dietResponse.getCompanyName().isEmpty() ? new String[0]
 					: dietResponse.getCompanyName().toArray(new String[0]);
@@ -148,7 +148,7 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 				sheet.setColumnWidth(col, 22 * 256);
 				if (validHeaders[col].equals("DIET_NO") || validHeaders[col].equals("DIET_NAME")
 						|| validHeaders[col].equals("CAL_DENSITY") || validHeaders[col].equals("PDM_DENSITY_VALUE")
-						|| validHeaders[col].equals("PDM_DENSITY_UOM")) {
+						|| validHeaders[col].equals("PDM_DENSITY_UOM") || validHeaders[col].equals("PRODUCT_TYPE")) {
 					this.addCellStyle(workbook, cell, IndexedColors.GREY_25_PERCENT.index,
 							IndexedColors.BROWN.getIndex(), false);
 				} else {
@@ -158,73 +158,66 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 			}
 
 			// Row for Message header
-			/*Row messageRow = sheet.createRow(1);
-			for (int col = 0; col < validHeaders.length; col++) {
-			    Cell cell = messageRow.createCell(col);
-			    String message = "";
-			    CellStyle style = workbook.createCellStyle();
-			    sheet.setColumnWidth(col, 22 * 256);
-			    switch (validHeaders[col]) {
-			        case "DIET_NO":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.DIET_NO_CHAR_LENGTH.toString(), true);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BROWN.getIndex(),false);
-			            break;
-			        case "DIET_NAME":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.DIET_NAME_CHAR_LENGTH.toString(), true);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BROWN.getIndex(),false);
-			            break;
-			        case "CAL_DENSITY_KCAL_KG":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.CAL_VAL_LENGTH, true);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BROWN.getIndex(),false);
-			            break;
-			        case "PDM_DENSITY_VALUE":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.CAL_VAL_LENGTH, true);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BROWN.getIndex(),false);
-			            break;
-			        case "PDM_DENSITY_UOM":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.CAL_VAL_LENGTH, true);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BROWN.getIndex(),false);
-			            break;
-			        case "COMPANY_NAME":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.COMPANY_NAME_CHAR_LENGTH.toString(), false);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index, IndexedColors.BLACK.getIndex(),false);
-			            break;
-			        case "BRAND":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.BRAND_NAME_CHAR_LENGTH.toString(), false);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BLACK.getIndex(),false);
-			            break;
-			        case "SUB_BRAND":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.SUB_BRAND_NAME_CHAR_LENGTH.toString(), false);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BLACK.getIndex(),false);
-			            break;
-			        case "CATEGORY":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.CATEGORY_CHAR_LENGTH.toString(), false);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BLACK.getIndex(),false);
-			            break;
-			        case "DESCRIPTION":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.DIET_DESCRIPTION_CHAR_LENGTH.toString(), false);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BLACK.getIndex(),false);
-			            break;
-			        case "MATERIAL_NUM":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.MATERIAL_NUMBER_CHAR_LENGTH.toString(), false);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BLACK.getIndex(),false);
-			            break;
-			        case "PRODUCT_TYPE":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.PRODUCT_TYPE_CHAR_LENGTH.toString(), false);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BLACK.getIndex(),false);
-			            break;
-			        case "RECIPE_TYPE":
-			            message = this.prepareColumnMessage(ActivityFactorConstants.RECIPE_TYPE_CHAR_LENGTH.toString(), false);
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BLACK.getIndex(),false);
-			            break;
-			        case "LATEST_MODIFIED_DATE":
-			            message = "Date(dd-mmm-yy)";
-			            this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.BLACK.getIndex(),false);
-			            break;
-			    }
-			    cell.setCellValue(message);
-			    style.setWrapText(true);
-			}*/
+			/*
+			 * Row messageRow = sheet.createRow(1); for (int col = 0; col <
+			 * validHeaders.length; col++) { Cell cell = messageRow.createCell(col); String
+			 * message = ""; CellStyle style = workbook.createCellStyle();
+			 * sheet.setColumnWidth(col, 22 * 256); switch (validHeaders[col]) { case
+			 * "DIET_NO": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.DIET_NO_CHAR_LENGTH.
+			 * toString(), true);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BROWN.getIndex(),false); break; case "DIET_NAME": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.DIET_NAME_CHAR_LENGTH.
+			 * toString(), true);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BROWN.getIndex(),false); break; case "CAL_DENSITY_KCAL_KG": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.CAL_VAL_LENGTH, true);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BROWN.getIndex(),false); break; case "PDM_DENSITY_VALUE": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.CAL_VAL_LENGTH, true);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BROWN.getIndex(),false); break; case "PDM_DENSITY_UOM": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.CAL_VAL_LENGTH, true);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BROWN.getIndex(),false); break; case "COMPANY_NAME": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.COMPANY_NAME_CHAR_LENGTH.
+			 * toString(), false);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,
+			 * IndexedColors.BLACK.getIndex(),false); break; case "BRAND": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.BRAND_NAME_CHAR_LENGTH.
+			 * toString(), false);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BLACK.getIndex(),false); break; case "SUB_BRAND": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.SUB_BRAND_NAME_CHAR_LENGTH.
+			 * toString(), false);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BLACK.getIndex(),false); break; case "CATEGORY": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.CATEGORY_CHAR_LENGTH.
+			 * toString(), false);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BLACK.getIndex(),false); break; case "DESCRIPTION": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.
+			 * DIET_DESCRIPTION_CHAR_LENGTH.toString(), false);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BLACK.getIndex(),false); break; case "MATERIAL_NUM": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.MATERIAL_NUMBER_CHAR_LENGTH
+			 * .toString(), false);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BLACK.getIndex(),false); break; case "PRODUCT_TYPE": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.PRODUCT_TYPE_CHAR_LENGTH.
+			 * toString(), false);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BLACK.getIndex(),false); break; case "RECIPE_TYPE": message =
+			 * this.prepareColumnMessage(ActivityFactorConstants.RECIPE_TYPE_CHAR_LENGTH.
+			 * toString(), false);
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BLACK.getIndex(),false); break; case "LATEST_MODIFIED_DATE": message =
+			 * "Date(dd-mmm-yy)";
+			 * this.addCellStyle(workbook,cell,IndexedColors.WHITE1.index,IndexedColors.
+			 * BLACK.getIndex(),false); break; } cell.setCellValue(message);
+			 * style.setWrapText(true); }
+			 */
 			// "DIET_NO","SPEC_TYPE","MATERIAL_NUM","PRODUCT_TYPE","DIET_NAME","IS_ACTIVE","BRAND","SUB_BRAND","COMPANY_NAME",
 			// "CATEGORY","CAL_DENSITY","PDM_DENSITY_VALUE","PDM_DENSITY_UOM","LATEST_MODIFIED_DATE"
 			// Added dropdowns
@@ -247,16 +240,15 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 			row.createCell(9).setCellValue("");// CATEGORY
 			validationHelper = new XSSFDataValidationHelper((XSSFSheet) sheet);
 			if (row.getCell(1).toString() == "") {
-				/*CellRangeAddressList cellRange = new CellRangeAddressList(1, 500, 1, 1);
-				try {
-					constraint = validationHelper.createExplicitListConstraint(recipeTypeArray);
-				} catch (Exception e) {
-					e.printStackTrace();
-					LOGGER.error("recipeTypeArray error.", e);
-				}
-				dataValidation = validationHelper.createValidation(constraint, cellRange);
-				dataValidation.setSuppressDropDownArrow(true);
-				sheet.addValidationData(dataValidation);*/
+				/*
+				 * CellRangeAddressList cellRange = new CellRangeAddressList(1, 500, 1, 1); try
+				 * { constraint =
+				 * validationHelper.createExplicitListConstraint(recipeTypeArray); } catch
+				 * (Exception e) { e.printStackTrace(); LOGGER.error("recipeTypeArray error.",
+				 * e); } dataValidation = validationHelper.createValidation(constraint,
+				 * cellRange); dataValidation.setSuppressDropDownArrow(true);
+				 * sheet.addValidationData(dataValidation);
+				 */
 				//
 				for (int i = 0; i < recipeTypeArray.length - 1; i++) {
 					sheet2.createRow(i).createCell(0).setCellValue(recipeTypeArray[i] + "");
@@ -292,16 +284,14 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 				sheet.addValidationData(dataValidation);
 			}
 			if (row.getCell(6).toString() == "") {
-				/*CellRangeAddressList cellRange = new CellRangeAddressList(1, 500, 6, 6);
-				try {
-					constraint = validationHelper.createExplicitListConstraint(brandArray);
-				} catch (Exception e) {
-					e.printStackTrace();
-					LOGGER.error("brandArray error.", e);
-				}
-				dataValidation = validationHelper.createValidation(constraint, cellRange);
-				dataValidation.setSuppressDropDownArrow(true);
-				sheet.addValidationData(dataValidation);*/
+				/*
+				 * CellRangeAddressList cellRange = new CellRangeAddressList(1, 500, 6, 6); try
+				 * { constraint = validationHelper.createExplicitListConstraint(brandArray); }
+				 * catch (Exception e) { e.printStackTrace(); LOGGER.error("brandArray error.",
+				 * e); } dataValidation = validationHelper.createValidation(constraint,
+				 * cellRange); dataValidation.setSuppressDropDownArrow(true);
+				 * sheet.addValidationData(dataValidation);
+				 */
 				for (int i = 0; i < brandArray.length - 1; i++) {
 					sheet4.createRow(i).createCell(0).setCellValue(brandArray[i] + "");
 				}
@@ -323,16 +313,15 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 				sheet.addValidationData(dataValidation);
 			}
 			if (row.getCell(7).toString() == "") {
-				/*CellRangeAddressList cellRange = new CellRangeAddressList(1, 500, 7, 7);
-				try {
-					constraint = validationHelper.createExplicitListConstraint(subBrandArray);
-				} catch (Exception e) {
-					e.printStackTrace();
-					LOGGER.error("subBrandArray error.", e);
-				}
-				dataValidation = validationHelper.createValidation(constraint, cellRange);
-				dataValidation.setSuppressDropDownArrow(true);
-				sheet.addValidationData(dataValidation);*/
+				/*
+				 * CellRangeAddressList cellRange = new CellRangeAddressList(1, 500, 7, 7); try
+				 * { constraint = validationHelper.createExplicitListConstraint(subBrandArray);
+				 * } catch (Exception e) { e.printStackTrace();
+				 * LOGGER.error("subBrandArray error.", e); } dataValidation =
+				 * validationHelper.createValidation(constraint, cellRange);
+				 * dataValidation.setSuppressDropDownArrow(true);
+				 * sheet.addValidationData(dataValidation);
+				 */
 				//
 				for (int i = 0; i < subBrandArray.length - 1; i++) {
 					sheet3.createRow(i).createCell(0).setCellValue(subBrandArray[i] + "");
@@ -355,16 +344,15 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 				sheet.addValidationData(dataValidation);
 			}
 			if (row.getCell(8).toString() == "") {
-				/*CellRangeAddressList cellRange = new CellRangeAddressList(1, 500, 8, 8);
-				try {
-					constraint = validationHelper.createExplicitListConstraint(companyNameArray);
-				} catch (Exception e) {
-					e.printStackTrace();
-					LOGGER.error("companyNameArray error.", e);
-				}
-				dataValidation = validationHelper.createValidation(constraint, cellRange);
-				dataValidation.setSuppressDropDownArrow(true);
-				sheet.addValidationData(dataValidation);*/
+				/*
+				 * CellRangeAddressList cellRange = new CellRangeAddressList(1, 500, 8, 8); try
+				 * { constraint =
+				 * validationHelper.createExplicitListConstraint(companyNameArray); } catch
+				 * (Exception e) { e.printStackTrace(); LOGGER.error("companyNameArray error.",
+				 * e); } dataValidation = validationHelper.createValidation(constraint,
+				 * cellRange); dataValidation.setSuppressDropDownArrow(true);
+				 * sheet.addValidationData(dataValidation);
+				 */
 				for (int i = 0; i < companyNameArray.length - 1; i++) {
 					sheet5.createRow(i).createCell(0).setCellValue(companyNameArray[i] + "");
 				}
@@ -410,8 +398,8 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 	}
 
 	/*
-	* Validate uploaded data
-	* */
+	 * Validate uploaded data
+	 */
 	@Override
 	public List<BulkUploadDietInfo> convertBulkExcelToDietList(InputStream uploadedInputStream, int userId)
 			throws ServiceExecutionException {
@@ -455,7 +443,9 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 				int cellIdx = 0;
 				BulkUploadDietInfo dietInfo = new BulkUploadDietInfo();
 				List<String> errorsList = new ArrayList<String>();
-				for (int cn = 0; cn < currentRow.getLastCellNum(); cn++) { // cn- cell number
+				for (int cn = 0; cn < 14 // NOTE: currentRow.getLastCellNum() is causing issue for one record. so
+											// replaced with 14.
+				; cn++) { // cn- cell number
 					Cell cell = currentRow.getCell(cn, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
 					DataFormatter formatter = new DataFormatter();
 					String value = formatter.formatCellValue(cell).trim();
@@ -470,11 +460,10 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 								errorsList.add(this.getInvalidCharLengthErrorMessage("diet number", value,
 										ActivityFactorConstants.DIET_NO_CHAR_LENGTH.toString()));
 							}
-							/*if(!isNumber(value)){
-							    errorsList.add("Invalid diet number (" + value + ")");
-							} else {
-							    dietInfo.setDietNo(Integer.parseInt(value));
-							}*/
+							/*
+							 * if(!isNumber(value)){ errorsList.add("Invalid diet number (" + value + ")");
+							 * } else { dietInfo.setDietNo(Integer.parseInt(value)); }
+							 */
 							else {
 								dietInfo.setDietNo(value);
 								dietInfo.setMaterialNumber(value); // MATERIAL_NUM
@@ -489,14 +478,13 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 							dietInfo.setRecipeType(value);
 						}
 						break;
-					/*case 2: // MATERIAL_NUM
-						if (validateCharLength(value, ActivityFactorConstants.MATERIAL_NUMBER_CHAR_LENGTH)) {
-							errorsList.add(this.getInvalidCharLengthErrorMessage(" material number ", value,
-									ActivityFactorConstants.MATERIAL_NUMBER_CHAR_LENGTH.toString()));
-						} else {
-							dietInfo.setMaterialNumber(value);
-						}
-						break;*/
+					/*
+					 * case 2: // MATERIAL_NUM if (validateCharLength(value,
+					 * ActivityFactorConstants.MATERIAL_NUMBER_CHAR_LENGTH)) {
+					 * errorsList.add(this.getInvalidCharLengthErrorMessage(" material number ",
+					 * value, ActivityFactorConstants.MATERIAL_NUMBER_CHAR_LENGTH.toString())); }
+					 * else { dietInfo.setMaterialNumber(value); } break;
+					 */
 					case 2: // PRODUCT_TYPE
 						if (validateCharLength(value, ActivityFactorConstants.PRODUCT_TYPE_CHAR_LENGTH)) {
 							errorsList.add(this.getInvalidCharLengthErrorMessage(" product type ", value,
@@ -565,20 +553,25 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 									ActivityFactorConstants.CAL_VAL_LENGTH));
 						} else {
 							if (isNumber(value) || isDecimal(value)) {
-								dietInfo.setCalDensityKcalKg(roundDecimalToFive(value));
+								double numericValue = Double.parseDouble(value);
+								if (numericValue > 0) {
+									dietInfo.setCalDensityKcalKg(roundDecimalToFive(value));
+								} else {
+									errorsList.add("Caloric density(Kcal/Kg) must be greater than 0. Value: " + value);
+								}
 							} else {
 								errorsList.add(this.getInvalidCharLengthErrorMessage("Caloric density(Kcal/Kg)", value,
 										ActivityFactorConstants.CAL_VAL_LENGTH));
 							}
 						}
 						break;
-					/*  case 5: //DESCRIPTION
-					      if (validateCharLength(value, ActivityFactorConstants.DIET_DESCRIPTION_CHAR_LENGTH)){
-					          errorsList.add(this.getInvalidCharLengthErrorMessage(" description ",value,ActivityFactorConstants.DIET_DESCRIPTION_CHAR_LENGTH.toString()));
-					          value = "";
-					      }
-					      dietInfo.setDietDescription(value);
-					      break;*/
+					/*
+					 * case 5: //DESCRIPTION if (validateCharLength(value,
+					 * ActivityFactorConstants.DIET_DESCRIPTION_CHAR_LENGTH)){
+					 * errorsList.add(this.getInvalidCharLengthErrorMessage(" description ",value,
+					 * ActivityFactorConstants.DIET_DESCRIPTION_CHAR_LENGTH.toString())); value =
+					 * ""; } dietInfo.setDietDescription(value); break;
+					 */
 					case 11:// PDM_DENSITY_VALUE
 						if (valueLength == 0) {
 							errorsList.add(this.isMandatoryErrorMessage("PDM density value",
@@ -639,14 +632,18 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 	}
 
 	/*
-	* Validation the template has column
-	* */
+	 * Validation the template has column
+	 */
 	private boolean validateHeaders(List<String> givenHeaders) {
 		if (!givenHeaders.isEmpty()) {
 			String[] validHeaders = new String[] {
-					/* "COMPANY_NAME","BRAND","SUB_BRAND","CATEGORY","DIET_NO","DESCRIPTION","MATERIAL_NUM","PRODUCT_TYPE","RECIPE_TYPE","DIET_NAME"
-					,"CAL_DENSITY_KCAL_KG","PDM_DENSITY_VALUE","PDM_DENSITY_UOM","DIET_MODIFIED_DATE","SUB_MODIFIED_DATE"
-					,"PROPERTIES_MODIFIED_DATE","LATEST_MODIFIED_DATE"*/
+					/*
+					 * "COMPANY_NAME","BRAND","SUB_BRAND","CATEGORY","DIET_NO","DESCRIPTION",
+					 * "MATERIAL_NUM","PRODUCT_TYPE","RECIPE_TYPE","DIET_NAME"
+					 * ,"CAL_DENSITY_KCAL_KG","PDM_DENSITY_VALUE","PDM_DENSITY_UOM",
+					 * "DIET_MODIFIED_DATE","SUB_MODIFIED_DATE"
+					 * ,"PROPERTIES_MODIFIED_DATE","LATEST_MODIFIED_DATE"
+					 */
 					"DIET_NO", "SPEC_TYPE", "MATERIAL_NUM", "PRODUCT_TYPE", "DIET_NAME", "DESCRIPTION", "IS_ACTIVE",
 					"BRAND", "SUB_BRAND", "COMPANY_NAME", "CATEGORY", "CAL_DENSITY", "PDM_DENSITY_VALUE",
 					"PDM_DENSITY_UOM", "LATEST_MODIFIED_DATE" };
@@ -662,8 +659,8 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 	}
 
 	/*
-	* Checks row is empty or not
-	* */
+	 * Checks row is empty or not
+	 */
 	private boolean checkIfRowIsEmpty(Row row) {
 		if (row == null) {
 			return true;
@@ -681,29 +678,29 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 	}
 
 	/*
-	* checks column length is with in DB data type length
-	* */
+	 * checks column length is with in DB data type length
+	 */
 	private boolean validateCharLength(String entity, Integer maxLength) {
 		return entity == null || entity.trim().length() > maxLength;
 	}
 
 	/*
-	* Checks if a given value is number
-	* */
+	 * Checks if a given value is number
+	 */
 	private boolean isNumber(String entity) {
 		return entity.matches("\\d+");
 	}
 
 	/*
-	* checks if a value is decimal of 15,5
-	* */
+	 * checks if a value is decimal of 15,5
+	 */
 	private boolean isDecimal(String entity) {
 		return entity.matches("^\\d{1,10}(\\.\\d{0,5})$");
 	}
 
 	/*
-	* Round the value is of decimal 5 digit
-	* */
+	 * Round the value is of decimal 5 digit
+	 */
 	private Double roundDecimalToFive(String entity) {
 		if (!entity.equals("")) {
 			double value = Double.parseDouble(entity);
@@ -714,7 +711,7 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 	}
 
 	/*
-	 *Add styling to the Cell
+	 * Add styling to the Cell
 	 */
 	public void addCellStyle(Workbook workbook, Cell cell, short foregroundColor, short color, boolean isBold) {
 		CellStyle cellStyle = workbook.createCellStyle();
@@ -734,7 +731,7 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 
 	/*
 	 * To prepare column message
-	 * */
+	 */
 	public String prepareColumnMessage(String length, boolean isRequired) {
 		return "Length: Max. " + length + " characters\n" + (isRequired ? "Required: Yes" : "Required: No");
 	}
@@ -827,7 +824,7 @@ public class DietDetailsServiceImpl implements DietDetailsService {
 
 	/**
 	 * @author akumarkhaspa
-	 * @return 
+	 * @return
 	 */
 	@Override
 	public DietLookUpResponse getFilterByData() throws ServiceExecutionException {

@@ -10,9 +10,21 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PetObservation extends BaseDTO {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private Integer petId;
 	private Integer activityTypeId;
 	private String activityType;
+
+	private Integer behaviorTypeId;
+	private String behaviorType;
+	private Integer behaviorId;
+	private String behavior;
+	private LocalDateTime modifiedDateTime;
+
 	private String observationText;
 	private LocalDateTime observationTime;
 	private String ImagePath;
@@ -126,6 +138,46 @@ public class PetObservation extends BaseDTO {
 
 	public void setObservationVideos(List<ObservationVideo> observationVideos) {
 		this.observationVideos = observationVideos;
+	}
+
+	public Integer getBehaviorTypeId() {
+		return behaviorTypeId;
+	}
+
+	public void setBehaviorTypeId(Integer behaviorTypeId) {
+		this.behaviorTypeId = behaviorTypeId;
+	}
+
+	public String getBehaviorType() {
+		return behaviorType;
+	}
+
+	public void setBehaviorType(String behaviorType) {
+		this.behaviorType = behaviorType;
+	}
+
+	public Integer getBehaviorId() {
+		return behaviorId;
+	}
+
+	public void setBehaviorId(Integer behaviorId) {
+		this.behaviorId = behaviorId;
+	}
+
+	public String getBehavior() {
+		return behavior;
+	}
+
+	public void setBehavior(String behavior) {
+		this.behavior = behavior;
+	}
+
+	public LocalDateTime getModifiedDateTime() {
+		return modifiedDateTime;
+	}
+
+	public void setModifiedDateTime(LocalDateTime modifiedDateTime) {
+		this.modifiedDateTime = modifiedDateTime;
 	}
 
 }

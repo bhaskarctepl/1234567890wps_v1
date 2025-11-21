@@ -70,6 +70,7 @@ import com.hillspet.wearables.dto.TotalAssetsByStausWidgetFilter;
 import com.hillspet.wearables.dto.TotalAssetsListDTO;
 import com.hillspet.wearables.dto.TotalAssetsbyStatusListDTO;
 import com.hillspet.wearables.dto.TotalModelListDTO;
+import com.hillspet.wearables.dto.filter.AssetReportFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.dto.filter.IssueByStudyWidgetFilter;
 import com.hillspet.wearables.dto.filter.IssueWidgetFilter;
@@ -96,16 +97,17 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 	@Autowired
 	private GCPClientUtil gcpClientUtil;
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Integer> getDeviceDetailsReportCount(BaseFilter filter) throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
+	public Map<String, Integer> getDeviceDetailsReportCount(AssetReportFilter filter) throws ServiceExecutionException {
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getDeviceDetailsReportCount called");
 		try {
 			counts = selectForObject(SQLConstants.FN_GET_DEVICE_DETAILS_REPORT_COUNT, String.class,
 					filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(), filter.getUserId(),
-					filter.getRoleTypeId());
+					filter.getRoleTypeId(), filter.getIsWhiteListed(), filter.getWifiSSId(), filter.getMacAddress(),
+					filter.getBoxNumber());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDeviceDetailsReportCount", e);
@@ -115,7 +117,7 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 	}
 
 	@Override
-	public List<DeviceDetailsReport> getDeviceDetailsReport(BaseFilter filter) throws ServiceExecutionException {
+	public List<DeviceDetailsReport> getDeviceDetailsReport(AssetReportFilter filter) throws ServiceExecutionException {
 		List<DeviceDetailsReport> deviceDetailsReportList = new ArrayList<>();
 		LOGGER.debug("getDeviceDetailsReport called");
 		try {
@@ -149,10 +151,17 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					deviceDetailsReport.setAssetStatus(rs.getString("STATUS_NAME"));
 					deviceDetailsReport.setAssetStatusId(rs.getString("STATUS_ID"));
 
+					deviceDetailsReport.setWifiSSId(rs.getString("WIFI_SSID_ID"));
+					deviceDetailsReport.setBoxNumber(rs.getString("BOX_NUMBER"));
+					Boolean isWhitelisted = rs.getBoolean("IS_WHITELISTED");
+					deviceDetailsReport.setIsWhiteListed(isWhitelisted == Boolean.TRUE ? "Yes" : "No");
+					deviceDetailsReport.setMacAddress(rs.getString("WIFI_MAC_ADDR"));
+
 					deviceDetailsReportList.add(deviceDetailsReport);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
-					filter.getFilterType(), filter.getFilterValue(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getFilterType(), filter.getFilterValue(), filter.getUserId(), filter.getRoleTypeId(),
+					filter.getIsWhiteListed(), filter.getWifiSSId(), filter.getMacAddress(), filter.getBoxNumber());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDeviceDetailsReport", e);
@@ -161,15 +170,16 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return deviceDetailsReportList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Integer> getDeviceHistoryReportCount(BaseFilter filter) throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
+	public Map<String, Integer> getDeviceHistoryReportCount(AssetReportFilter filter) throws ServiceExecutionException {
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getDeviceHistoryReportCount called");
 		try {
 			counts = selectForObject(SQLConstants.FN_GET_DEVICE_HISTORY_REPORT_COUNT, String.class,
-					filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(), filter.getUserId());
+					filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(), filter.getUserId(),
+					filter.getIsWhiteListed(), filter.getWifiSSId(), filter.getMacAddress(), filter.getBoxNumber());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDeviceHistoryReportCount", e);
@@ -179,7 +189,7 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 	}
 
 	@Override
-	public List<DeviceHistoryReport> getDeviceHistoryReport(BaseFilter filter) throws ServiceExecutionException {
+	public List<DeviceHistoryReport> getDeviceHistoryReport(AssetReportFilter filter) throws ServiceExecutionException {
 		List<DeviceHistoryReport> deviceHistoryReportList = new ArrayList<>();
 		LOGGER.debug("getDeviceHistoryReport called");
 		try {
@@ -218,10 +228,17 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 						);
 					}
 
+					deviceHistoryReport.setWifiSSId(rs.getString("WIFI_SSID_ID"));
+					deviceHistoryReport.setBoxNumber(rs.getString("BOX_NUMBER"));
+					Boolean isWhitelisted = rs.getBoolean("IS_WHITELISTED");
+					deviceHistoryReport.setIsWhiteListed(isWhitelisted == Boolean.TRUE ? "Yes" : "No");
+					deviceHistoryReport.setMacAddress(rs.getString("WIFI_MAC_ADDR"));
+
 					deviceHistoryReportList.add(deviceHistoryReport);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
-					filter.getFilterType(), filter.getFilterValue(), filter.getUserId());
+					filter.getFilterType(), filter.getFilterValue(), filter.getUserId(), filter.getIsWhiteListed(),
+					filter.getWifiSSId(), filter.getMacAddress(), filter.getBoxNumber());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDeviceHistoryReport", e);
@@ -230,9 +247,9 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return deviceHistoryReportList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getDeviceInventoryReportCount(BaseFilter filter) throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getDeviceInventoryReportCount called");
@@ -300,16 +317,18 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return deviceInventoryReportList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Integer> getDeviceMalfunctionReportCount(BaseFilter filter) throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
+	public Map<String, Integer> getDeviceMalfunctionReportCount(AssetReportFilter filter)
+			throws ServiceExecutionException {
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getDeviceMalfunctionReportCount called");
 		try {
 			counts = selectForObject(SQLConstants.FN_GET_DEVICE_MALFUNCTION_REPORT_COUNT, String.class,
 					filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(), filter.getUserId(),
-					filter.getRoleTypeId());
+					filter.getRoleTypeId(), filter.getIsWhiteListed(), filter.getWifiSSId(), filter.getMacAddress(),
+					filter.getBoxNumber());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDeviceMalfunctionReportCount", e);
@@ -319,7 +338,7 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 	}
 
 	@Override
-	public List<DeviceMalfunctionReport> getDeviceMalfunctionReport(BaseFilter filter)
+	public List<DeviceMalfunctionReport> getDeviceMalfunctionReport(AssetReportFilter filter)
 			throws ServiceExecutionException {
 		List<DeviceMalfunctionReport> deviceMalfunctionReportList = new ArrayList<>();
 		LOGGER.debug("getDeviceMalfunctionReport called");
@@ -338,11 +357,18 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					if (rs.getString("UN_ASSIGN_DATE") != null)
 						deviceMalfunctionReport.setUnAssignDate(rs.getString("UN_ASSIGN_DATE"));
 
+					deviceMalfunctionReport.setWifiSSId(rs.getString("WIFI_SSID_ID"));
+					deviceMalfunctionReport.setBoxNumber(rs.getString("BOX_NUMBER"));
+					Boolean isWhitelisted = rs.getBoolean("IS_WHITELISTED");
+					deviceMalfunctionReport.setIsWhiteListed(isWhitelisted == Boolean.TRUE ? "Yes" : "No");
+					deviceMalfunctionReport.setMacAddress(rs.getString("WIFI_MAC_ADDR"));
+
 					// deviceDetailsReport.setAddDate(rs.getTimestamp("ADD_DATE").toLocalDateTime());
 					deviceMalfunctionReportList.add(deviceMalfunctionReport);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
-					filter.getFilterType(), filter.getFilterValue(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getFilterType(), filter.getFilterValue(), filter.getUserId(), filter.getRoleTypeId(),
+					filter.getIsWhiteListed(), filter.getWifiSSId(), filter.getMacAddress(), filter.getBoxNumber());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDeviceMalfunctionReport", e);
@@ -351,15 +377,17 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return deviceMalfunctionReportList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Integer> getDeviceTrackingReportCount(BaseFilter filter) throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
+	public Map<String, Integer> getDeviceTrackingReportCount(AssetReportFilter filter)
+			throws ServiceExecutionException {
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getDeviceTrackingReportCount called");
 		try {
 			counts = selectForObject(SQLConstants.FN_GET_DEVICE_TRACKING_REPORT_COUNT, String.class,
-					filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(), filter.getUserId());
+					filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(), filter.getUserId(),
+					filter.getIsWhiteListed(), filter.getWifiSSId(), filter.getMacAddress(), filter.getBoxNumber());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDeviceTrackingReportCount", e);
@@ -369,7 +397,8 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 	}
 
 	@Override
-	public List<DeviceTrackingReport> getDeviceTrackingReport(BaseFilter filter) throws ServiceExecutionException {
+	public List<DeviceTrackingReport> getDeviceTrackingReport(AssetReportFilter filter)
+			throws ServiceExecutionException {
 		List<DeviceTrackingReport> deviceTrackingReportList = new ArrayList<>();
 		LOGGER.debug("getDeviceTrackingReport called");
 		try {
@@ -381,8 +410,6 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					deviceTrackingReport.setDeviceNumber(rs.getString("DEVICE_NUMBER"));
 					deviceTrackingReport
 							.setDeviceType(rs.getString("DEVICE_TYPE") != null ? rs.getString("DEVICE_TYPE") : "");
-					// deviceTrackingReport.setSlNumber(rs.getInt("slNo"));
-//					deviceTrackingReport.setStudyName(rs.getString("STUDY_NAME"));
 					deviceTrackingReport
 							.setDeviceModel(rs.getString("DEVICE_MODEL") != null ? rs.getString("DEVICE_MODEL") : "");
 					deviceTrackingReport.setCurrentStatus(rs.getBoolean("IS_ACTIVE"));
@@ -404,12 +431,20 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					deviceTrackingReport.setCurrentBatteryLevel(rs.getString("Current_Battery_Level"));
 					deviceTrackingReport.setAssetStatus(rs.getString("STATUS_NAME"));
 					deviceTrackingReport.setAssetStatusId(rs.getString("STATUS_ID"));
+					deviceTrackingReport.setPetParentName(rs.getString("PET_PARENT_NAME"));
+
+					deviceTrackingReport.setWifiSSId(rs.getString("WIFI_SSID_ID"));
+					deviceTrackingReport.setBoxNumber(rs.getString("BOX_NUMBER"));
+					Boolean isWhitelisted = rs.getBoolean("IS_WHITELISTED");
+					deviceTrackingReport.setIsWhiteListed(isWhitelisted == Boolean.TRUE ? "Yes" : "No");
+					deviceTrackingReport.setMacAddress(rs.getString("WIFI_MAC_ADDR"));
 
 					// deviceDetailsReport.setAddDate(rs.getTimestamp("ADD_DATE").toLocalDateTime());
 					deviceTrackingReportList.add(deviceTrackingReport);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
-					filter.getFilterType(), filter.getFilterValue(), filter.getUserId());
+					filter.getFilterType(), filter.getFilterValue(), filter.getUserId(), filter.getIsWhiteListed(),
+					filter.getWifiSSId(), filter.getMacAddress(), filter.getBoxNumber());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDeviceTrackingReport", e);
@@ -418,10 +453,10 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return deviceTrackingReportList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getStudyBasedReportCount(BaseFilter filter, int userId)
 			throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getStudyBasedReportCount called");
@@ -449,7 +484,6 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					studyBasedReport.setDeviceNumber(rs.getString("DEVICE_NUMBER"));
 					studyBasedReport
 							.setDeviceType(rs.getString("DEVICE_TYPE") != null ? rs.getString("DEVICE_TYPE") : "");
-					// studyBasedReport.setSlNumber(rs.getInt("slNo"));
 					studyBasedReport.setStudyName(rs.getString("STUDY_NAME"));
 					studyBasedReport
 							.setDeviceModel(rs.getString("DEVICE_MODEL") != null ? rs.getString("DEVICE_MODEL") : "");
@@ -457,18 +491,34 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					studyBasedReport.setAssetIsActive(rs.getBoolean("ASSET_IS_ACTIVE"));
 					studyBasedReport.setAssetStatus(rs.getString("STATUS_NAME"));
 					studyBasedReport.setAssetStatusId(rs.getString("STATUS_ID"));
+					int isActive = rs.getInt("STUDY_STATUS_ID");
 					String statusName = "";
-					if (rs.getInt("IS_ACTIVE") == 1) {
-						statusName = "Active";
-					}
-					if (rs.getInt("IS_ACTIVE") == 0) {
-						statusName = "Inactive";
+					switch (isActive) {
+					case 1:
+						statusName = "Draft";
+						break;
+					case 2:
+						statusName = "Scheduled";
+						break;
+					case 3:
+						statusName = "In progress";
+						break;
+					case 4:
+						statusName = "Completed";
+						break;
+					case 5:
+						statusName = "Groups & Phases Finalized";
+						break;
+					default:
+						statusName = "Unknown";
+						break;
 					}
 					studyBasedReport.setStatus(statusName);
 					studyBasedReport.setStudyName(rs.getString("STUDY_NAME") != null ? rs.getString("STUDY_NAME") : "");
 					studyBasedReport.setPetName(rs.getString("PET_NAME") != null ? rs.getString("PET_NAME") : "");
-//					studyBasedReport.setCurrentLocation(rs.getString("DEVICE_LOCATION")!= null ? rs.getString("DEVICE_LOCATION") :"");
 					studyBasedReport.setCurrentBatteryLevel(rs.getString("Current_Battery_Level"));
+					studyBasedReport.setPetParentName(rs.getString("PET_PARENT_NAME"));
+					studyBasedReport.setIsPetVip(rs.getBoolean("IS_VIP_PET"));
 
 					studyBasedReportList.add(studyBasedReport);
 				}
@@ -498,6 +548,7 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 
 	DevicesbyStudyReport devicesbyStudyReport;
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public List<DevicesbyStudyReport> getAssetsDevicesByStudyReport(AssetByStudyWidgetFilter filter)
 			throws ServiceExecutionException {
@@ -611,6 +662,7 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 
 	DevicesMalfunctionsReport devicesMalfunctionsReport;
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public List<DevicesMalfunctionsReport> getAssetsDevicesMalfunctionsReport(PointTrackerFilter filter)
 			throws ServiceExecutionException {
@@ -733,10 +785,10 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return devicesMalfunctionsReportList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getPointTrackerReportCount(PointTrackerFilter filter, int userId)
 			throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getDeviceDetailsReportCount called");
@@ -763,10 +815,6 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 				public void processRow(ResultSet rs) throws SQLException {
 					PointTrackerReport pointTrackerReport = new PointTrackerReport();
 
-					// CREATED_DATE , CAMPAIGN, PET, STUDY , ACTIVITY, BEHAVIOR POINTS STATUS
-					// pointTrackerReport.setCreatedDate(rs.getTimestamp("CREATED_DATE") != null ?
-					// new SimpleDateFormat("MM/dd/yyyy").format(new
-					// Date(rs.getTimestamp("CREATED_DATE").getTime())) : null);
 					pointTrackerReport.setCreatedDate(rs.getTimestamp("CREATED_DATE").toLocalDateTime());
 					if (rs.getString("C_DATE") != null) {
 						pointTrackerReport.setDate(rs.getString("C_DATE"));
@@ -782,6 +830,9 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					} else {
 						pointTrackerReport.setPoints("N/A");
 					}
+					pointTrackerReport.setPetParentName(rs.getString("PET_PARENT_NAME"));
+					pointTrackerReport.setIsPetVip(rs.getBoolean("IS_VIP_PET"));
+
 					pointTrackerReportList.add(pointTrackerReport);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
@@ -795,10 +846,10 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return pointTrackerReportList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getPointsAccumulatedReportCount(PointsAccumulatedReportFilter filter, int userId)
 			throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getPointsAccumulatedReportCount called");
@@ -842,9 +893,9 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return pointTrackerReportList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getCustomerSupportTicketsCount(SupportFilter filter) throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		try {
@@ -949,11 +1000,11 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return customerSupportIssueByStudyWidgetResponseList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<TotalAssetsListDTO> getTotalAssets() throws ServiceExecutionException {
 		List<TotalAssetsListDTO> totalAssetsReportResponses = new ArrayList<>();
 		try {
-			int count = 0;
 			Map<String, Object> inputParams = new HashMap<String, Object>();
 			inputParams.put("type", "type1");
 
@@ -989,7 +1040,6 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					for (int i = 0; i < totalAssetsReportResponses.size(); i++) {
 
 						String deviceType = totalAssetsReportResponses.get(i).getDeviceType(); // Sensor
-						List<TotalModelListDTO> modelArray = null;
 						list2.forEach(rs -> {
 //                        	count = count + 1;
 //                        	System.out.println("count");
@@ -1089,6 +1139,7 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					parentReport.setAnsweredOn(rs.getString("ANSWERED_ON"));
 
 					parentReport.setStudy(rs.getString("STUDY_NAME"));
+					parentReport.setPetParentNames(rs.getString("PET_PARENT_NAMES"));
 
 					// parentReport.setPetParentName(rs.getString("PET_PARENT_NAME"));
 					// parentReport.setCompletedCount(rs.getInt("COMPLETED"));
@@ -1106,10 +1157,10 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return pList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getPetParentReportCount(PetParentReportFilter filter, int userId)
 			throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		try {
@@ -1122,6 +1173,7 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 		return map;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getPetBfiScoreReportCount(PetBfiScoreReportFilter filter)
 			throws ServiceExecutionException {
@@ -1157,6 +1209,7 @@ public class ReportDaoImpl extends BaseDaoImpl implements ReportDao {
 					petBfiScoreReport.setPetId(rs.getInt("PET_ID"));
 					petBfiScoreReport.setPetBfiImageSetId(rs.getInt("PET_BFI_IMAGE_SET_ID"));
 					petBfiScoreReport.setPetParentId(rs.getInt("PET_PARENT_ID"));
+					petBfiScoreReport.setIsVipPetParent(rs.getBoolean("IS_VIP"));
 
 					petBfiScoreReport.setPetName(rs.getString("PET_NAME"));
 					petBfiScoreReport.setPetParentName(rs.getString("PET_PARENT_NAME"));

@@ -32,7 +32,7 @@ public class QuestionnaireConfigRequest {
 
 	@ApiModelProperty(value = "questionnairesAssociated", required = true)
 	private List<QuestionnaireAssociated> questionnairesAssociated;
-
+	
 	private Integer userId;
 
 	public Integer getStudyId() {

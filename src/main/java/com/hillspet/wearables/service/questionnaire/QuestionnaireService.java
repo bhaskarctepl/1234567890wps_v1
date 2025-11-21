@@ -1,15 +1,20 @@
 package com.hillspet.wearables.service.questionnaire;
 
-import javax.validation.Valid;
+import java.util.List;
 
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
+import com.hillspet.wearables.dto.CustomUserDetails;
 import com.hillspet.wearables.dto.Question;
+import com.hillspet.wearables.dto.Questionnaire;
 import com.hillspet.wearables.dto.QuestionnaireInstruction;
+import com.hillspet.wearables.dto.QuestionnairePublishHistory;
 import com.hillspet.wearables.dto.filter.QuestionnaireFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseByStudyFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.request.QuestionnaireRequest;
 import com.hillspet.wearables.request.QuestionnaireSkipRequest;
+import com.hillspet.wearables.request.RepublishQuestionnaireRequest;
+import com.hillspet.wearables.response.ExportQuestionnaireResponse;
 import com.hillspet.wearables.response.PetQuestionnaireResponseList;
 import com.hillspet.wearables.response.QuestionnaireListResponse;
 import com.hillspet.wearables.response.QuestionnaireResponse;
@@ -19,10 +24,10 @@ import com.hillspet.wearables.response.QuestionnaireViewResponse;
 
 public interface QuestionnaireService {
 
-	Integer addQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
+	Questionnaire addQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
 			throws ServiceExecutionException;
 
-	void updateQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
+	Questionnaire updateQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
 			throws ServiceExecutionException;
 
 	QuestionnaireResponse getQuestionnaireById(int questionnaireId) throws ServiceExecutionException;
@@ -61,4 +66,20 @@ public interface QuestionnaireService {
 
 	public void implementSkipOnQuestionnaire(QuestionnaireSkipRequest questionnaireSkipRequest, int modifiedBy)
 			throws ServiceExecutionException;
+
+	public void republishQuestionnaire(RepublishQuestionnaireRequest republishQuestionnaireRequest, Integer userId)
+			throws ServiceExecutionException;
+
+	public List<QuestionnairePublishHistory> getQuestionnairePublishHistory(int questionnaireId)
+			throws ServiceExecutionException;
+
+	public String getCopyQuestionnaireName(String questionnaireName) throws ServiceExecutionException;
+
+	public ExportQuestionnaireResponse getExportsRequestedList(QuestionnaireFilter filter) throws ServiceExecutionException;
+
+	public void exportQuestionaire(String questionnaireIds, CustomUserDetails userDetails) throws ServiceExecutionException;
+
+	public String downloadQuestionnaire(int exportId) throws ServiceExecutionException;
+	
+	QuestionnaireListResponse getQuestionnairesForExport(QuestionnaireFilter filter) throws ServiceExecutionException;
 }

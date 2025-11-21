@@ -38,6 +38,26 @@ public class BulkAssetUploadDeviceInfo {
 	private String exceptionMsg;
 	private String attachmentName;
 
+	private String wifiSSID;
+
+	private String boxNumber;
+
+	public String getBoxNumber() {
+		return boxNumber;
+	}
+
+	public void setBoxNumber(String boxNumber) {
+		this.boxNumber = boxNumber;
+	}
+
+	public String getWifiSSID() {
+		return wifiSSID;
+	}
+
+	public void setWifiSSID(String wifiSSID) {
+		this.wifiSSID = wifiSSID;
+	}
+
 	public Integer getStagingId() {
 		return stagingId;
 	}

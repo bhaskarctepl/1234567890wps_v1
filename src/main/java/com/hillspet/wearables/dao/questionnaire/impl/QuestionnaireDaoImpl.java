@@ -36,6 +36,8 @@ import com.hillspet.wearables.common.utils.GCPClientUtil;
 import com.hillspet.wearables.common.utils.GCStorageUtil;
 import com.hillspet.wearables.dao.BaseDaoImpl;
 import com.hillspet.wearables.dao.questionnaire.QuestionnaireDao;
+import com.hillspet.wearables.dto.CustomUserDetails;
+import com.hillspet.wearables.dto.ExportQuestionnaireDTO;
 import com.hillspet.wearables.dto.PetQuestionnaireResponse;
 import com.hillspet.wearables.dto.Question;
 import com.hillspet.wearables.dto.QuestionAnswer;
@@ -46,6 +48,7 @@ import com.hillspet.wearables.dto.Questionnaire;
 import com.hillspet.wearables.dto.QuestionnaireDetailsDTO;
 import com.hillspet.wearables.dto.QuestionnaireInstruction;
 import com.hillspet.wearables.dto.QuestionnaireListDTO;
+import com.hillspet.wearables.dto.QuestionnairePublishHistory;
 import com.hillspet.wearables.dto.QuestionnaireResponseByStudyListDTO;
 import com.hillspet.wearables.dto.QuestionnaireResponseDTO;
 import com.hillspet.wearables.dto.QuestionnaireResponseListDTO;
@@ -55,6 +58,8 @@ import com.hillspet.wearables.dto.filter.QuestionnaireResponseByStudyFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.request.QuestionnaireRequest;
 import com.hillspet.wearables.request.QuestionnaireSkipRequest;
+import com.hillspet.wearables.request.RepublishQuestionnaireRequest;
+import com.hillspet.wearables.response.QuestionnaireExportDTO;
 import com.hillspet.wearables.response.QuestionnaireViewResponse;
 
 @Repository
@@ -72,12 +77,13 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 	private ObjectMapper mapper;
 
 	@Override
-	public Integer addQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
+	public Questionnaire addQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
 			throws ServiceExecutionException {
 		Integer questionnaireId = 0;
+		Questionnaire questionnaire = questionnaireRequest.getQuestionnaire();
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
-			Questionnaire questionnaire = questionnaireRequest.getQuestionnaire();
+
 			inputParams.put("p_questionnaire_name", questionnaire.getQuestionnaireName());
 			inputParams.put("p_start_date", questionnaire.getStartDate());
 			inputParams.put("p_end_date", questionnaire.getEndDate());
@@ -105,6 +111,8 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 				inputParams.put("p_section_json", null);
 			}
 
+			inputParams.put("p_parent_questionnaire_id", questionnaire.getParentQuestionnaireId());
+
 			LOGGER.info("addQuestionnaire inputParams are {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.QUESTIONNAIRE_INSERT, inputParams);
 			LOGGER.info("addQuestionnaire outParams are {}", outParams);
@@ -130,15 +138,15 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 			LOGGER.error("error while executing addQuestionnaire ", e);
 			throw new ServiceExecutionException(e.getMessage());
 		}
-		return questionnaireId;
+		return getQuestionnaireById(questionnaireId);
 	}
 
 	@Override
-	public void updateQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
+	public Questionnaire updateQuestionnaire(QuestionnaireRequest questionnaireRequest, Integer userId)
 			throws ServiceExecutionException {
+		Questionnaire questionnaire = questionnaireRequest.getQuestionnaire();
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
-			Questionnaire questionnaire = questionnaireRequest.getQuestionnaire();
 
 			inputParams.put("p_questionnaire_id", questionnaire.getQuestionnaireId());
 			inputParams.put("p_questionnaire_name", questionnaire.getQuestionnaireName());
@@ -185,6 +193,7 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 			LOGGER.error("error while executing updateQuestionnaire ", e);
 			throw new ServiceExecutionException(e.getMessage());
 		}
+		return getQuestionnaireById(questionnaire.getQuestionnaireId());
 	}
 
 	@Override
@@ -446,6 +455,10 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 							questionnaire.setQuestionnaireImageUrl(gcpClientUtil.getDownloaFiledUrl(fileName,
 									Constants.GCP_QUESTIONNAIRE_QUESTION_IMAGE_PATH));
 						}
+
+						questionnaire.setParentQuestionnaireId(quesObj.get("PARENT_QUESTIONNAIRE_ID") != null
+								? (Integer) quesObj.get("PARENT_QUESTIONNAIRE_ID")
+								: null);
 					});
 				}
 
@@ -505,11 +518,18 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 						QuestionAnswerOption ansOptions = new QuestionAnswerOption();
 						ansOptions.setQuestionAnswerId((Integer) answerOpts.get("QUESTION_ANSWER_OPTION_ID"));
 						ansOptions.setQuestionAnswer((String) answerOpts.get("ANSWER"));
-
-						ansOptions.setSubmitQuestionnaire(answerOpts.get("AUTO_SUBMIT_QUESTIONNAIRE") != null
-								&& (Integer) answerOpts.get("AUTO_SUBMIT_QUESTIONNAIRE") > NumberUtils.INTEGER_ZERO
-										? Boolean.TRUE
-										: Boolean.FALSE);
+						
+						String isAutoSubmit = String.valueOf(answerOpts.get("AUTO_SUBMIT_QUESTIONNAIRE"));
+						
+						if(StringUtils.isNotBlank(isAutoSubmit)) {
+							ansOptions.setSubmitQuestionnaire((Integer) answerOpts.get("AUTO_SUBMIT_QUESTIONNAIRE") > NumberUtils.INTEGER_ZERO
+											? Boolean.TRUE
+											: Boolean.FALSE);
+						}else {
+							ansOptions.setSubmitQuestionnaire(Boolean.FALSE);
+						}
+						
+						
 						ansOptions.setSkipTo((Integer) answerOpts.get("SKIP_TO"));
 
 						ansOptions.setAnsOptionMediaType((Integer) answerOpts.get("MEDIA_TYPE"));
@@ -527,6 +547,7 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 
 						questionAnsOptsMap.computeIfAbsent(questionId, k -> new ArrayList<QuestionAnswerOption>())
 								.add(ansOptions);
+						
 
 						ansOptions.setAnswerCategories(answerOptCategoryMap.get(questionAnswerOptId) != null
 								? answerOptCategoryMap.get(questionAnswerOptId)
@@ -606,6 +627,7 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 										: Boolean.FALSE);
 						question.setValidityPeriodId((Integer) quest.get("VALIDITY_PERIOD_ID"));
 						question.setValidityPeriod((String) quest.get("VALIDITY_DESCRIPTION"));
+						question.setNoOfDays(quest.get("NO_OF_DAYS") != null ? (Integer) quest.get("NO_OF_DAYS") :  null);
 
 						question.setQuestionCategories(
 								questionCategoryMap.get(questionId) != null ? questionCategoryMap.get(questionId)
@@ -660,6 +682,7 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 					questionnaire.setIsActive(rs.getBoolean("IS_ACTIVE"));
 					questionnaire.setIsPublished(rs.getBoolean("IS_PUBLISHED"));
 					questionnaire.setQuestionnaireLevel(rs.getString("QUESTIONNAIRE_LEVEL"));
+					questionnaire.setIsRepublished(rs.getBoolean("IS_REPUBLISHED"));
 					questionnaireList.add(questionnaire);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
@@ -739,7 +762,8 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 		try {
 			String counts = selectForObject(SQLConstants.QUESTIONNAIRE_RESPONSE_LIST_BY_STUDY_COUNT, String.class,
 					filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(), filter.getStartDate(),
-					filter.getEndDate(), filter.getQuestionnaireId(), filter.getStudyId());
+					filter.getEndDate(), filter.getQuestionnaireId(), filter.getStudyId(), filter.getPetName(),
+					filter.getPetParentName());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while executing getQuestionnaireResponseByStudyCount ", e);
@@ -771,6 +795,8 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 					questionnaire.setPetName(rs.getString("PET_NAME"));
 					questionnaire.setRespondentPetParentName(rs.getString("PET_PARENT_NAME"));
 					questionnaire.setCompletionPercentage(rs.getDouble("COMPLETION_PERCENTAGE"));
+					questionnaire.setPetParentId(rs.getInt("STUDY_ID"));
+					questionnaire.setIsVipPetParent(rs.getBoolean("IS_VIP"));
 
 					questionnaireResponseList.add(questionnaire);
 				}
@@ -795,6 +821,7 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 				public void processRow(ResultSet rs) throws SQLException {
 					QuestionnaireResponseByStudyListDTO questionnaire = new QuestionnaireResponseByStudyListDTO();
 					questionnaire.setPetParentName(rs.getString("FULL_NAME"));
+					questionnaire.setIsVipPetParent(rs.getBoolean("IS_VIP"));
 					questionnaire.setPetId(rs.getInt("PET_ID"));
 					questionnaire.setQuestionnaireResponseId(rs.getInt("QUESTIONNAIRE_RESPONSE_ID"));
 					questionnaire.setPetName(rs.getString("PET_NAME"));
@@ -807,7 +834,7 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
 					filter.getFilterType(), filter.getFilterValue(), filter.getStartDate(), filter.getEndDate(),
-					filter.getQuestionnaireId(), filter.getStudyId());
+					filter.getQuestionnaireId(), filter.getStudyId(), filter.getPetName(), filter.getPetParentName());
 		} catch (Exception e) {
 			LOGGER.error("error while executing getQuestionnaireResponseByStudyList ", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -1006,6 +1033,13 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 				inputParams.put("p_questions_json", null);
 			}
 
+			inputParams.put("p_questionnaire_type_id", questionnaireSkipRequest.getQuestionnaireTypeId());
+			inputParams.put("p_questionnaire_category_id", questionnaireSkipRequest.getQuestionnaireCategoryId());
+			inputParams.put("p_questionnaire_level_id", questionnaireSkipRequest.getQuestionnaireLevelId());
+
+			// inputParams.put("p_start_date", questionnaireSkipRequest.getStartDate());
+			// inputParams.put("p_end_date", questionnaireSkipRequest.getEndDate());
+
 			inputParams.put("p_modified_by", modifiedBy);
 
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.QUESTIONNAIRE_SKIP_UPDATE, inputParams);
@@ -1052,4 +1086,314 @@ public class QuestionnaireDaoImpl extends BaseDaoImpl implements QuestionnaireDa
 		}
 
 	}
+
+	@Override
+	public void republishQuestionnaire(RepublishQuestionnaireRequest republishQuestionnaireRequest, Integer userId)
+			throws ServiceExecutionException {
+		try {
+			Map<String, Object> inputParams = new HashMap<>();
+			inputParams.put("p_questionnaire_id", republishQuestionnaireRequest.getQuestionnaireId());
+			inputParams.put("p_end_date", republishQuestionnaireRequest.getEndDate());
+			inputParams.put("p_comments", republishQuestionnaireRequest.getComments());
+			inputParams.put("p_modified_by", userId);
+
+			LOGGER.info("republishQuestionnaire inputParams are {}", inputParams);
+			Map<String, Object> outParams = callStoredProcedure(SQLConstants.QUESTIONNAIRE_UPDATE_REPUBLISH,
+					inputParams);
+			LOGGER.info("republishQuestionnaire outParams are {}", outParams);
+			String errorMsg = (String) outParams.get("out_error_msg");
+			int statusFlag = (int) outParams.get("out_flag");
+
+			if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
+				LOGGER.info("Questionnaire has been republished successfully, Questionnaire id is ",
+						republishQuestionnaireRequest.getQuestionnaireId());
+			} else {
+				throw new ServiceExecutionException(errorMsg);
+			}
+		} catch (SQLException e) {
+			LOGGER.error("error while executing republishQuestionnaire ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+	}
+
+	@Override
+	public List<QuestionnairePublishHistory> getQuestionnairePublishHistory(int questionnaireId)
+			throws ServiceExecutionException {
+		List<QuestionnairePublishHistory> publishHistory = new ArrayList<>();
+		try {
+			String sql = SQLConstants.QUESTIONNAIRE_GET_PUBLISH_HISTORY;
+			jdbcTemplate.query(sql, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					QuestionnairePublishHistory questionnairePublishHistory = new QuestionnairePublishHistory();
+					questionnairePublishHistory.setQuestionnaireId(rs.getInt("QUESTIONNAIRE_ID"));
+					questionnairePublishHistory.setPublishDate(
+							rs.getDate("PUBLISHED_DATE") != null ? rs.getDate("PUBLISHED_DATE").toLocalDate() : null);
+					questionnairePublishHistory
+							.setEndDate(rs.getDate("END_DATE") != null ? rs.getDate("END_DATE").toLocalDate() : null);
+					questionnairePublishHistory.setComments(rs.getString("COMMENTS"));
+					publishHistory.add(questionnairePublishHistory);
+				}
+			}, questionnaireId);
+		} catch (Exception e) {
+			LOGGER.error("error while executing getQuestionnairePublishHistory ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return publishHistory;
+	}
+
+	@Override
+	public String getCopyQuestionnaireName(String questionnaireName) throws ServiceExecutionException {
+		String proposedQuestionnaireName = questionnaireName;
+		proposedQuestionnaireName = selectForObject(SQLConstants.FN_GET_PROPOSED_QUESTIONNAIRE_NAME, String.class,
+				questionnaireName);
+		if (proposedQuestionnaireName.length() > 100) {
+			throw new ServiceExecutionException(
+					"getCopyQuestionnaireName service validation failed cannot proceed further",
+					Status.BAD_REQUEST.getStatusCode(),
+					Arrays.asList(new WearablesError(WearablesErrorCode.QUESTIONNAIRE_NAME_INVALID_LENGTH)));
+		}
+		return proposedQuestionnaireName;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Integer> getExportsRequestedListCount(QuestionnaireFilter filter)
+			throws ServiceExecutionException {
+		HashMap<String, Integer> map = new HashMap<>();
+		try {
+			String counts = selectForObject(SQLConstants.QUESTIONNAIRE_EXPORT_REQUEST_LIST_COUNT, String.class,
+					filter.getUserId());
+			map = mapper.readValue(counts, HashMap.class);
+		} catch (Exception e) {
+			LOGGER.error("error while executing getExportsRequestedListCount ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return map;
+	}
+
+	@Override
+	public List<ExportQuestionnaireDTO> getExportsRequestedList(QuestionnaireFilter filter)
+			throws ServiceExecutionException {
+		List<ExportQuestionnaireDTO> exportQuestionnaire = new ArrayList<>();
+		try {
+			String sql = SQLConstants.QUESTIONNAIRE_EXPORT_REQUEST_LIST;
+			jdbcTemplate.query(sql, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+
+					ExportQuestionnaireDTO exportQuestionnaireDTO = new ExportQuestionnaireDTO();
+					exportQuestionnaireDTO.setRequestedDate(rs.getDate("EXPORT_DATE").toLocalDate());
+					exportQuestionnaireDTO.setQuestionnaireName(rs.getString("QUESTIONNAIRE_NAME"));
+					exportQuestionnaireDTO.setStatus(rs.getString("STATUS"));
+					exportQuestionnaireDTO.setQuestionnaireExportId(rs.getInt("QUESTIONNAIRE_EXPORT_ID"));
+					
+					exportQuestionnaire.add(exportQuestionnaireDTO);
+				}
+			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getUserId(),
+					filter.getRoleTypeId());
+		} catch (Exception e) {
+			LOGGER.error("error while executing getQuestionnairePublishHistory ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return exportQuestionnaire;
+	}
+
+	@Override
+	public ExportQuestionnaireDTO exportQuestionaire(String questionnaireIds, CustomUserDetails userDetails)
+			throws ServiceExecutionException {
+		ExportQuestionnaireDTO exportQuestionnaireDTO = new ExportQuestionnaireDTO();
+		try {
+			Map<String, Object> inputParams = new HashMap<>();
+
+			inputParams.put("p_questionnaire_ids", questionnaireIds);
+			inputParams.put("p_user_id", userDetails.getUserId());
+
+			LOGGER.info("exportQuestionaire inputParams are {}", inputParams);
+			Map<String, Object> outParams = callStoredProcedure(SQLConstants.QUESTIONNAIRE_EXPORT_INSERT, inputParams);
+			LOGGER.info("exportQuestionaire outParams are {}", outParams);
+			String errorMsg = (String) outParams.get("out_error_msg");
+			int statusFlag = (int) outParams.get("out_flag");
+			if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
+				int exportRequestId = (int) outParams.get("questionnaire_export_id");
+				LOGGER.info("Questionnaire has been exported succcessfully exportRequestId is ", exportRequestId);
+
+				exportQuestionnaireDTO.setQuestionnaireExportId(exportRequestId);
+
+			} else {
+				throw new ServiceExecutionException(errorMsg);
+			}
+
+		} catch (SQLException e) {
+			LOGGER.error("error while executing addQuestionnaire ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return exportQuestionnaireDTO;
+	}
+
+	@Override
+	public List<QuestionnaireExportDTO> getQuestionnaireDetailsForExport(int questionnaireId)
+			throws ServiceExecutionException {
+
+		List<QuestionnaireExportDTO> questionnaires = new ArrayList<QuestionnaireExportDTO>();
+
+		try {
+
+			jdbcTemplate.query(SQLConstants.QUESTIONNAIRE_EXPORT_GET_QUESTIONNAIRES, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+
+					QuestionnaireExportDTO exportDTO = new QuestionnaireExportDTO();
+					exportDTO.setQuestionnaireId(rs.getInt("QUESTIONNAIRE_ID"));
+					exportDTO.setQuestionnaireName(rs.getString("QUESTIONNAIRE_NAME"));
+					exportDTO.setStudyName(rs.getString("STUDY_NAME"));
+					exportDTO.setPetId(rs.getInt("PET_ID"));
+					exportDTO.setPetName(rs.getString("PET_NAME"));
+					exportDTO.setFullName(rs.getString("FULL_NAME"));
+					exportDTO.setEmail(rs.getString("EMAIL"));
+					exportDTO.setSubmittedDate(rs.getDate("SUBMITTED_DATE") != null ? rs.getDate("SUBMITTED_DATE").toLocalDate() : null);
+					exportDTO.setSharedDate(rs.getDate("SHARED_DATE") != null ? rs.getDate("SHARED_DATE").toLocalDate() : null);
+					exportDTO.setQuestionCode(rs.getString("QUESTION_CODE"));
+					exportDTO.setQuestionnaireId(rs.getInt("QUESTIONNAIRE_ID"));
+
+					String fileName = rs.getString("QUESTION_IMAGE");
+
+					if (fileName != null && fileName != "null" && !fileName.trim().equals("")) {
+						exportDTO.setQuestionImageUrl(gcpClientUtil.getDownloaFiledUrl(fileName,
+								Constants.GCP_QUESTIONNAIRE_QUESTION_IMAGE_PATH));
+					}
+
+					List<QuestionAnswer> answers = null;
+
+					try {
+						answers = new ObjectMapper().readValue(rs.getString("ANSWER"),
+								new TypeReference<List<QuestionAnswer>>() {
+								});
+
+						generateGoogleFileUrl(answers);
+						exportDTO.setAnswers(answers);
+
+					} catch (JsonProcessingException e) {
+						LOGGER.error("error while converting ANSWER in getViewQuestionnaireResponse "
+								+ rs.getString("ANSWER"), e);
+					}
+
+					questionnaires.add(exportDTO);
+
+				}
+			}, questionnaireId);
+			
+			return questionnaires;
+
+		} catch (Exception e) {
+			LOGGER.error("error while executing getViewQuestionnaireResponse ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+	}
+
+	@Override
+	public boolean updateExportQuestionnaireFilePath(int exportId, String fileName, int userId)
+			throws ServiceExecutionException {
+		LOGGER.info("updateExportQuestionnaireFilePath called");
+		try {
+			Map<String, Object> inputParams = new HashMap<>();
+
+			inputParams.put("p_export_id", exportId);
+			inputParams.put("p_file_name", fileName);
+			inputParams.put("p_user_id", userId);
+
+			LOGGER.info("updateQuestionnaire inputParams are {}", inputParams);
+			Map<String, Object> outParams = callStoredProcedure(SQLConstants.QUESTIONNAIRE_EXPORT_UPDATE, inputParams);
+			LOGGER.info("updateQuestionnaire outParams are {}", outParams);
+			String errorMsg = (String) outParams.get("out_error_msg");
+			int statusFlag = (int) outParams.get("out_flag");
+			if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
+				LOGGER.info("updateExportQuestionnaireFilePath updated successfully ", exportId);
+				return true;
+			} else {
+				throw new ServiceExecutionException(errorMsg);
+			}
+		} catch (SQLException e) {
+			LOGGER.error("error while executing updateQuestionnaire ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+	}
+
+	 
+	@Override
+	public String downloadQuestionnaire(int exportId) throws ServiceExecutionException {
+		final StringBuilder file = new StringBuilder("");
+		try {
+
+			jdbcTemplate.query(SQLConstants.QUESTIONNAIRE_EXPORT_DOWNLOAD, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+
+					String fileName = rs.getString("EXPORT_URL");
+
+					if (StringUtils.isNotBlank(fileName)) {
+						file.append(gcpClientUtil.getDownloaFiledUrl(fileName,
+								Constants.GCP_QUESTIONNAIRE_EXPORT_PATH));
+					}
+				}
+			}, exportId);
+
+		} catch (Exception e) {
+			LOGGER.error("error while executing getViewQuestionnaireResponse ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return file.toString();
+	}
+
+	 
+	@Override
+	public Map<String, Integer> getQuestionnairesForExportCount(QuestionnaireFilter filter)
+			throws ServiceExecutionException {
+		HashMap<String, Integer> map = new HashMap<>();
+		try {
+			String counts = selectForObject(SQLConstants.QUESTIONNAIRE_GET_LIST_FOR_EXPORT_COUNT, String.class,
+					filter.getSearchText(), filter.getQuestionnaireTypeId(), filter.getStatusId(),
+					filter.getStartDate(), filter.getEndDate(), filter.getQuestionnaireLevelId());
+			map = mapper.readValue(counts, HashMap.class);
+		} catch (Exception e) {
+			LOGGER.error("error while executing getQuestionnairesCount ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return map;
+	}
+	
+	@Override
+	public List<QuestionnaireListDTO> getQuestionnairesForExport(QuestionnaireFilter filter) throws ServiceExecutionException {
+		List<QuestionnaireListDTO> questionnaireList = new ArrayList<>();
+		try {
+			String sql = SQLConstants.QUESTIONNAIRE_GET_LIST_FOR_EXPORT;
+			jdbcTemplate.query(sql, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					QuestionnaireListDTO questionnaire = new QuestionnaireListDTO();
+					questionnaire.setSlNumber(rs.getInt("slNo"));
+					questionnaire.setQuestionnaireId(rs.getInt("QUESTIONNAIRE_ID"));
+					questionnaire.setQuestionnaireName(rs.getString("QUESTIONNAIRE_NAME"));
+					questionnaire.setQuestionnaireTypeId(rs.getInt("QUESTIONNAIRE_TYPE_ID"));
+					questionnaire.setQuestionnaireCategoryId(rs.getInt("QUESTIONNAIRE_CATEGORY_ID"));
+					questionnaire.setQuestionnaireType(rs.getString("QUESTIONNAIRE_TYPE"));
+					questionnaire.setQuestionnaireCategory(rs.getString("QUESTIONNAIRE_CATEGORY"));
+					questionnaire.setStartDate(rs.getDate("START_DATE").toLocalDate());
+					questionnaire.setEndDate(rs.getDate("END_DATE").toLocalDate());
+					questionnaire.setIsActive(rs.getBoolean("IS_ACTIVE"));
+					questionnaire.setIsPublished(rs.getBoolean("IS_PUBLISHED"));
+					questionnaire.setQuestionnaireLevel(rs.getString("QUESTIONNAIRE_LEVEL"));
+					questionnaire.setIsRepublished(rs.getBoolean("IS_REPUBLISHED"));
+					questionnaireList.add(questionnaire);
+				}
+			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
+					filter.getQuestionnaireTypeId(), filter.getStatusId(), filter.getStartDate(), filter.getEndDate(),
+					filter.getQuestionnaireLevelId());
+		} catch (Exception e) {
+			LOGGER.error("error while executing getQuestionnaires ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return questionnaireList;
+	}
+	 
 }

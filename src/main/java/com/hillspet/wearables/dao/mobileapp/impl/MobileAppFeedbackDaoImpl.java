@@ -42,6 +42,7 @@ public class MobileAppFeedbackDaoImpl extends BaseDaoImpl implements MobileAppFe
 	@Autowired
 	private ObjectMapper mapper;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getMobileAppFeedbackCount(MobileAppFeedbackFilter filter)
 			throws ServiceExecutionException {
@@ -53,7 +54,7 @@ public class MobileAppFeedbackDaoImpl extends BaseDaoImpl implements MobileAppFe
 					filter.getPhoneModel(), filter.getPageName(),
 					// filter.getFilterType(),
 					// filter.getFilterValue(),
-					filter.getStartDate(), filter.getEndDate()
+					filter.getStartDate(), filter.getEndDate(), filter.getPetName(), filter.getPetParentName()
 
 			);
 			map = mapper.readValue(countJson, HashMap.class);
@@ -88,6 +89,7 @@ public class MobileAppFeedbackDaoImpl extends BaseDaoImpl implements MobileAppFe
 					mobileAppFeedback.setFeedbackDate(rs.getTimestamp("created_date").toLocalDateTime());
 					mobileAppFeedback.setPetId(rs.getInt("PET_ID"));
 					mobileAppFeedback.setPetParentId(rs.getInt("PET_PARENT_ID"));
+					mobileAppFeedback.setIsVipPetParent(rs.getBoolean("IS_VIP"));
 					mobileAppFeedback.setPetStudyId(rs.getInt("PET_STUDY_ID"));
 
 					mobileAppFeedbackList.add(mobileAppFeedback);
@@ -95,7 +97,7 @@ public class MobileAppFeedbackDaoImpl extends BaseDaoImpl implements MobileAppFe
 			}, filter.getStartIndex(), filter.getLimit(), filter.getSortBy(), filter.getOrder(), filter.getSearchText(),
 					// filter.getFilterType(), filter.getFilterValue()
 					filter.getStartDate(), filter.getEndDate(), filter.getPhoneModel(), filter.getPageName(),
-					filter.getUserId());
+					filter.getUserId(), filter.getPetName(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getMobileAppFeedback", e);

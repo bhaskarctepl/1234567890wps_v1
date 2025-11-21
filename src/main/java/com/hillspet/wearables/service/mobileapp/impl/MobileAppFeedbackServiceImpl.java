@@ -1,7 +1,6 @@
 package com.hillspet.wearables.service.mobileapp.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +37,6 @@ public class MobileAppFeedbackServiceImpl implements MobileAppFeedbackService {
 
 		int searchCount =	mapper.get("searchedElementsCount");
 		int totalCount = mapper.get("totalCount");
-		HashMap<String, Integer> map = new HashMap<>();
 
 		List<MobileAppFeedback> mobileAppFeedbackList = totalCount > 0 ? mobileAppFeedbackDao.getMobileAppFeedback(filter)
 				: new ArrayList<>();

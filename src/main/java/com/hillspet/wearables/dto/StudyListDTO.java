@@ -18,6 +18,7 @@ public class StudyListDTO extends BaseDTO {
 	private String studyDescription;
 	private Integer studyStatusId;
 	private String studyStatus;
+	private Boolean isVipPetsPresent;
 
 	public Integer getStudyId() {
 		return studyId;
@@ -105,6 +106,14 @@ public class StudyListDTO extends BaseDTO {
 
 	public void setStudyStatus(String studyStatus) {
 		this.studyStatus = studyStatus;
+	}
+
+	public Boolean getIsVipPetsPresent() {
+		return isVipPetsPresent;
+	}
+
+	public void setIsVipPetsPresent(Boolean isVipPetsPresent) {
+		this.isVipPetsPresent = isVipPetsPresent;
 	}
 
 }

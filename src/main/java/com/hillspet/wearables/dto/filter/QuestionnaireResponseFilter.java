@@ -13,7 +13,7 @@ public class QuestionnaireResponseFilter extends BaseFilter {
 	@ApiParam(name = "studyId", value = "Study Id")
 	@QueryParam("studyId")
 	private String studyId;
-	
+
 	@ApiParam(name = "phaseId", value = "Phase Id")
 	@QueryParam("phaseId")
 	private String phaseId;
@@ -29,16 +29,22 @@ public class QuestionnaireResponseFilter extends BaseFilter {
 	@ApiParam(name = "endDate", value = "End Date is the second date component value of date range")
 	@QueryParam("endDate")
 	private String endDate;
-	
+
 	@ApiParam(name = "questionnaireTypeId", value = "Search Questionnaire Type Id")
 	@QueryParam("questionnaireTypeId")
 	private String questionnaireTypeId;
-	
+
 	@ApiParam(name = "questionnaireLevelId", value = "Search Questionnaire Level Id")
 	@QueryParam("questionnaireLevelId")
 	private String questionnaireLevelId;
-	
-	
+
+	@QueryParam("petName")
+	@ApiParam(name = "petName", value = "Search pet by pet name", required = false)
+	private String petName;
+
+	@QueryParam("petParentName")
+	@ApiParam(name = "petParentName", value = "Search pet by Pet Parent Name", required = false)
+	private String petParentName;
 
 	public String getQuestionnaireLevelId() {
 		return questionnaireLevelId;
@@ -107,5 +113,21 @@ public class QuestionnaireResponseFilter extends BaseFilter {
 	public void setPhaseId(String phaseId) {
 		this.phaseId = phaseId;
 	}
-	
+
+	public String getPetName() {
+		return petName;
+	}
+
+	public void setPetName(String petName) {
+		this.petName = petName;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
+	}
+
 }

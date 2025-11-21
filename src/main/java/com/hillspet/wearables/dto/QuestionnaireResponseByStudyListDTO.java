@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class QuestionnaireResponseByStudyListDTO {
 	private String petParentName;
+
 	private Integer petId;
 	private String petName;
 	private Timestamp submittedDate;
@@ -17,6 +18,7 @@ public class QuestionnaireResponseByStudyListDTO {
 	private Integer studyId;
 	private Integer questionnaireResponseId;
 	private LocalDate sharedDate;
+	private Boolean isVipPetParent;
 
 	public String getPetParentName() {
 		return petParentName;
@@ -80,6 +82,14 @@ public class QuestionnaireResponseByStudyListDTO {
 
 	public void setSharedDate(LocalDate sharedDate) {
 		this.sharedDate = sharedDate;
+	}
+
+	public Boolean getIsVipPetParent() {
+		return isVipPetParent;
+	}
+
+	public void setIsVipPetParent(Boolean isVipPetParent) {
+		this.isVipPetParent = isVipPetParent;
 	}
 
 	@Override

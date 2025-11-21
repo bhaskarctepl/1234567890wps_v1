@@ -41,14 +41,14 @@ public class WearablesApplication extends SpringBootServletInitializer {
 	 */
 	@Bean(name = Constants.WEARABLES_TRANSACTION_MANAGER)
 	public PlatformTransactionManager txManager() {
-	    return new DataSourceTransactionManager(createDataSource()); 
+		return new DataSourceTransactionManager(createDataSource());
 	}
-	
+
 	@Bean
 	public RestTemplate restTemplate() {
-	    return new RestTemplate();
+		return new RestTemplate();
 	}
-	
+
 	/**
 	 * It gets the information from configuration files and creates the data source
 	 * object.
@@ -58,7 +58,6 @@ public class WearablesApplication extends SpringBootServletInitializer {
 	 * 
 	 * @return
 	 */
-
 	@Bean(name = Constants.DATA_SOURCE)
 	@Primary
 	public DataSource createDataSource() {
@@ -103,7 +102,7 @@ public class WearablesApplication extends SpringBootServletInitializer {
 		C3P0Registry.reregister(dataSource);
 		return dataSource;
 	}
-	
+
 	@Bean
 	public MultipartConfigElement multipartConfigElement() {
 		MultipartConfigFactory factory = new MultipartConfigFactory();

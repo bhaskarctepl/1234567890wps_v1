@@ -19,9 +19,9 @@ public class QuestionnaireListDTO extends BaseDTO {
 	private LocalDate endDate;
 	private Boolean isActive;
 	private Boolean isPublished;
-	
+	private Boolean isRepublished;
+
 	private String questionnaireLevel;
-	
 
 	public String getQuestionnaireLevel() {
 		return questionnaireLevel;
@@ -109,6 +109,14 @@ public class QuestionnaireListDTO extends BaseDTO {
 
 	public void setIsPublished(Boolean isPublished) {
 		this.isPublished = isPublished;
+	}
+
+	public Boolean getIsRepublished() {
+		return isRepublished;
+	}
+
+	public void setIsRepublished(Boolean isRepublished) {
+		this.isRepublished = isRepublished;
 	}
 
 }

@@ -8,9 +8,41 @@ public class QuestionnaireResponseDTO {
 	private String questionImageUrl;
 	private Integer questionTypeId;
 	private String answer;
+	private String questionCode;
+	
 	private List<QuestionAnswer> answers;
 
 	private QuestionnaireSection section;
+	
+	/**
+	 * 
+	 */
+	public QuestionnaireResponseDTO() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public QuestionnaireResponseDTO(Integer questionId, String question, String questionImageUrl,
+			Integer questionTypeId, String answer, String questionCode, List<QuestionAnswer> answers,
+			QuestionnaireSection section) {
+		super();
+		this.questionId = questionId;
+		this.question = question;
+		this.questionImageUrl = questionImageUrl;
+		this.questionTypeId = questionTypeId;
+		this.answer = answer;
+		this.questionCode = questionCode;
+		this.answers = answers;
+		this.section = section;
+	}
+
+ 
+	public String getQuestionCode() {
+		return questionCode;
+	}
+
+	public void setQuestionCode(String questionCode) {
+		this.questionCode = questionCode;
+	}
 
 	public Integer getQuestionId() {
 		return questionId;

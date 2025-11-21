@@ -3,10 +3,8 @@ package com.hillspet.wearables.service.pet.impl;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -29,7 +27,6 @@ import com.hillspet.wearables.dto.filter.PetDataStreamFilter;
 import com.hillspet.wearables.request.DataStreamGroupRequest;
 import com.hillspet.wearables.response.DuplicatePetConfigResponse;
 import com.hillspet.wearables.response.DuplicatePetResponse;
-import com.hillspet.wearables.security.Authentication;
 import com.hillspet.wearables.service.pet.DuplicatePetMgmtService;
 
 
@@ -41,9 +38,6 @@ public class DuplicatePetMgmtServiceImpl implements DuplicatePetMgmtService {
 
 	@Autowired
 	private DuplicatePetMgmtDao duplicatePetMgmtDao;
-
-	@Autowired
-	private Authentication authentication;
 
 	@Autowired
 	private ObjectMapper mapper;
@@ -180,6 +174,7 @@ public class DuplicatePetMgmtServiceImpl implements DuplicatePetMgmtService {
 		return response;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Map<Object, List<PetDataStreamDTO>> getDuplicatePetConfigDetailsById(int petId) throws ServiceExecutionException {
 		LOGGER.debug("getDuplicatePet called.");

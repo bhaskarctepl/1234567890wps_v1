@@ -6,6 +6,7 @@ public class PetParent {
 	private String petParentAddress;
 	private String email;
 	private String fcmToken;
+	private Boolean isVipPetParent;
 
 	public int getPetParentId() {
 		return petParentId;
@@ -45,6 +46,14 @@ public class PetParent {
 
 	public void setFcmToken(String fcmToken) {
 		this.fcmToken = fcmToken;
+	}
+
+	public Boolean getIsVipPetParent() {
+		return isVipPetParent;
+	}
+
+	public void setIsVipPetParent(Boolean isVipPetParent) {
+		this.isVipPetParent = isVipPetParent;
 	}
 
 	@Override

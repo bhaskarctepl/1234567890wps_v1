@@ -68,17 +68,22 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 	public static final String PET_QUESTIONNAIRE_INSERT = "PET_QUESTIONNAIRE_INSERT";
 	public static final String PET_QUESTIONNAIRE_UPDATE = "PET_QUESTIONNAIRE_UPDATE";
 	public static final String PET_QUESTIONNAIRE_DELETE = "PET_QUESTIONNAIRE_DELETE";
-	public static final String GET_PET_LIST_TO_SCHED_QUESTIONNAIRE_COUNT = "SELECT FN_GET_PET_LIST_TO_SCHED_QUESTIONNAIRE_COUNT(?,?,?,?,?,?,?)";
-	public static final String PET_GET_LIST_TO_SCHED_QUESTIONNAIRE = "CALL PET_GET_LIST_TO_SCHED_QUESTIONNAIRE(?,?,?,?,?,?,?,?,?,?,?)";
-	public static final String PET_QUESTIONNAIRE_SCHEDULED_COUNT = "SELECT FN_GET_PET_QUESTIONNAIRE_SCHEDULED_COUNT(?,?,?,?,?) as count";
-	public static final String PET_QUESTIONNAIRE_GET_SCHEDULED_LIST = "CALL PET_QUESTIONNAIRE_GET_SCHEDULED_LIST(?,?,?,?,?,?,?,?,?)";
+
+	public static final String GET_PET_LIST_TO_SCHED_QUESTIONNAIRE_COUNT = "SELECT FN_GET_PET_LIST_TO_SCHED_QUESTIONNAIRE_COUNT(?,?,?,?,?,?,?,?,?,?,?)";
+	public static final String PET_GET_LIST_TO_SCHED_QUESTIONNAIRE = "CALL PET_GET_LIST_TO_SCHED_QUESTIONNAIRE(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+	public static final String PET_QUESTIONNAIRE_SCHEDULED_COUNT = "SELECT FN_GET_PET_QUESTIONNAIRE_SCHEDULED_COUNT(?,?,?,?,?,?) as count";
+	public static final String PET_QUESTIONNAIRE_GET_SCHEDULED_LIST = "CALL PET_QUESTIONNAIRE_GET_SCHEDULED_LIST(?,?,?,?,?,?,?,?,?,?)";
 
 	public static final String PET_QUESTIONNAIRE_GET_BY_CONFIG_ID = "PET_QUESTIONNAIRE_GET_BY_CONFIG_ID";
-	public static final String PET_QUESTIONNAIRE_LIST_BY_CONFIG_COUNT = "SELECT FN_GET_PET_QUESTIONNAIRE_LIST_BY_CONFIG_COUNT(?,?,?,?,?) as count";
-	public static final String PET_QUESTIONNAIRE_GET_LIST_BY_CONFIG_ID = "CALL PET_QUESTIONNAIRE_GET_LIST_BY_CONFIG_ID(?,?,?,?,?,?,?,?,?)";
+
+	public static final String PET_QUESTIONNAIRE_LIST_BY_CONFIG_COUNT = "SELECT FN_GET_PET_QUESTIONNAIRE_LIST_BY_CONFIG_COUNT(?,?,?,?,?,?,?) as count";
+	public static final String PET_QUESTIONNAIRE_GET_LIST_BY_CONFIG_ID = "CALL PET_QUESTIONNAIRE_GET_LIST_BY_CONFIG_ID(?,?,?,?,?,?,?,?,?,?,?)";
+
 	public static final String PET_QUESTIONNAIRE_GET_RESPONSE_DETAILS = "PET_QUESTIONNAIRE_GET_RESPONSE_DETAILS";
 	public static final String PET_QUESTIONNAIRE_GET_PET_PARENTS_BY_PET_ID = "CALL PET_QUESTIONNAIRE_GET_PET_PARENTS_BY_PET_ID(?)";
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getPetsToSchedQuestionnaireCount(PetFilter filter) throws ServiceExecutionException {
 		HashMap<String, Integer> map = new HashMap<>();
@@ -86,7 +91,8 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 		try {
 			String counts = selectForObject(GET_PET_LIST_TO_SCHED_QUESTIONNAIRE_COUNT, String.class,
 					filter.getSearchText(), filter.getRoleTypeId(), filter.getGender(), filter.getSpeciesId(),
-					filter.getBreedId(), filter.getStatusId(), filter.getUserId());
+					filter.getBreedId(), filter.getStatusId(), filter.getUserId(), filter.getStudyId(),
+					filter.getPetName(), filter.getPetParentName(), filter.getStudyName());
 			map = mapper.readValue(counts, HashMap.class);
 			LOGGER.debug("getPetsToSchedQuestionnaireCount successfully completed");
 		} catch (Exception e) {
@@ -123,11 +129,13 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 					petListDTO.setPetStatusId(rs.getInt("PET_STATUS_ID"));
 					petListDTO.setPetStatus(rs.getString("STATUS_NAME"));
 					petListDTO.setPetParentName(rs.getString("PET_PARENT_NAME"));
+					petListDTO.setStudyName(rs.getString("STUDY_NAMES"));
 					petList.add(petListDTO);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
 					filter.getStatusId(), filter.getGender(), filter.getSpeciesId(), filter.getBreedId(),
-					filter.getUserId(), filter.getRoleTypeId());
+					filter.getUserId(), filter.getRoleTypeId(), filter.getStudyId(), filter.getPetName(),
+					filter.getPetParentName(), filter.getStudyName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetsToSchedQuestionnaire", e);
@@ -162,6 +170,7 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getPetSchedQuestionnaireCount(PetQuestionnaireFilter filter)
 			throws ServiceExecutionException {
@@ -169,7 +178,8 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 		LOGGER.debug("getPetSchedQuestionnaireCount called");
 		try {
 			String counts = selectForObject(PET_QUESTIONNAIRE_SCHEDULED_COUNT, String.class, filter.getSearchText(),
-					filter.getOccurrenceId(), filter.getFrequencyId(), filter.getStartDate(), filter.getEndDate());
+					filter.getOccurrenceId(), filter.getFrequencyId(), filter.getStartDate(), filter.getEndDate(),
+					filter.getPetName());
 			map = mapper.readValue(counts, HashMap.class);
 			LOGGER.debug("getPetSchedQuestionnaireCount successfully completed");
 		} catch (Exception e) {
@@ -209,7 +219,8 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 					petSchedQuestionnaires.add(petSchedQuestionnaire);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
-					filter.getOccurrenceId(), filter.getFrequencyId(), filter.getStartDate(), filter.getEndDate());
+					filter.getOccurrenceId(), filter.getFrequencyId(), filter.getStartDate(), filter.getEndDate(),
+					filter.getPetName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetSchedQuestionnaireList", e);
@@ -218,6 +229,7 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 		return petSchedQuestionnaires;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getPetQuestionnaireListByConfigCount(PetQuestionnaireFilter filter)
 			throws ServiceExecutionException {
@@ -226,7 +238,7 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 		try {
 			String counts = selectForObject(PET_QUESTIONNAIRE_LIST_BY_CONFIG_COUNT, String.class,
 					filter.getSearchText(), filter.getPetQuestionnaireConfigId(), filter.getStatus(),
-					filter.getStartDate(), filter.getEndDate());
+					filter.getStartDate(), filter.getEndDate(), filter.getPetName(), filter.getPetParentName());
 			map = mapper.readValue(counts, HashMap.class);
 			LOGGER.debug("getPetQuestionnaireListByConfigCount successfully completed");
 		} catch (Exception e) {
@@ -265,12 +277,13 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 							: null;
 					petReccurrence.setDueDate(dueDate.toLocalDate());
 					petReccurrence.setStatus(rs.getString("STATUS"));
+					petReccurrence.setPetParentName(rs.getString("PET_PARENT_NAME"));
 
 					petQuestionnaireReccurrences.add(petReccurrence);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
 					filter.getPetQuestionnaireConfigId(), filter.getStatus(), filter.getStartDate(),
-					filter.getEndDate());
+					filter.getEndDate(), filter.getPetName(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetQuestionnaireListByConfigId", e);
@@ -279,41 +292,41 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 		return petQuestionnaireReccurrences;
 	}
 
-	/*@Override
-	public PetSchedQuestionnaire getPetQuestionnaireByConfigId(int petQuestionnaireConfigId)
-			throws ServiceExecutionException {
-		PetSchedQuestionnaire petSchedQuestionnaire = new PetSchedQuestionnaire();
-		LOGGER.debug("getPetQuestionnaireByConfigId called");
-		try {
-			jdbcTemplate.query(PET_QUESTIONNAIRE_GET_LIST_BY_CONFIG_ID, new RowCallbackHandler() {
-				@Override
-				public void processRow(ResultSet rs) throws SQLException {
-	
-					petSchedQuestionnaire.setPetQuestionnaireConfigId(rs.getInt("PET_QUESTIONNAIRE_CONFIG_ID"));
-	
-					petSchedQuestionnaire.setQuestionnaireId(rs.getInt("QUESTIONNAIRE_ID"));
-					petSchedQuestionnaire.setQuestionnaireName(rs.getString("QUESTIONNAIRE_NAME"));
-	
-					petSchedQuestionnaire.setOccurrenceId((Integer) rs.getInt("OCCURANCE_ID"));
-					petSchedQuestionnaire.setOccurrence(rs.getString("OCCURANCE_NAME"));
-	
-					petSchedQuestionnaire.setFrequencyId((Integer) rs.getInt("FREQUENCY_ID"));
-					petSchedQuestionnaire.setFrequency(rs.getString("FREQUENCY_NAME"));
-	
-					Date startDate = (Date) rs.getDate("START_DATE");
-					petSchedQuestionnaire.setStartDate(startDate.toLocalDate());
-					Date endDate = (Date) rs.getDate("END_DATE");
-					petSchedQuestionnaire.setEndDate(endDate.toLocalDate());
-				}
-			});
-	
-		} catch (Exception e) {
-			LOGGER.error("error while fetching getPetQuestionnaireByConfigId", e);
-			throw new ServiceExecutionException(e.getMessage());
-		}
-		return petSchedQuestionnaire;
-	}*/
+	/*
+	 * @Override public PetSchedQuestionnaire getPetQuestionnaireByConfigId(int
+	 * petQuestionnaireConfigId) throws ServiceExecutionException {
+	 * PetSchedQuestionnaire petSchedQuestionnaire = new PetSchedQuestionnaire();
+	 * LOGGER.debug("getPetQuestionnaireByConfigId called"); try {
+	 * jdbcTemplate.query(PET_QUESTIONNAIRE_GET_LIST_BY_CONFIG_ID, new
+	 * RowCallbackHandler() {
+	 * 
+	 * @Override public void processRow(ResultSet rs) throws SQLException {
+	 * 
+	 * petSchedQuestionnaire.setPetQuestionnaireConfigId(rs.getInt(
+	 * "PET_QUESTIONNAIRE_CONFIG_ID"));
+	 * 
+	 * petSchedQuestionnaire.setQuestionnaireId(rs.getInt("QUESTIONNAIRE_ID"));
+	 * petSchedQuestionnaire.setQuestionnaireName(rs.getString("QUESTIONNAIRE_NAME")
+	 * );
+	 * 
+	 * petSchedQuestionnaire.setOccurrenceId((Integer) rs.getInt("OCCURANCE_ID"));
+	 * petSchedQuestionnaire.setOccurrence(rs.getString("OCCURANCE_NAME"));
+	 * 
+	 * petSchedQuestionnaire.setFrequencyId((Integer) rs.getInt("FREQUENCY_ID"));
+	 * petSchedQuestionnaire.setFrequency(rs.getString("FREQUENCY_NAME"));
+	 * 
+	 * Date startDate = (Date) rs.getDate("START_DATE");
+	 * petSchedQuestionnaire.setStartDate(startDate.toLocalDate()); Date endDate =
+	 * (Date) rs.getDate("END_DATE");
+	 * petSchedQuestionnaire.setEndDate(endDate.toLocalDate()); } });
+	 * 
+	 * } catch (Exception e) {
+	 * LOGGER.error("error while fetching getPetQuestionnaireByConfigId", e); throw
+	 * new ServiceExecutionException(e.getMessage()); } return
+	 * petSchedQuestionnaire; }
+	 */
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public PetSchedQuestionnaire getPetQuestionnaireByConfigId(int petQuestionnaireConfigId)
 			throws ServiceExecutionException {
@@ -443,6 +456,7 @@ public class PetQuestionnaireDaoImpl extends BaseDaoImpl implements PetQuestionn
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public QuestionnaireViewResponse getQuestionnaireResponse(int petQuestionnaireConfigId,
 			int questionnaireResponseId) {

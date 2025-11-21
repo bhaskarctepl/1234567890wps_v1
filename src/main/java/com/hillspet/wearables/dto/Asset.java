@@ -7,6 +7,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Asset extends BaseDTO {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Integer deviceId;
 	private String deviceType;
 	private String deviceModel;
@@ -19,9 +23,35 @@ public class Asset extends BaseDTO {
 	private String petName;
 	private String petId;
 	private Integer studyId;
-	
-	
-	
+	private String iswhiteListed;
+	private String wifiSSID;
+	private String boxNumber;
+	private Integer totalCount;
+
+	public Integer getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	public String getIswhiteListed() {
+		return iswhiteListed;
+	}
+
+	public void setIswhiteListed(String iswhiteListed) {
+		this.iswhiteListed = iswhiteListed;
+	}
+
+	public String getWifiSSID() {
+		return wifiSSID;
+	}
+
+	public void setWifiSSID(String wifiSSID) {
+		this.wifiSSID = wifiSSID;
+	}
+
 	public Integer getStudyId() {
 		return studyId;
 	}
@@ -116,6 +146,14 @@ public class Asset extends BaseDTO {
 
 	public void setPetId(String petId) {
 		this.petId = petId;
+	}
+
+	public String getBoxNumber() {
+		return boxNumber;
+	}
+
+	public void setBoxNumber(String boxNumber) {
+		this.boxNumber = boxNumber;
 	}
 
 }

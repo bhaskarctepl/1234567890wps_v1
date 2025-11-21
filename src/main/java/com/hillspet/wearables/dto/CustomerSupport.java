@@ -50,6 +50,7 @@ public class CustomerSupport {
 	private String studyStartDate;
 	private String studyEndDate;
 	private Boolean studyStatus;
+	private Boolean isVipPetParent;
 
 	public String getStudyStartDate() {
 		return studyStartDate;
@@ -410,4 +411,13 @@ public class CustomerSupport {
 	public void setInventoryType(String inventoryType) {
 		this.inventoryType = inventoryType;
 	}
+
+	public Boolean getIsVipPetParent() {
+		return isVipPetParent;
+	}
+
+	public void setIsVipPetParent(Boolean isVipPetParent) {
+		this.isVipPetParent = isVipPetParent;
+	}
+
 }

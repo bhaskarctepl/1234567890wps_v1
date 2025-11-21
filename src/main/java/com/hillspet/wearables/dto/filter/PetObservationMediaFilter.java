@@ -18,21 +18,37 @@ public class PetObservationMediaFilter extends BaseFilter {
 	@QueryParam("status")
 	private String status;
 
+	@ApiParam(name = "studyId", value = "Study Id key holds Study Id.")
+	@QueryParam("studyId")
+	private String studyId;
+
 	@ApiParam(name = "study", value = "Study key holds Study value.")
 	@QueryParam("study")
 	private String study;
+
+	@ApiParam(name = "phaseId", value = "Study Id key holds Study Id.")
+	@QueryParam("phaseId")
+	private String phaseId;
 
 	@ApiParam(name = "petId", value = "Pet Id key holds Pet Id.")
 	@QueryParam("petId")
 	private String petId;
 
-	@ApiParam(name = "studyId", value = "Study Id key holds Study Id.")
-	@QueryParam("studyId")
-	private String studyId;
+	@QueryParam("petName")
+	@ApiParam(name = "petName", value = "Search pet by pet name", required = false)
+	private String petName;
 
-	@ApiParam(name = "phaseId", value = "Study Id key holds Study Id.")
-	@QueryParam("phaseId")
-	private String phaseId;
+	@QueryParam("petParentName")
+	@ApiParam(name = "petParentName", value = "Search pet by Pet Parent Name", required = false)
+	private String petParentName;
+
+	@QueryParam("behaviorTypeId")
+	@ApiParam(name = "behaviorTypeId", value = "Search pet by behavior type", required = false)
+	private String behaviorTypeId;
+
+	@QueryParam("behavior")
+	@ApiParam(name = "behaviorId", value = "Search pet by behavior", required = false)
+	private String behaviorId;
 
 	public PetObservationMediaFilter() {
 
@@ -98,6 +114,38 @@ public class PetObservationMediaFilter extends BaseFilter {
 
 	public void setPhaseId(String phaseId) {
 		this.phaseId = phaseId;
+	}
+
+	public String getPetName() {
+		return petName;
+	}
+
+	public void setPetName(String petName) {
+		this.petName = petName;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
+	}
+
+	public String getBehaviorTypeId() {
+		return behaviorTypeId;
+	}
+
+	public void setBehaviorTypeId(String behaviorTypeId) {
+		this.behaviorTypeId = behaviorTypeId;
+	}
+
+	public String getBehaviorId() {
+		return behaviorId;
+	}
+
+	public void setBehaviorId(String behaviorId) {
+		this.behaviorId = behaviorId;
 	}
 
 }

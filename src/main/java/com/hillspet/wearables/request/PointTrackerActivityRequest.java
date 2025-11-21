@@ -22,11 +22,31 @@ public class PointTrackerActivityRequest {
 
 	@ApiModelProperty(value = "points", required = true)
 	private Integer points;
-
+	private String studyConfigId;
 	private String startDate;
 	private String endDate;
 	private Integer eligibleForPointsAccumulation;
 	private List<PointTrackerMetricRequest> pointTrackerMetricRequest;
+	
+	
+	
+	public String getStudyConfigId() {
+		return studyConfigId;
+	}
+
+	public void setStudyConfigId(String studyConfigId) {
+		this.studyConfigId = studyConfigId;
+	}
+
+	private Integer studyQuestionnaireConfigId;
+
+	public Integer getStudyQuestionnaireConfigId() {
+		return studyQuestionnaireConfigId;
+	}
+
+	public void setStudyQuestionnaireConfigId(Integer studyQuestionnaireConfigId) {
+		this.studyQuestionnaireConfigId = studyQuestionnaireConfigId;
+	}
 
 	public Integer getActivitiesId() {
 		return activitiesId;
@@ -78,7 +98,7 @@ public class PointTrackerActivityRequest {
 
 	@Override
 	public String toString() {
-		return activitiesId + "#" + points + "#" + startDate + "#" + endDate;
+		return activitiesId + "#" + points + "#" + startDate + "#" + endDate + "#" + studyConfigId;
 	}
 
 }

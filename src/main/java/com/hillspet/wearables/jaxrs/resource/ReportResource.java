@@ -14,6 +14,7 @@ import com.hillspet.wearables.common.constants.Constants;
 import com.hillspet.wearables.common.response.Message;
 import com.hillspet.wearables.dto.AssetByStudyWidgetFilter;
 import com.hillspet.wearables.dto.TotalAssetsByStausWidgetFilter;
+import com.hillspet.wearables.dto.filter.AssetReportFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.dto.filter.IssueByStudyWidgetFilter;
 import com.hillspet.wearables.dto.filter.IssueWidgetFilter;
@@ -61,7 +62,7 @@ public interface ReportResource {
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
-	public Response getDeviceDetailsReport(@BeanParam BaseFilter filter);
+	public Response getDeviceDetailsReport(@BeanParam AssetReportFilter filter);
 
 	@GET
 	@Path("/getDeviceHistoryReport")
@@ -72,7 +73,7 @@ public interface ReportResource {
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
-	public Response getDeviceHistoryReport(@BeanParam BaseFilter filter);
+	public Response getDeviceHistoryReport(@BeanParam AssetReportFilter filter);
 
 	@GET
 	@Path("/getDeviceInventoryReport")
@@ -94,7 +95,7 @@ public interface ReportResource {
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
-	public Response getDeviceMalfunctionReport(@BeanParam BaseFilter filter);
+	public Response getDeviceMalfunctionReport(@BeanParam AssetReportFilter filter);
 
 	@GET
 	@Path("/getDeviceTrackingReport")
@@ -105,7 +106,7 @@ public interface ReportResource {
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
-	public Response getDeviceTrackingReport(@BeanParam BaseFilter filter);
+	public Response getDeviceTrackingReport(@BeanParam AssetReportFilter filter);
 
 	@GET
 	@Path("/getStudyBasedReport")

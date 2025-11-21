@@ -35,6 +35,7 @@ public class CustomerSupportDetails {
 	private String studyStartDate;
 	private String studyEndDate;
 	private Boolean studyStatus;
+	private Boolean isVipPetParent;
 
 	public String getStudyStartDate() {
 		return studyStartDate;
@@ -266,6 +267,14 @@ public class CustomerSupportDetails {
 
 	public void setUploadedFiles(List<Map<String, String>> uploadedFiles) {
 		this.uploadedFiles = uploadedFiles;
+	}
+	
+	public Boolean getIsVipPetParent() {
+		return isVipPetParent;
+	}
+
+	public void setIsVipPetParent(Boolean isVipPetParent) {
+		this.isVipPetParent = isVipPetParent;
 	}
 
 	@Override

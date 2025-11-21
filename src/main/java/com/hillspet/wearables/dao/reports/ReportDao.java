@@ -35,6 +35,7 @@ import com.hillspet.wearables.dto.SupportListDTO;
 import com.hillspet.wearables.dto.TotalAssetsByStausWidgetFilter;
 import com.hillspet.wearables.dto.TotalAssetsListDTO;
 import com.hillspet.wearables.dto.TotalAssetsbyStatusListDTO;
+import com.hillspet.wearables.dto.filter.AssetReportFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.dto.filter.IssueByStudyWidgetFilter;
 import com.hillspet.wearables.dto.filter.IssueWidgetFilter;
@@ -53,25 +54,25 @@ import com.hillspet.wearables.dto.filter.SupportFilter;
  */
 public interface ReportDao {
 
-	public Map<String, Integer> getDeviceDetailsReportCount(BaseFilter filter) throws ServiceExecutionException;
+	public Map<String, Integer> getDeviceDetailsReportCount(AssetReportFilter filter) throws ServiceExecutionException;
 
-	public List<DeviceDetailsReport> getDeviceDetailsReport(BaseFilter filter) throws ServiceExecutionException;
+	public List<DeviceDetailsReport> getDeviceDetailsReport(AssetReportFilter filter) throws ServiceExecutionException;
 
-	public Map<String, Integer> getDeviceHistoryReportCount(BaseFilter filter) throws ServiceExecutionException;
+	public Map<String, Integer> getDeviceHistoryReportCount(AssetReportFilter filter) throws ServiceExecutionException;
 
-	public List<DeviceHistoryReport> getDeviceHistoryReport(BaseFilter filter) throws ServiceExecutionException;
+	public List<DeviceHistoryReport> getDeviceHistoryReport(AssetReportFilter filter) throws ServiceExecutionException;
 
 	public Map<String, Integer> getDeviceInventoryReportCount(BaseFilter filter) throws ServiceExecutionException;
 
 	public List<DeviceInventoryReport> getDeviceInventoryReport(BaseFilter filter) throws ServiceExecutionException;
 
-	public Map<String, Integer> getDeviceMalfunctionReportCount(BaseFilter filter) throws ServiceExecutionException;
+	public Map<String, Integer> getDeviceMalfunctionReportCount(AssetReportFilter filter) throws ServiceExecutionException;
 
-	public List<DeviceMalfunctionReport> getDeviceMalfunctionReport(BaseFilter filter) throws ServiceExecutionException;
+	public List<DeviceMalfunctionReport> getDeviceMalfunctionReport(AssetReportFilter filter) throws ServiceExecutionException;
 
-	public Map<String, Integer> getDeviceTrackingReportCount(BaseFilter filter) throws ServiceExecutionException;
+	public Map<String, Integer> getDeviceTrackingReportCount(AssetReportFilter filter) throws ServiceExecutionException;
 
-	public List<DeviceTrackingReport> getDeviceTrackingReport(BaseFilter filter) throws ServiceExecutionException;
+	public List<DeviceTrackingReport> getDeviceTrackingReport(AssetReportFilter filter) throws ServiceExecutionException;
 
 	Map<String, Integer> getStudyBasedReportCount(BaseFilter filter, int userId) throws ServiceExecutionException;
 

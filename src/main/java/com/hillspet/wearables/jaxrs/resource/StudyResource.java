@@ -25,6 +25,7 @@ import com.hillspet.wearables.dto.filter.FeedingScheduleResponseFilter;
 import com.hillspet.wearables.dto.filter.ImageScaleFilter;
 import com.hillspet.wearables.dto.filter.IntakeFilter;
 import com.hillspet.wearables.dto.filter.PhaseWisePetListFilter;
+import com.hillspet.wearables.dto.filter.QuestionnaireConfigFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.dto.filter.StudyDiaryFilter;
 import com.hillspet.wearables.dto.filter.StudyDietFilter;
@@ -43,6 +44,7 @@ import com.hillspet.wearables.request.StudyActivityFactorRequest;
 import com.hillspet.wearables.request.StudyDietRequest;
 import com.hillspet.wearables.request.StudyMobileAppConfigRequest;
 import com.hillspet.wearables.request.StudyNotesRequest;
+import com.hillspet.wearables.request.StudyNotificationConfigRequest;
 import com.hillspet.wearables.request.StudyNotificationRequest;
 import com.hillspet.wearables.request.StudyPlanRequest;
 import com.hillspet.wearables.request.StudyPreludeConfigRequest;
@@ -62,6 +64,7 @@ import com.hillspet.wearables.response.StudyImageScalesListResponse;
 import com.hillspet.wearables.response.StudyListResponse;
 import com.hillspet.wearables.response.StudyMobileAppConfigResponse;
 import com.hillspet.wearables.response.StudyNotesListResponse;
+import com.hillspet.wearables.response.StudyNotificationConfigResponse;
 import com.hillspet.wearables.response.StudyNotificationResponse;
 import com.hillspet.wearables.response.StudyPhaseQuestionnaireScheduleList;
 import com.hillspet.wearables.response.StudyPlanListResponse;
@@ -117,7 +120,7 @@ public interface StudyResource {
 	@Path("/diet/{studyId}")
 	@ApiOperation(value = "Add Diet to Study ", notes = "Add a Diet to a Study")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = StudyDietListResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
@@ -152,7 +155,7 @@ public interface StudyResource {
 	@Path("/plan/{studyId}")
 	@ApiOperation(value = "Add Plan to Study ", notes = "Add a Plan to a Study")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = StudyPlanListResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
@@ -200,7 +203,7 @@ public interface StudyResource {
 	@Path("/{studyId}/{phaseId}/notes")
 	@ApiOperation(value = "Add mobile app config to study ", notes = "Add a notes to a study")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = StudyNotesListResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
@@ -409,7 +412,6 @@ public interface StudyResource {
 	public Response associatedQuestionnaires(@PathParam("studyId") int studyId);
 
 	/* ---------------- STUDY NOTIFICATIONS SERVICES ------------------------- */
-
 	@GET
 	@Path("/getStudyNotifications")
 	@ApiOperation(value = "Get Study Notification", notes = "Get the Study Notification list")
@@ -654,7 +656,6 @@ public interface StudyResource {
 			@Valid @ApiParam(name = "feedingSchedule", required = true) FeedingScheduleConfig feedingSchedule);
 
 	// ----------------- Services for Adding pet,Search page and Delete Pet to Study
-
 	@GET
 	@Path("/{studyId}/{phaseId}/getPetList")
 	@ApiOperation(value = "Get PetList Based on Study and Phase", notes = "Get PetList Based on Study and Phase")
@@ -765,7 +766,7 @@ public interface StudyResource {
 	@Path("/{studyId}/{phaseId}/pushNotificationConfig")
 	@ApiOperation(value = "Configure study push notification to study ", notes = "Configure study push notification to a study")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = PushNotificationConfigResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
@@ -788,7 +789,7 @@ public interface StudyResource {
 	@Path("/{studyId}/{phaseId}/imageScoringConfig")
 	@ApiOperation(value = "Configure image scores to study ", notes = "Configure image scores to a study")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = ImageScoresConfigResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
@@ -811,13 +812,25 @@ public interface StudyResource {
 	@Path("/{studyId}/{phaseId}/questionnaireConfig")
 	@ApiOperation(value = "Study Phase Questionnaire Config", notes = "Add Questionnaire Config To Study Phase")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnaireConfigResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response questionnaireConfig(@PathParam("studyId") int studyId, @PathParam("phaseId") int phaseId,
 			@Valid @ApiParam(name = "questionnaireConfigRequest", required = true) QuestionnaireConfigRequest questionnaireConfigRequest);
+
+	@DELETE
+	@Path("/{studyId}/{phaseId}/questionnaireConfig/{questionnaireConfigId}")
+	@ApiOperation(value = "Study Phase Questionnaire Config", notes = "Add Questionnaire Config To Study Phase")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response deleteQuestionnaireConfig(@PathParam("studyId") int studyId, @PathParam("phaseId") int phaseId,
+			@PathParam("questionnaireConfigId") int questionnaireConfigId);
 
 	@GET
 	@Path("/{studyId}/{phaseId}/getQuestionnaireConfig")
@@ -829,6 +842,31 @@ public interface StudyResource {
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response getQuestionnaireConfig(@PathParam("studyId") int studyId, @PathParam("phaseId") int phaseId);
+
+	@GET
+	@Path("/{studyId}/{phaseId}/getQuestionnaireConfigList")
+	@ApiOperation(value = "Get Study Phase Questionnaire Configuration", notes = "Get Study Phase Questionnaire Configuration")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnaireConfigResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getQuestionnaireConfigList(@PathParam("studyId") int studyId, @PathParam("phaseId") int phaseId,
+			@BeanParam QuestionnaireConfigFilter filter);
+
+	@GET
+	@Path("/{studyId}/{phaseId}/{questionnaireId}/getQuestionnaireConfigListByQuestionnaire")
+	@ApiOperation(value = "Get Study Phase Questionnaire Configuration", notes = "Get Study Phase Questionnaire Configuration")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnaireConfigResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getQuestionnaireConfigListByQuestionnaire(@PathParam("studyId") int studyId,
+			@PathParam("phaseId") int phaseId, @PathParam("questionnaireId") int questionnaireId,
+			@BeanParam QuestionnaireConfigFilter filter);
 
 	@GET
 	@Path("/getImageScoringResponse/{studyId}/{phaseId}")
@@ -958,4 +996,28 @@ public interface StudyResource {
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response getPetBreeds(@PathParam("studyId") int studyId, @PathParam("phaseId") int phaseId);
+
+	@POST
+	@Path("/notificationconfig/{studyId}")
+	@ApiOperation(value = "Add Notification config to study ", notes = "Add a Notification config to a study")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response addStudyNotificationConfig(
+			@Valid @ApiParam(name = "studyNotificationConfigRequest", required = false) StudyNotificationConfigRequest studyNotificationConfigRequest,
+			@PathParam("studyId") int studyId);
+
+	@GET
+	@Path("/notificationconfig/{studyId}")
+	@ApiOperation(value = "Get Notification config's which are mapped to a study", notes = "Get the Notification config list based on Filters")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = StudyNotificationConfigResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getStudyNotificationConfigs(@PathParam("studyId") int studyId);
 }

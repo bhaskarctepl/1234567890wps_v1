@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 import com.hillspet.wearables.dao.mobileapp.MobileAppSelfOnboardingDao;
 import com.hillspet.wearables.dto.MobileAppSelfOnboardingDTO;
-import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.MobileAppSelfOnboardFilter;
 import com.hillspet.wearables.response.MobileAppSelfOnboardingResponse;
 import com.hillspet.wearables.service.mobileapp.MobileAppSelfOnboardingService;
 
@@ -25,7 +25,7 @@ public class MobileAppSelfOnboardingServiceImpl implements MobileAppSelfOnboardi
 	private MobileAppSelfOnboardingDao mobileAppSelfOnboardingDao;
 
 	@Override
-	public MobileAppSelfOnboardingResponse getMobilAppSelfOnboarding(BaseFilter filter)
+	public MobileAppSelfOnboardingResponse getMobilAppSelfOnboarding(MobileAppSelfOnboardFilter filter)
 			throws ServiceExecutionException {
 		LOGGER.debug("getMobilAppSelfOnboarding called");
 		Map<String, Integer> mapper = mobileAppSelfOnboardingDao.getMobileAppSelfOnboardingCount(filter);

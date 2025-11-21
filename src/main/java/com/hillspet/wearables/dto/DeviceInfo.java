@@ -29,6 +29,42 @@ public class DeviceInfo extends BaseDTO {
 	private String deviceLocationOthers;
 	private String otherAssetType;
 	private String otherAssetModel;
+	private Integer isWhiteListed;
+	private String wifiSS;
+	private Integer wifiSSID;
+	private String boxNumber;
+
+	public String getWifiSS() {
+		return wifiSS;
+	}
+
+	public void setWifiSS(String wifiSS) {
+		this.wifiSS = wifiSS;
+	}
+
+	public Integer getWifiSSID() {
+		return wifiSSID;
+	}
+
+	public void setWifiSSID(Integer wifiSSID) {
+		this.wifiSSID = wifiSSID;
+	}
+
+	public Integer getIsWhiteListed() {
+		return isWhiteListed;
+	}
+
+	public void setIsWhiteListed(Integer isWhiteListed) {
+		this.isWhiteListed = isWhiteListed;
+	}
+
+	public String getBoxNumber() {
+		return boxNumber;
+	}
+
+	public void setBoxNumber(String boxNumber) {
+		this.boxNumber = boxNumber;
+	}
 
 	private Integer studyId;
 	private String studyName;

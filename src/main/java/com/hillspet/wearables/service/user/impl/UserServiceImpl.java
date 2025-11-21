@@ -16,9 +16,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +25,10 @@ import com.hillspet.wearables.common.constants.WearablesErrorCode;
 import com.hillspet.wearables.common.dto.WearablesError;
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 import com.hillspet.wearables.common.exceptions.ServiceValidationException;
-import com.hillspet.wearables.common.utils.BeanUtil;
 import com.hillspet.wearables.common.utils.WearablesUtils;
 import com.hillspet.wearables.concurrent.EmailSenderThread;
 import com.hillspet.wearables.concurrent.EmailThreadPoolExecutor;
 import com.hillspet.wearables.dao.user.UserDao;
-import com.hillspet.wearables.dto.CustomUserDetails;
 import com.hillspet.wearables.dto.User;
 import com.hillspet.wearables.dto.filter.UserFilter;
 import com.hillspet.wearables.request.UpdatePasswordRequest;
@@ -41,23 +36,15 @@ import com.hillspet.wearables.response.UsersResponse;
 import com.hillspet.wearables.service.user.UserService;
 
 @Service
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService {
 
 	private static final Logger LOGGER = LogManager.getLogger(UserServiceImpl.class);
 
 	@Autowired
 	private UserDao userDao;
 
-	@Override
-	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-		LOGGER.info("loadUserByUsername called");
-		Optional<User> usersOptional = userDao.findByUsername(userName);
-		usersOptional.orElseThrow(() -> new UsernameNotFoundException("Username not found!"));
-
-		User user = usersOptional.get();
-		LOGGER.info("loadUserByUsername completed successfully");
-		return new CustomUserDetails(user);
-	}
+	@Autowired
+	PasswordEncoder passwordEncoder;
 
 	@Override
 	public void addUser(User user) throws ServiceExecutionException {
@@ -65,11 +52,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		// set password
 		String rawPassword = StringUtils.isNotEmpty(user.getPassword()) ? user.getPassword()
 				: WearablesUtils.generatePassword();
-		// need to change it to set the rawPassword once email functionality is added
-		// user.setPassword(passwordEncoder.encode("Admin@123"));
 
-		// This is to resolve circular dependency injection
-		PasswordEncoder passwordEncoder = BeanUtil.getBean(PasswordEncoder.class);
 		user.setPassword(passwordEncoder.encode(rawPassword));
 
 		user.setStudyPermissions(String.join(",", user.getStydyPermissionMap()));
@@ -78,7 +61,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		// Sending Create Mail
 		String subject = Constants.CREATE_USER_MAIL_SUBJECT;
 		String messageBody = MessageFormat.format(Constants.CREATE_USER_MAIL_BODY, user.getFullName(),
-				user.getUserName(), Constants.WEBSITE_SITE_TITLE, rawPassword, Constants.WEBSITE_SITE_TITLE);
+				Constants.WEBSITE_SITE_TITLE, Constants.WEBSITE_SITE_TITLE, Constants.WEBSITE_SITE_TITLE);
 
 		ThreadPoolExecutor threadPoolExecutor = EmailThreadPoolExecutor.getEmailThreadPoolExecutor();
 		EmailSenderThread emailSenderThread = new EmailSenderThread(user.getEmail(), subject, messageBody);
@@ -88,10 +71,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
 	@Override
 	public void updateUser(User user) throws ServiceExecutionException {
-		LOGGER.debug("updateUser called");
+		LOGGER.info("updateUser called");
 		user.setStudyPermissions(String.join(",", user.getStydyPermissionMap()));
 		userDao.updateUser(user);
-		if (!user.getHiddenFieldStatus().equals("")) {
+		if (user.getHiddenFieldStatus() != null && !(user.getHiddenFieldStatus().equals(""))) {
 			String mailBody = getUpdatedUserDetailsMailBody(user.getHiddenFieldStatus(), user);
 			String subject = Constants.UPDATED_USER_MAIL_SUBJECT;
 			String messageBody = MessageFormat.format(Constants.UPDATED_USER_MAIL_BODY, user.getFullName(),
@@ -203,8 +186,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		// set password
 		String rawPassword = WearablesUtils.generatePassword();
 
-		// This is to resolve circular dependency injection
-		PasswordEncoder passwordEncoder = BeanUtil.getBean(PasswordEncoder.class);
 		userDao.updateUserPassword(user.getUserId(), user.getUserName(), passwordEncoder.encode(rawPassword), true,
 				modifiedBy > NumberUtils.INTEGER_ZERO ? modifiedBy : user.getUserId(), platform);
 
@@ -231,48 +212,50 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	public void updatePassword(UpdatePasswordRequest updatePasswordRequest, String platform)
 			throws ServiceExecutionException {
 		LOGGER.debug("updatePassword called");
-		User user = userDao.getUserById(updatePasswordRequest.getUserId());
-		// This is to resolve circular dependency injection
-		PasswordEncoder passwordEncoder = BeanUtil.getBean(PasswordEncoder.class);
-
-		if (passwordEncoder.matches(updatePasswordRequest.getPassword(), user.getPassword())) {
-
-			List<String> passwords = userDao.getPasswordHistoryById(updatePasswordRequest.getUserId());
-			passwords.stream().forEach(password -> {
-				if (passwordEncoder.matches(updatePasswordRequest.getNewPassword(), password)) {
-					throw new ServiceValidationException(
-							"updatePassword service failed for history validation cannot proceed further",
-							Status.BAD_REQUEST.getStatusCode(),
-							Arrays.asList(new WearablesError(WearablesErrorCode.INCORRECT_NEW_PASSWORD)));
-
-				}
-			});
-
-			userDao.updateUserPassword(user.getUserId(), user.getUserName(),
-					passwordEncoder.encode(updatePasswordRequest.getNewPassword()), false, user.getUserId(), platform);
-
-			// Sending update password mail
-			String subject = Constants.UPDATE_PASSWORD_MAIL_SUBJECT;
-			String requestFrom = Constants.WEBSITE_SITE_TITLE;
-
-			if (Constants.REQUEST_FROM_ANALYTICAL.equalsIgnoreCase(platform)) {
-				subject = Constants.FORGOT_PASSWORD_MAIL_SUBJECT_AP;
-				requestFrom = Constants.WEBSITE_SITE_TITLE_AP;
-			}
-
-			String messageBody = MessageFormat.format(Constants.UPDATE_PASSWORD_MAIL_BODY, user.getFullName(),
-					requestFrom, requestFrom);
-
-			ThreadPoolExecutor threadPoolExecutor = EmailThreadPoolExecutor.getEmailThreadPoolExecutor();
-			EmailSenderThread emailSenderThread = new EmailSenderThread(user.getEmail(), subject, messageBody);
-			threadPoolExecutor.submit(emailSenderThread);
-
-		} else {
-			throw new ServiceValidationException("updatePassword service validation failed cannot proceed further",
-					Status.BAD_REQUEST.getStatusCode(),
-					Arrays.asList(new WearablesError(WearablesErrorCode.INCORRECT_PASSWORD)));
-		}
-		LOGGER.debug("updatePassword completed successfully");
+		/*
+		 * User user = userDao.getUserById(updatePasswordRequest.getUserId());
+		 * 
+		 * if (passwordEncoder.matches(updatePasswordRequest.getPassword(),
+		 * user.getPassword())) {
+		 * 
+		 * List<String> passwords =
+		 * userDao.getPasswordHistoryById(updatePasswordRequest.getUserId());
+		 * passwords.stream().forEach(password -> { if
+		 * (passwordEncoder.matches(updatePasswordRequest.getNewPassword(), password)) {
+		 * throw new ServiceValidationException(
+		 * "updatePassword service failed for history validation cannot proceed further"
+		 * , Status.BAD_REQUEST.getStatusCode(), Arrays.asList(new
+		 * WearablesError(WearablesErrorCode.INCORRECT_NEW_PASSWORD)));
+		 * 
+		 * } });
+		 * 
+		 * userDao.updateUserPassword(user.getUserId(), user.getUserName(),
+		 * passwordEncoder.encode(updatePasswordRequest.getNewPassword()), false,
+		 * user.getUserId(), platform);
+		 * 
+		 * // Sending update password mail String subject =
+		 * Constants.UPDATE_PASSWORD_MAIL_SUBJECT; String requestFrom =
+		 * Constants.WEBSITE_SITE_TITLE;
+		 * 
+		 * if (Constants.REQUEST_FROM_ANALYTICAL.equalsIgnoreCase(platform)) { subject =
+		 * Constants.FORGOT_PASSWORD_MAIL_SUBJECT_AP; requestFrom =
+		 * Constants.WEBSITE_SITE_TITLE_AP; }
+		 * 
+		 * String messageBody =
+		 * MessageFormat.format(Constants.UPDATE_PASSWORD_MAIL_BODY, user.getFullName(),
+		 * requestFrom, requestFrom);
+		 * 
+		 * ThreadPoolExecutor threadPoolExecutor =
+		 * EmailThreadPoolExecutor.getEmailThreadPoolExecutor(); EmailSenderThread
+		 * emailSenderThread = new EmailSenderThread(user.getEmail(), subject,
+		 * messageBody); threadPoolExecutor.submit(emailSenderThread);
+		 * 
+		 * } else { throw new
+		 * ServiceValidationException("updatePassword service validation failed cannot proceed further"
+		 * , Status.BAD_REQUEST.getStatusCode(), Arrays.asList(new
+		 * WearablesError(WearablesErrorCode.INCORRECT_PASSWORD))); }
+		 * LOGGER.debug("updatePassword completed successfully");
+		 */
 	}
 
 	@Override

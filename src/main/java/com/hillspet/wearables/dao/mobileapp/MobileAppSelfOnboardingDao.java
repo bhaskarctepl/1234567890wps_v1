@@ -18,7 +18,7 @@ import java.util.Map;
 
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 import com.hillspet.wearables.dto.MobileAppSelfOnboardingDTO;
-import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.MobileAppSelfOnboardFilter;
 
 
 /**
@@ -30,9 +30,9 @@ import com.hillspet.wearables.dto.filter.BaseFilter;
  */
 public interface MobileAppSelfOnboardingDao {
 
-	public Map<String, Integer> getMobileAppSelfOnboardingCount(BaseFilter filter) throws ServiceExecutionException;
+	public Map<String, Integer> getMobileAppSelfOnboardingCount(MobileAppSelfOnboardFilter filter) throws ServiceExecutionException;
 
-	public List<MobileAppSelfOnboardingDTO> getMobileAppSelfOnboarding(BaseFilter filter)
+	public List<MobileAppSelfOnboardingDTO> getMobileAppSelfOnboarding(MobileAppSelfOnboardFilter filter)
 			throws ServiceExecutionException;
 
 	public void assignStudyToPet(int petId, int studyId) throws ServiceExecutionException;

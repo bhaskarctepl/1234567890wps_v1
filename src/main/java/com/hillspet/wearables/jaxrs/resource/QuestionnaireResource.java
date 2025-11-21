@@ -23,6 +23,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.http.HttpStatus;
@@ -38,14 +39,19 @@ import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.objects.common.response.CommonResponse;
 import com.hillspet.wearables.request.QuestionnaireRequest;
 import com.hillspet.wearables.request.QuestionnaireSkipRequest;
+import com.hillspet.wearables.request.RepublishQuestionnaireRequest;
 import com.hillspet.wearables.response.PetQuestionnaireResponseList;
 import com.hillspet.wearables.response.QuestionnaireListResponse;
+import com.hillspet.wearables.response.QuestionnaireNameResponse;
+import com.hillspet.wearables.response.QuestionnairePublishResponse;
 import com.hillspet.wearables.response.QuestionnaireResponse;
 import com.hillspet.wearables.response.QuestionnaireResponseByStudyListResponse;
 import com.hillspet.wearables.response.QuestionnaireResponseListResponse;
 import com.hillspet.wearables.response.QuestionnaireViewResponse;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -71,6 +77,14 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "RESTful service that performs Questionnaire related operations", tags = { "Questionnaire Management" })
 @Produces({ MediaType.APPLICATION_JSON_VALUE, Constants.MEDIA_TYPE_APPLICATION_JSON_INITIAL_VERSION1 })
 @Consumes({ MediaType.APPLICATION_JSON_VALUE, Constants.MEDIA_TYPE_APPLICATION_JSON_INITIAL_VERSION1 })
+@ApiImplicitParams({
+    @ApiImplicitParam(name = "Authorization", value = "",
+        required = true, dataType = "string", paramType = "header", defaultValue = "") 
+    ,@ApiImplicitParam(name = "Accept", 
+        required = true, dataType = "string", paramType = "header", defaultValue = MediaType.APPLICATION_JSON_VALUE)
+    ,@ApiImplicitParam(name = "Content-Type", 
+    	required = true, dataType = "string", paramType = "header", defaultValue = MediaType.APPLICATION_JSON_VALUE)
+})
 public interface QuestionnaireResource {
 
 	@POST
@@ -266,4 +280,82 @@ public interface QuestionnaireResource {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response implementSkipOnQuestionnaire(
 			@Valid @ApiParam(name = "skipOnQuestionnaireReqeust", required = true) QuestionnaireSkipRequest questionnaireSkipRequest);
+	
+	@PUT
+	@Path("republishQuestionnaire")
+	@ApiOperation(value = "Republish Questionnaire", notes = "Republish an inactive questionnaire")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = CommonResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response republishQuestionnaire(
+			@Valid @ApiParam(name = "republishQuestionnaireRequest", required = true) RepublishQuestionnaireRequest republishQuestionnaireRequest);
+	
+	@GET
+	@Path("getQuestionnairePublishHistory/{questionnaireId}")
+	@ApiOperation(value = "Get questionnaire publish history", notes = "Get questionnaire publish history")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnairePublishResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getQuestionnairePublishHistory(@PathParam("questionnaireId") int questionnaireId);
+	
+	@GET
+	@Path("getCopyQuestionnaireName/{questionnaireName}")
+	@ApiOperation(value = "Get name to a copied questionnaire", notes = "Get name to a copied questionnaire")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnaireNameResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getCopyQuestionnaireName(@PathParam("questionnaireName") String questionnaireName);
+	
+	@GET
+	@Path("getExportsRequestedList")
+	@ApiOperation(value = "Get Questionnare Response Exports Requested", notes = "Get Questionnare Response Exports Requested")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnaireNameResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getExportsRequestedList(@BeanParam QuestionnaireFilter filter);
+	
+	@GET
+	@Path("exportQuestionaire")
+	@ApiOperation(value = "Export Questionnaire Request", notes = "Export Questionnaire Request")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnaireNameResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response exportQuestionaire(@QueryParam("questionnaireIds") String questionnaireIds);
+	
+	@GET
+	@Path("downloadQuestionnaire")
+	@ApiOperation(value = "Download Export Questionnaire Request", notes = "Download Questionnare by Export Id")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnaireNameResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response downloadQuestionnaire(@QueryParam("exportId") int exportId);
+	
+	@GET
+	@Path("getQuestionnairesListForExport")
+	@ApiOperation(value = "Get Questionnaire List for Export", notes = "Gets Questionnaire List")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnaireListResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getQuestionnairesListForExport(@BeanParam QuestionnaireFilter filter);
 }

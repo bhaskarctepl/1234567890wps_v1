@@ -6,12 +6,14 @@ import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 import com.hillspet.wearables.dto.AgentAction;
 import com.hillspet.wearables.dto.Algorithm;
 import com.hillspet.wearables.dto.AssignedUser;
+import com.hillspet.wearables.dto.BehaviorType;
 import com.hillspet.wearables.dto.BfiScorer;
 import com.hillspet.wearables.dto.CategoryTimer;
 import com.hillspet.wearables.dto.ContactMethod;
 import com.hillspet.wearables.dto.Country;
 import com.hillspet.wearables.dto.CustomerContactMethod;
 import com.hillspet.wearables.dto.CustomerContactReason;
+import com.hillspet.wearables.dto.DataQuality;
 import com.hillspet.wearables.dto.DefectiveSensorAction;
 import com.hillspet.wearables.dto.DeviceLocation;
 import com.hillspet.wearables.dto.DeviceStatus;
@@ -21,6 +23,7 @@ import com.hillspet.wearables.dto.ExtractFileCategory;
 import com.hillspet.wearables.dto.Frequency;
 import com.hillspet.wearables.dto.ImageScoringType;
 import com.hillspet.wearables.dto.InventoryStatus;
+import com.hillspet.wearables.dto.IsdCode;
 import com.hillspet.wearables.dto.Issue;
 import com.hillspet.wearables.dto.MaterialCategory;
 import com.hillspet.wearables.dto.MaterialType;
@@ -30,6 +33,7 @@ import com.hillspet.wearables.dto.MenuAction;
 import com.hillspet.wearables.dto.MobileAppConfig;
 import com.hillspet.wearables.dto.MobileAppFBPhoneModel;
 import com.hillspet.wearables.dto.MobileAppFeedbackPage;
+import com.hillspet.wearables.dto.NotificationConfig;
 import com.hillspet.wearables.dto.Occurance;
 import com.hillspet.wearables.dto.PetBreed;
 import com.hillspet.wearables.dto.PetFeedingTime;
@@ -39,6 +43,7 @@ import com.hillspet.wearables.dto.PetParent;
 import com.hillspet.wearables.dto.PetParentNameTimer;
 import com.hillspet.wearables.dto.PetSpecies;
 import com.hillspet.wearables.dto.PetStatus;
+import com.hillspet.wearables.dto.PetStudyAction;
 import com.hillspet.wearables.dto.Phase;
 import com.hillspet.wearables.dto.PointTracker;
 import com.hillspet.wearables.dto.PointTrackerActivity;
@@ -56,6 +61,7 @@ import com.hillspet.wearables.dto.QuestionValidityPeriod;
 import com.hillspet.wearables.dto.QuestionnaireCategory;
 import com.hillspet.wearables.dto.QuestionnaireListDTO;
 import com.hillspet.wearables.dto.QuestionnaireType;
+import com.hillspet.wearables.dto.QuestionnariesByStudy;
 import com.hillspet.wearables.dto.Role;
 import com.hillspet.wearables.dto.RoleType;
 import com.hillspet.wearables.dto.RootCause;
@@ -73,6 +79,8 @@ import com.hillspet.wearables.dto.TicketPriority;
 import com.hillspet.wearables.dto.TicketStatus;
 import com.hillspet.wearables.dto.TicketType;
 import com.hillspet.wearables.dto.TimeZone;
+import com.hillspet.wearables.dto.WifiSsIdResponse;
+import com.hillspet.wearables.dto.filter.PointTrackFilter;
 
 public interface LookupDao {
 
@@ -153,6 +161,8 @@ public interface LookupDao {
 	List<QuestionnaireListDTO> getQuestionnaires(int typeId) throws ServiceExecutionException;
 
 	List<QuestionnaireListDTO> getPetQuestionnaires(int petId) throws ServiceExecutionException;
+
+	List<QuestionnariesByStudy> getQuestionnairesList(PointTrackFilter filter) throws ServiceExecutionException;
 
 	/* ------------ PointTracker Lookup Services Start ---------------- */
 	List<PointTrackerActivity> getPointTrackerActivities() throws ServiceExecutionException;
@@ -238,12 +248,22 @@ public interface LookupDao {
 
 	List<BfiScorer> getbfiScorerList() throws ServiceExecutionException;
 
+	List<DataQuality> getAlertTypes() throws ServiceExecutionException;
+
+	List<DataQuality> getStudiesWithAlerts() throws ServiceExecutionException;
+
+	List<DataQuality> getDevicesWithAlerts() throws ServiceExecutionException;
+
+	List<DataQuality> getAlertActions() throws ServiceExecutionException;
+
 	List<MeasurementUnit> getMeasurementUnits(String unitCategory) throws ServiceExecutionException;
 
 	List<Phase> getStudyPhases() throws ServiceExecutionException;
 
 	List<StudyStatus> getStudyStatus() throws ServiceExecutionException;
+
 	List<ProductType> getProductTypeList() throws ServiceExecutionException;
+
 	List<StudyLocation> getStudyLocations() throws ServiceExecutionException;
 
 	List<MeasurementUnit> getStudyPhaseDurationUnits() throws ServiceExecutionException;
@@ -252,4 +272,17 @@ public interface LookupDao {
 
 	List<PetName> getPetsByStudy(int studyId) throws ServiceExecutionException;
 
+	List<Frequency> getFrequencies(String frequencyType) throws ServiceExecutionException;
+
+	List<NotificationConfig> getNotificationConfig(String studyId) throws ServiceExecutionException;
+
+	List<IsdCode> getIsdCodes() throws ServiceExecutionException;
+
+	List<PetStudyAction> getPetStudyActions() throws ServiceExecutionException;
+
+	List<WifiSsIdResponse> getWifiSsIdList() throws ServiceExecutionException;
+
+	List<BehaviorType> getPetBehaviorTypes() throws ServiceExecutionException;
+
+	List<PointTrackerMetric> getUniquePetBehaviors() throws ServiceExecutionException;
 }

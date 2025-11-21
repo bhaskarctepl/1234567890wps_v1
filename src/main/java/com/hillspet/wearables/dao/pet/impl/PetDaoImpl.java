@@ -94,6 +94,7 @@ import com.hillspet.wearables.request.AssociateNewStudyRequest;
 import com.hillspet.wearables.request.BehaviorHistoryRequest;
 import com.hillspet.wearables.request.BulkExtPetIdsUploadRequest;
 import com.hillspet.wearables.request.ManualRecommendationRequest;
+import com.hillspet.wearables.request.PetNotificationRequest;
 import com.hillspet.wearables.request.PetRequest;
 import com.hillspet.wearables.request.UpdatePetIBWRequest;
 import com.hillspet.wearables.request.ValidateDuplicatePetRequest;
@@ -138,7 +139,9 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 		LOGGER.debug("getPetsCount called");
 		try {
 			totalCount = selectForObject(SQLConstants.PET_GET_LIST_COUNT, String.class, filter.getSearchText(),
-					filter.getStatusId(), filter.getStudyId(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getStatusId(), filter.getStudyId(), filter.getUserId(), filter.getRoleTypeId(),
+					filter.getPetName(), filter.getPetParentName(), filter.getPushNotificationStatus(),
+					filter.getEmailNotificationStatus());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetsCount", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -176,11 +179,15 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 					petListDTO.setPetStatus(rs.getString("STATUS_NAME"));
 					petListDTO.setDeviceId(rs.getInt("DEVICE_ID"));
 					petListDTO.setPetParentName(rs.getString("PET_PARENT_NAME"));
+					petListDTO.setIsPushNotificationEnabled(rs.getInt("PUSH_NOTIFICATIONS"));
+					petListDTO.setIsEmailNotificationEnabled(rs.getInt("EMAIL_NOTIFICATIONS"));
+					petListDTO.setIsVip(rs.getInt("IS_VIP"));
 					petList.add(petListDTO);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
 					filter.getSearchText().trim(), filter.getStatusId(), filter.getStudyId(), filter.getUserId(),
-					filter.getRoleTypeId());
+					filter.getRoleTypeId(), filter.getPetName(), filter.getPetParentName(),
+					filter.getPushNotificationStatus(), filter.getEmailNotificationStatus());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetList", e);
@@ -498,6 +505,8 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 						petParentDTO.setFirstName((String) parent.get("FIRST_NAME"));
 						petParentDTO.setLastName((String) parent.get("LAST_NAME"));
 						petParentDTO.setEmail((String) parent.get("EMAIL"));
+						petParentDTO.setIsdCodeId((Integer) parent.get("ISD_CODE_ID"));
+						petParentDTO.setIsdCode((String) parent.get("ISD_CODE"));
 						petParentDTO.setPhoneNumber((String) parent.get("PHONE_NUMBER"));
 						petParentDTO.setIsShipAddrSameAsResdntlAddr((Integer) parent.get("IS_SHIPPING_ADDR_SAME"));
 						petParentDTO.setResidentialAddressString((String) parent.get("RESIDENTAIL_ADDRESS"));
@@ -573,8 +582,9 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 						if (device.get("UN_ASSIGN_DATE") != null) {
 							LocalDateTime dateUnAssign = (LocalDateTime) device.get("UN_ASSIGN_DATE");
 							petStudyDevice.setUnAssignedOn(dateUnAssign != null ? dateUnAssign.toLocalDate() : null);
-							petStudyDevice.setUnAssignReasonId((Integer) device.get("REASON_ID"));
 						}
+						petStudyDevice.setReasonId((Integer) device.get("REASON_ID"));
+						petStudyDevice.setUnAssignReason((String) device.get("UNASSIGN_REASON"));
 
 						petStudyDevice.setDataStreamId((String) device.get("DATA_STREAM_ID"));
 						petStudyDevice.setStreamDeviceSeqNum((Integer) device.get("STRM_DEVICE_SEQ_NUM"));
@@ -751,8 +761,9 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 		LOGGER.debug("getPetObservationsCount called");
 		HashMap<String, Integer> map = new HashMap<>();
 		try {
-			totalCount = selectForObject(SQLConstants.FN_GET_PET_OBSERVATIONS_COUNT, String.class, filter.getPetId(),
-					filter.getStudyId(), filter.getPhaseId());
+			totalCount = selectForObject(SQLConstants.FN_GET_PET_OBSERVATIONS_COUNT, String.class,
+					filter.getSearchText(), filter.getPetId(), filter.getStudyId(), filter.getPhaseId(),
+					filter.getBehaviorTypeId(), filter.getBehaviorId(), filter.getStartDate(), filter.getEndDate());
 			map = mapper.readValue(totalCount, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetObservationsCount", e);
@@ -797,11 +808,16 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 					}
 
 					petObservation.setModifiedDate(rs.getTimestamp("MODIFIED_DATE").toLocalDateTime());
+					petObservation.setBehaviorTypeId(rs.getInt("BEHAVIOR_TYPE_ID"));
+					petObservation.setBehaviorType(rs.getString("BEHAVIOR_TYPE"));
+					petObservation.setBehaviorId(rs.getInt("ACTIVITY_TYPE_ID"));
+					petObservation.setBehavior(rs.getString("ACTIVITY_TYPE"));
 
 					petObservations.add(petObservation);
 				}
-			}, filter.getStartIndex(), filter.getLimit(), filter.getSortBy(), filter.getOrder(), filter.getPetId(),
-					filter.getStudyId(), filter.getPhaseId());
+			}, filter.getStartIndex(), filter.getLimit(), filter.getSortBy(), filter.getOrder(), filter.getSearchText(),
+					filter.getPetId(), filter.getStudyId(), filter.getPhaseId(), filter.getBehaviorTypeId(),
+					filter.getBehaviorId(), filter.getStartDate(), filter.getEndDate());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetObservations", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -820,9 +836,11 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 					PetParentListDTO parentDTO = new PetParentListDTO();
 					parentDTO.setPetParentId(rs.getInt("PET_PARENT_ID"));
 					parentDTO.setPetParentName(rs.getString("FULL_NAME"));
-					parentDTO.setPetParentFirstName(rs.getString("FIRST_NAME"));
-					parentDTO.setPetParentLastName(rs.getString("LAST_NAME"));
+					parentDTO.setFirstName(rs.getString("FIRST_NAME"));
+					parentDTO.setLastName(rs.getString("LAST_NAME"));
 					parentDTO.setEmail(rs.getString("EMAIL"));
+					parentDTO.setIsdCodeId(rs.getInt("ISD_CODE_ID"));
+					parentDTO.setIsdCode(rs.getString("ISD_CODE"));
 					parentDTO.setPhoneNumber(rs.getString("PHONE_NUMBER"));
 
 					parentDTO.setIsShipAddrSameAsResdntlAddr(rs.getInt("IS_SHIPPING_ADDR_SAME"));
@@ -971,7 +989,7 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 		try {
 			totalCount = selectForObject(SQLConstants.FN_GET_OBSERVATION_MEDIA_COUNT, String.class,
 					filter.getSearchText(), filter.getStatus(), filter.getStudy(), filter.getStartDate(),
-					filter.getEndDate());
+					filter.getEndDate(), filter.getPetName(), filter.getPetParentName());
 			map = mapper.readValue(totalCount, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetsObservatonMediaCount", e);
@@ -1039,7 +1057,8 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 				}
 
 			}, filter.getStartIndex(), filter.getLimit(), filter.getSortBy(), filter.getOrder(), filter.getSearchText(),
-					filter.getStatus(), filter.getStudy(), filter.getStartDate(), filter.getEndDate());
+					filter.getStatus(), filter.getStudy(), filter.getStartDate(), filter.getEndDate(),
+					filter.getPetName(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetObservationMediaList", e);
@@ -1473,7 +1492,7 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 							? rs.getTimestamp("ASSIGN_DATE").toLocalDateTime().toLocalDate()
 							: null);
 					petStudyDevice.setBatteryPercentage(rs.getString("BATTERY_PERCENTAGE"));
-					petStudyDevice.setUnassignedReason(rs.getString("UNASSIGN_REASON"));
+					petStudyDevice.setUnAssignReason(rs.getString("UNASSIGN_REASON"));
 
 					if (rs.getDate("UN_ASSIGN_DATE") != null) {
 						petStudyDevice.setUnAssignedOn(rs.getDate("UN_ASSIGN_DATE").toLocalDate());
@@ -1617,6 +1636,7 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 										correctedIBWInLbs.toString() + "LBS / " + correctedIBWInKgs.toString() + "KGS");
 							}
 						}
+						petDTO.setIsPetVip((Boolean) pet.get("IS_PET_VIP"));
 					});
 				}
 				if (key.equals(SQLConstants.RESULT_SET_2)) {
@@ -1628,6 +1648,8 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 						petParentDTO.setFirstName((String) parent.get("FIRST_NAME"));
 						petParentDTO.setLastName((String) parent.get("FIRST_NAME"));
 						petParentDTO.setEmail((String) parent.get("EMAIL"));
+						petParentDTO.setIsdCodeId((Integer) parent.get("ISD_CODE_ID"));
+						petParentDTO.setIsdCode((String) parent.get("ISD_CODE"));
 						petParentDTO.setPhoneNumber((String) parent.get("PHONE_NUMBER"));
 
 						petParentDTO.setIsShipAddrSameAsResdntlAddr((Integer) parent.get("IS_SHIPPING_ADDR_SAME"));
@@ -1957,6 +1979,7 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 		return petDTO;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public PetDTO addPetWeight(AddPetWeight addPetWeight) throws ServiceExecutionException {
 		PetDTO petDTO = new PetDTO();
@@ -2010,8 +2033,10 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 		return petDTO;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void updateWeight(int weightId, String weight, String unit, boolean latest) throws ServiceExecutionException {
+	public void updateWeight(int weightId, String weight, String unit, boolean latest)
+			throws ServiceExecutionException {
 		int userId = authentication.getAuthUserDetails().getUserId();
 		LOGGER.debug("updateWeight called " + weightId);
 		Map<String, Object> inputParams = new HashMap<>();
@@ -2025,7 +2050,6 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 			LOGGER.info("updateWeight outParams are {}", outParams);
 			// Added by deepak for IBW trigger
 			String errorMsg = null;// (String) outParams.get("out_error_msg");
-			int statusFlag = 0;// (int) outParams.get("out_flag");
 			for (Entry<String, Object> entry : outParams.entrySet()) {
 				String key = entry.getKey();
 				if (key.equals(SQLConstants.RESULT_SET_2)) {
@@ -2216,6 +2240,7 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 			throws ServiceExecutionException {
 		String totalCount = "";
 		LOGGER.debug("ActivityFactorResultResponseListCount called");
+		LOGGER.info("ActivityFactorResultResponseListCount filter {}", filter);
 		try {
 			totalCount = selectForObject(SQLConstants.PET_GET_ACTIVITY_FACTOR_RESULTS_BY_PET_COUNT, String.class,
 					filter.getStudyIds(), filter.getPetIds(), filter.getStartDate(), filter.getEndDate());
@@ -2231,6 +2256,7 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 			throws ServiceExecutionException {
 		List<ActivityFactorResultResponse> petAFResultList = new ArrayList<>();
 		LOGGER.debug("getPetActivityFactorResult called");
+		LOGGER.info("getPetActivityFactorResult filter {}", filter);
 		try {
 			jdbcTemplate.query(SQLConstants.PET_GET_ACTIVITY_FACTOR_RESULTS_BY_PET, new RowCallbackHandler() {
 				@Override
@@ -2414,9 +2440,9 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 	@Override
 	public BehaviorVisualizationResponse getBehaviorVisualization(int petId) throws ServiceExecutionException {
 		String query = MessageFormat.format(SQLConstants.BIG_QEURY_GET_BEHAVIOR_VISULAZATION, Integer.toString(petId));
-		LOGGER.info("===============getBehaviorVisualization================ " + query);
+		LOGGER.info("===============getBehaviorVisualization================ {}",  query);
 		TableResult tableResult = BigQueryServiceUtil.queryBigQueryTable(query);
-		LOGGER.info("Total Rows == getBehaviorVisualization " + tableResult.getTotalRows());
+		LOGGER.info("Total Rows == getBehaviorVisualization : {}", tableResult.getTotalRows());
 		BehaviorVisualizationResponse response = new BehaviorVisualizationResponse();
 		PetForwardMotionInfo forwardMotionInfo = new PetForwardMotionInfo();
 		PetSleepInfo sleepInfo = new PetSleepInfo();
@@ -2542,7 +2568,8 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 				(todayForwardMotion * 100) / forwardMotionGoalSettingValue);
 
 		int goalToAchieve = forwardMotionGoalSettingValue - todayForwardMotion;
-		int tobeAchieved = 0, overAchieved = 0;
+		int tobeAchieved = 0;
+		int  overAchieved = 0;
 
 		if (goalToAchieve > 0) {
 			tobeAchieved = goalToAchieve;
@@ -2878,5 +2905,94 @@ public class PetDaoImpl extends BaseDaoImpl implements PetDao {
 			throw new ServiceExecutionException(e.getMessage());
 		}
 		return petMap;
+	}
+
+	@Override
+	public void updatePetNotification(PetNotificationRequest petNotificationRequest) throws ServiceExecutionException {
+
+		try {
+			int userId = authentication.getAuthUserDetails().getUserId();
+			LOGGER.debug("updatePetNotification called ");
+			Map<String, Object> inputParams = new HashMap<>();
+			String notificationsJson = null;
+			if (petNotificationRequest != null && petNotificationRequest.getPetnotifications() != null
+					&& !petNotificationRequest.getPetnotifications().isEmpty()) {
+				notificationsJson = new ObjectMapper().writeValueAsString(petNotificationRequest.getPetnotifications());
+			}
+			inputParams.put("p_pet_notifications", notificationsJson);
+			inputParams.put("p_modified_by", userId);
+
+			LOGGER.info("updatePetNotification inputParams are {}", inputParams);
+			Map<String, Object> outParams = callStoredProcedure(SQLConstants.PET_NOTIFICATION_INSERT, inputParams);
+			LOGGER.info("updatePetNotification outParams are {}", outParams);
+			String errorMsg = (String) outParams.get("out_error_msg");
+			int statusFlag = (int) outParams.get("out_flag");
+			if (StringUtils.isEmpty(errorMsg) && statusFlag > 0) {
+				LOGGER.info("updatePetNotification successfully");
+			} else {
+				throw new ServiceExecutionException(errorMsg);
+			}
+		} catch (Exception e) {
+			LOGGER.error("error while executing updatePetNotification", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+	}
+
+	@Override
+	public String getActivePetsCount(PetFilter filter) throws ServiceExecutionException {
+		String totalCount = "";
+		LOGGER.debug("getPetsCount called");
+		try {
+			totalCount = selectForObject(SQLConstants.PET_GET_ACTIVE_PET_LIST_COUNT, String.class,
+					filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
+					filter.getSearchText().trim(), filter.getPetName(), filter.getPetParentName(),
+					filter.getStudyName(), filter.getStudyId(), filter.getPushNotificationStatus(),
+					filter.getEmailNotificationStatus());
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getActivePetsCount", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return totalCount;
+	}
+
+	@Override
+	public List<PetListDTO> getActivePetList(PetFilter filter) throws ServiceExecutionException {
+		List<PetListDTO> petList = new ArrayList<>();
+		LOGGER.debug("getActivePetList called");
+		try {
+			jdbcTemplate.query(SQLConstants.PET_GET_ACTIVE_PET_LIST, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					PetListDTO petListDTO = new PetListDTO();
+					petListDTO.setPetId(rs.getInt("PET_ID"));
+					petListDTO.setPetName(rs.getString("PET_NAME"));
+
+					petListDTO.setPetPhoto(rs.getString("PHOTO_NAME"));
+					String fileName = rs.getString("PHOTO_NAME");
+
+					if (fileName != null && !fileName.trim().equals("")) {
+						petListDTO.setPetPhotoUrl(
+								gcpClientUtil.getDownloaFiledUrl(fileName, Constants.GCP_PETPHOTO_PATH));
+					}
+
+					petListDTO.setBreedName(rs.getString("BREED_NAME"));
+					petListDTO.setIsPushNotificationEnabled(rs.getInt("PUSH_NOTIFICATIONS"));
+					petListDTO.setIsEmailNotificationEnabled(rs.getInt("EMAIL_NOTIFICATIONS"));
+					petListDTO.setPetParentName(rs.getString("PET_PARENT_NAMES"));
+					petListDTO.setIsVip(rs.getInt("IS_VIP"));
+					petListDTO.setStudyName(rs.getString("STUDY_NAMES"));
+
+					petList.add(petListDTO);
+				}
+			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
+					filter.getSearchText().trim(), filter.getPetName(), filter.getPetParentName(),
+					filter.getStudyName(), filter.getStudyId(), filter.getPushNotificationStatus(),
+					filter.getEmailNotificationStatus());
+
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getActivePetList", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return petList;
 	}
 }

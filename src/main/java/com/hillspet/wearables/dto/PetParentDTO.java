@@ -14,6 +14,8 @@ public class PetParentDTO {
 	private String firstName;
 	private String lastName;
 	private String email;
+	private Integer isdCodeId;
+	private String isdCode;
 	private String phoneNumber;
 	private Integer status;
 	private String secondaryEmail;
@@ -29,6 +31,7 @@ public class PetParentDTO {
 	private String preferredFoodUnit;
 	private Integer preferredWeightUnitId;
 	private String preferredWeightUnit;
+	private Boolean isVipPetParent;
 
 	public String getSecondaryEmail() {
 		return secondaryEmail;
@@ -84,6 +87,22 @@ public class PetParentDTO {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Integer getIsdCodeId() {
+		return isdCodeId;
+	}
+
+	public void setIsdCodeId(Integer isdCodeId) {
+		this.isdCodeId = isdCodeId;
+	}
+
+	public String getIsdCode() {
+		return isdCode;
+	}
+
+	public void setIsdCode(String isdCode) {
+		this.isdCode = isdCode;
 	}
 
 	public String getPhoneNumber() {
@@ -188,6 +207,14 @@ public class PetParentDTO {
 
 	public void setPreferredWeightUnit(String preferredWeightUnit) {
 		this.preferredWeightUnit = preferredWeightUnit;
+	}
+
+	public Boolean getIsVipPetParent() {
+		return isVipPetParent;
+	}
+
+	public void setIsVipPetParent(Boolean isVipPetParent) {
+		this.isVipPetParent = isVipPetParent;
 	}
 
 }

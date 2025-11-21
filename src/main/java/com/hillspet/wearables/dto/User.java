@@ -13,6 +13,11 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class User extends BaseDTO {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private Integer userId;
 	private String userName;
 	@JsonProperty(access = Access.WRITE_ONLY)
@@ -22,6 +27,8 @@ public class User extends BaseDTO {
 	private String fullName;
 	private String email;
 	private String secondaryEmail;
+	private Integer isdCodeId;
+	private String isdCode;
 	private String phoneNumber;
 	private Integer countryId;
 	private Integer stateId;
@@ -51,6 +58,7 @@ public class User extends BaseDTO {
 	private Integer inactiveStudies;
 	private String hiddenFieldStatus;
 	private String userDetailsMailBody;
+	private boolean hasIssueTrackerAccess;
 
 	public String getUserDetailsMailBody() {
 		return userDetailsMailBody;
@@ -129,6 +137,22 @@ public class User extends BaseDTO {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Integer getIsdCodeId() {
+		return isdCodeId;
+	}
+
+	public void setIsdCodeId(Integer isdCodeId) {
+		this.isdCodeId = isdCodeId;
+	}
+
+	public String getIsdCode() {
+		return isdCode;
+	}
+
+	public void setIsdCode(String isdCode) {
+		this.isdCode = isdCode;
 	}
 
 	public String getPhoneNumber() {
@@ -369,6 +393,14 @@ public class User extends BaseDTO {
 
 	public void setSecondaryEmail(String secondaryEmail) {
 		this.secondaryEmail = secondaryEmail;
+	}
+
+	public boolean isHasIssueTrackerAccess() {
+		return hasIssueTrackerAccess;
+	}
+
+	public void setHasIssueTrackerAccess(boolean hasIssueTrackerAccess) {
+		this.hasIssueTrackerAccess = hasIssueTrackerAccess;
 	}
 
 }

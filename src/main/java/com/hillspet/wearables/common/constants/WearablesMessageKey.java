@@ -95,7 +95,7 @@ public enum WearablesMessageKey implements MessageKeyInterface {
 	INVALID_NEW_CONFIRM_PASSWORD("service.customer.new.confirm.password.invalid"),
 	INCORRECT_PASSWORD("service.customer.incorrect.password"),
 	INCORRECT_NEW_PASSWORD("service.customer.incorrect.newPassword"),
-	
+	INVALID_FILE("service.file.upload.invalid.file"),
 	
 	USERNAME_NOT_FOUND("service.customer.email.notFound"),
 	
@@ -134,6 +134,8 @@ public enum WearablesMessageKey implements MessageKeyInterface {
 	STUDY_REMOVE_PET_INVALID_DATE("service.study.removepet.date.validation.falied"),
 	STUDY_REMOVE_PET_INVALID_PHASE_DAY("service.study.removepet.phaseday.validation.falied"),
 	STUDY_PET_CANNOT_ADD_IN_CURRENT_OR_PREVIOUS_PHASES("service.study.addpet.phase.validation.falied"),
+	QUESTIONNAIRE_NAME_INVALID_LENGTH("service.questionnaire.name.length.validation.falied"),
+	STUDY_QUESTIONNAIRE_CONFIG_INVALID_DATE_RANGE("service.study.questionnaire.config.already.exists"),
 	;
 	
 

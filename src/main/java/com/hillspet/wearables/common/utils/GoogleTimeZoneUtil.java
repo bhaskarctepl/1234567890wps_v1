@@ -4,7 +4,10 @@ import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Client;
@@ -237,7 +240,7 @@ public class GoogleTimeZoneUtil {
 	}
 
 	/**
-	 * @param city
+	 * @param address
 	 * 
 	 */
 	@SuppressWarnings("unchecked")
@@ -265,14 +268,20 @@ public class GoogleTimeZoneUtil {
 
 				geoCodeAddress.setLat(latLngNode.get("lat").asText());
 				geoCodeAddress.setLng(latLngNode.get("lng").asText());
-				
+
 				String formattedAddress = formattedAddressNode.asText();
-				
+
 				String zipCode = null;
 
 				if (addressComponentsNode.isArray()) {
 					List<String> cities = new ArrayList<String>();
 					List<String> states = new ArrayList<String>();
+
+					Map<String, String> cityMap = new HashMap<>();
+					Map<String, String> cityShortMap = new HashMap<>();
+					Map<String, String> stateMap = new HashMap<>();
+					Map<String, String> stateShortMap = new HashMap<>();
+
 					for (final JsonNode addressComponentNode : addressComponentsNode) {
 
 						ArrayList<String> typesArrayList = mapper.convertValue(addressComponentNode.get("types"),
@@ -280,9 +289,6 @@ public class GoogleTimeZoneUtil {
 
 						if (typesArrayList.contains("postal_code")) {
 							zipCode = addressComponentNode.get("long_name").asText();
-						}
-
-						if (typesArrayList.contains("postal_code")) {
 							geoCodeAddress.setZipCode(addressComponentNode.get("long_name").asText());
 						}
 
@@ -290,50 +296,75 @@ public class GoogleTimeZoneUtil {
 							geoCodeAddress.setCountry(addressComponentNode.get("long_name").asText());
 							geoCodeAddress.setCountryShortCode(addressComponentNode.get("short_name").asText());
 						}
-						
+
 						if (typesArrayList.contains("administrative_area_level_2")) {
-							geoCodeAddress.setState(addressComponentNode.get("long_name").asText());
-							geoCodeAddress.setStateShortCode(addressComponentNode.get("short_name").asText());
+							cityMap.put("administrative_area_level_2", addressComponentNode.get("long_name").asText());
+							cityShortMap.put("administrative_area_level_2",
+									addressComponentNode.get("short_name").asText());
+
+							stateMap.put("administrative_area_level_2", addressComponentNode.get("long_name").asText());
+							stateShortMap.put("administrative_area_level_2",
+									addressComponentNode.get("short_name").asText());
+
 							states.add(addressComponentNode.get("long_name").asText().toLowerCase());
 							cities.add(addressComponentNode.get("long_name").asText().toLowerCase());
 						}
 
 						if (typesArrayList.contains("administrative_area_level_1")) {
-							geoCodeAddress.setState(addressComponentNode.get("long_name").asText());
-							geoCodeAddress.setStateShortCode(addressComponentNode.get("short_name").asText());
+							stateMap.put("administrative_area_level_1", addressComponentNode.get("long_name").asText());
+							stateShortMap.put("administrative_area_level_1",
+									addressComponentNode.get("short_name").asText());
 							states.add(addressComponentNode.get("long_name").asText().toLowerCase());
-						}						
+						}
 
 						if (typesArrayList.contains("route")) {
-							geoCodeAddress.setCity(addressComponentNode.get("long_name").asText());
-							geoCodeAddress.setCityShortCode(addressComponentNode.get("short_name").asText());
+							cityMap.put("route", addressComponentNode.get("long_name").asText());
+							cityShortMap.put("route", addressComponentNode.get("short_name").asText());
 							cities.add(addressComponentNode.get("long_name").asText().toLowerCase());
 						}
 
 						if (typesArrayList.contains("neighborhood")) {
-							geoCodeAddress.setCity(addressComponentNode.get("long_name").asText());
-							geoCodeAddress.setCityShortCode(addressComponentNode.get("short_name").asText());
+							cityMap.put("neighborhood", addressComponentNode.get("long_name").asText());
+							cityShortMap.put("neighborhood", addressComponentNode.get("short_name").asText());
 							cities.add(addressComponentNode.get("long_name").asText().toLowerCase());
+
+							stateMap.put("neighborhood", addressComponentNode.get("long_name").asText());
+							stateShortMap.put("neighborhood", addressComponentNode.get("short_name").asText());
+							states.add(addressComponentNode.get("long_name").asText().toLowerCase());
 						}
 
 						if (typesArrayList.contains("sublocality")) {
-							geoCodeAddress.setCity(addressComponentNode.get("long_name").asText());
-							geoCodeAddress.setCityShortCode(addressComponentNode.get("short_name").asText());
+							cityMap.put("sublocality", addressComponentNode.get("long_name").asText());
+							cityShortMap.put("sublocality", addressComponentNode.get("short_name").asText());
 							cities.add(addressComponentNode.get("long_name").asText().toLowerCase());
+
+							stateMap.put("sublocality", addressComponentNode.get("long_name").asText());
+							stateShortMap.put("sublocality", addressComponentNode.get("short_name").asText());
+							states.add(addressComponentNode.get("long_name").asText().toLowerCase());
 						}
 
 						if (typesArrayList.contains("postal_town")) {
-							geoCodeAddress.setCity(addressComponentNode.get("long_name").asText());
-							geoCodeAddress.setCityShortCode(addressComponentNode.get("short_name").asText());
+							cityMap.put("postal_town", addressComponentNode.get("long_name").asText());
+							cityShortMap.put("postal_town", addressComponentNode.get("short_name").asText());
 							cities.add(addressComponentNode.get("long_name").asText().toLowerCase());
+
+							stateMap.put("postal_town", addressComponentNode.get("long_name").asText());
+							stateShortMap.put("postal_town", addressComponentNode.get("short_name").asText());
+							states.add(addressComponentNode.get("long_name").asText().toLowerCase());
 						}
 
 						if (typesArrayList.contains("locality")) {
-							geoCodeAddress.setCity(addressComponentNode.get("long_name").asText());
-							geoCodeAddress.setCityShortCode(addressComponentNode.get("short_name").asText());
+							cityMap.put("locality", addressComponentNode.get("long_name").asText());
+							cityShortMap.put("locality", addressComponentNode.get("short_name").asText());
 							cities.add(addressComponentNode.get("long_name").asText().toLowerCase());
-						}						
+
+							stateMap.put("locality", addressComponentNode.get("long_name").asText());
+							stateShortMap.put("locality", addressComponentNode.get("short_name").asText());
+							states.add(addressComponentNode.get("long_name").asText().toLowerCase());
+						}
 					}
+					setCity(geoCodeAddress, cityMap, cityShortMap);
+					setState(geoCodeAddress, stateMap, stateShortMap);
 
 					if (zipCode == null) {
 						throw new ServiceValidationException("getGeocodeAddress no data found cannot proceed further",
@@ -341,7 +372,18 @@ public class GoogleTimeZoneUtil {
 								Arrays.asList(new WearablesError(WearablesErrorCode.INVALID_ADDRESS,
 										Constants.ADDRESS_STRING)));
 					} else {
-						geoCodeAddress.setAddress1(formattedAddress.split(",")[0]);
+						int cityIndex = address.indexOf(geoCodeAddress.getCity());
+						if (cityIndex != -1) {
+							// Extract substring before the word
+							String address1 = address.substring(0, cityIndex).trim();
+							if (address1.endsWith(",")) {
+								// Remove the last character (comma)
+								address1 = address1.substring(0, address1.length() - 1);
+							}
+							geoCodeAddress.setAddress1(address1);
+						} else {
+							geoCodeAddress.setAddress1(formattedAddress.split(",")[0]);
+						}
 					}
 
 					if (postCodeLocalitiesNode != null && postCodeLocalitiesNode.isArray()) {
@@ -361,6 +403,13 @@ public class GoogleTimeZoneUtil {
 					}
 
 					geoCodeAddress.setStates(states);
+
+					if (StringUtils.isBlank(geoCodeAddress.getAddress1())) {
+						throw new ServiceValidationException("getGeocodeAddress no data found cannot proceed further",
+								Status.BAD_REQUEST.getStatusCode(),
+								Arrays.asList(new WearablesError(WearablesErrorCode.INVALID_ADDRESS,
+										Constants.ADDRESS_STRING)));
+					}
 				}
 			} else {
 				throw new ServiceValidationException("getGeocodeAddress no data found cannot proceed further",
@@ -374,6 +423,69 @@ public class GoogleTimeZoneUtil {
 					Arrays.asList(new WearablesError(WearablesErrorCode.INVALID_ADDRESS, Constants.ADDRESS_STRING)));
 		}
 		return geoCodeAddress;
+	}
+
+	private void setCity(GeoCodeAddress geoCodeAddress, Map<String, String> cityMap, Map<String, String> cityShortMap) {
+		Set<String> cityKeySet = cityMap.keySet();
+		if (geoCodeAddress != null && cityMap != null && !cityMap.isEmpty()) {
+			if (cityKeySet.contains("locality")) {
+				geoCodeAddress.setCity(cityMap.get("locality"));
+				geoCodeAddress.setCityShortCode(cityShortMap.get("locality"));
+				return;
+			} else if (cityKeySet.contains("postal_town")) {
+				geoCodeAddress.setCity(cityMap.get("postal_town"));
+				geoCodeAddress.setCityShortCode(cityShortMap.get("postal_town"));
+				return;
+			} else if (cityKeySet.contains("sublocality")) {
+				geoCodeAddress.setCity(cityMap.get("sublocality"));
+				geoCodeAddress.setCityShortCode(cityShortMap.get("sublocality"));
+				return;
+			} else if (cityKeySet.contains("neighborhood")) {
+				geoCodeAddress.setCity(cityMap.get("neighborhood"));
+				geoCodeAddress.setCityShortCode(cityShortMap.get("neighborhood"));
+				return;
+			} else if (cityKeySet.contains("administrative_area_level_2")) {
+				geoCodeAddress.setCity(cityMap.get("administrative_area_level_2"));
+				geoCodeAddress.setCityShortCode(cityShortMap.get("administrative_area_level_2"));
+				return;
+			} else if (cityKeySet.contains("route")) {
+				geoCodeAddress.setCity(cityMap.get("route"));
+				geoCodeAddress.setCityShortCode(cityShortMap.get("route"));
+				return;
+			}
+		}
+	}
+
+	private void setState(GeoCodeAddress geoCodeAddress, Map<String, String> stateMap,
+			Map<String, String> stateShortMap) {
+		Set<String> statekeySet = stateMap.keySet();
+		if (geoCodeAddress != null && stateMap != null && !stateShortMap.isEmpty()) {
+			if (statekeySet.contains("administrative_area_level_1")) {
+				geoCodeAddress.setState(stateMap.get("administrative_area_level_1"));
+				geoCodeAddress.setStateShortCode(stateShortMap.get("administrative_area_level_1"));
+				return;
+			} else if (statekeySet.contains("administrative_area_level_2")) {
+				geoCodeAddress.setState(stateMap.get("administrative_area_level_2"));
+				geoCodeAddress.setStateShortCode(stateShortMap.get("administrative_area_level_2"));
+				return;
+			} else if (statekeySet.contains("locality")) {
+				geoCodeAddress.setState(stateMap.get("locality"));
+				geoCodeAddress.setStateShortCode(stateShortMap.get("locality"));
+				return;
+			} else if (statekeySet.contains("postal_town")) {
+				geoCodeAddress.setState(stateMap.get("postal_town"));
+				geoCodeAddress.setStateShortCode(stateShortMap.get("postal_town"));
+				return;
+			} else if (statekeySet.contains("sublocality")) {
+				geoCodeAddress.setState(stateMap.get("sublocality"));
+				geoCodeAddress.setStateShortCode(stateShortMap.get("sublocality"));
+				return;
+			} else if (statekeySet.contains("neighborhood")) {
+				geoCodeAddress.setState(stateMap.get("neighborhood"));
+				geoCodeAddress.setStateShortCode(stateShortMap.get("neighborhood"));
+				return;
+			}
+		}
 	}
 
 	/**
@@ -392,7 +504,6 @@ public class GoogleTimeZoneUtil {
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(geoCodeAPI);
 		Response response = target.request().get();
-
 		try {
 			if (response.getStatus() != 200) {
 				throw new ServiceValidationException("getGeocodeAddress no data found cannot proceed further",
@@ -524,5 +635,16 @@ public class GoogleTimeZoneUtil {
 		}
 		return timeZoneResponse;
 	}
+
+//	public static void main(String[] args) {
+//		GoogleTimeZoneUtil util = new GoogleTimeZoneUtil();
+//		GeoCodeAddress i = util.getGeocodeAddress("67 Heol Maengwyn, Machynlleth, Cymru, UK");
+//		System.out.println("Address 1: " + i.getAddress1());
+//		System.out.println("City: " + i.getCity());
+//		System.out.println("State: " + i.getState());
+//		System.out.println("Country: " + i.getCountry());
+//		System.out.println("zip: " + i.getZipCode());
+//
+//	}
 
 }

@@ -39,7 +39,7 @@ import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 import com.hillspet.wearables.dao.BaseDaoImpl;
 import com.hillspet.wearables.dao.mobileapp.MobileAppSelfOnboardingDao;
 import com.hillspet.wearables.dto.MobileAppSelfOnboardingDTO;
-import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.MobileAppSelfOnboardFilter;
 import com.hillspet.wearables.security.Authentication;
 
 @Repository
@@ -53,15 +53,16 @@ public class MobileAppSelfOnboardingDaoImpl extends BaseDaoImpl implements Mobil
 	@Autowired
 	private ObjectMapper mapper;
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Integer> getMobileAppSelfOnboardingCount(BaseFilter filter) throws ServiceExecutionException {
-		int totalCount = NumberUtils.INTEGER_ZERO;
+	public Map<String, Integer> getMobileAppSelfOnboardingCount(MobileAppSelfOnboardFilter filter)
+			throws ServiceExecutionException {
 		String counts;
 		HashMap<String, Integer> map = new HashMap<>();
 		LOGGER.debug("getMobileAppFeedbackCount called");
 		try {
 			counts = selectForObject(SQLConstants.MOBILE_APP_SELF_ONBOARD_COUNT, String.class, filter.getSearchText(),
-					filter.getFilterType(), filter.getFilterValue());
+					filter.getFilterType(), filter.getFilterValue(), filter.getPetName(), filter.getPetParentName());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getMobileAppSelfOnboardingCount", e);
@@ -71,7 +72,7 @@ public class MobileAppSelfOnboardingDaoImpl extends BaseDaoImpl implements Mobil
 	}
 
 	@Override
-	public List<MobileAppSelfOnboardingDTO> getMobileAppSelfOnboarding(BaseFilter filter)
+	public List<MobileAppSelfOnboardingDTO> getMobileAppSelfOnboarding(MobileAppSelfOnboardFilter filter)
 			throws ServiceExecutionException {
 		List<MobileAppSelfOnboardingDTO> mobileAppSelfOnboardingDTOList = new ArrayList<MobileAppSelfOnboardingDTO>();
 		LOGGER.debug("getMobileAppSelfOnboarding called");
@@ -88,11 +89,12 @@ public class MobileAppSelfOnboardingDaoImpl extends BaseDaoImpl implements Mobil
 					mobileAppSelfOnboardingDTO.setPetParentName(rs.getString("pet_parent_name"));
 					mobileAppSelfOnboardingDTO.setEmail(rs.getString("email"));
 					mobileAppSelfOnboardingDTO.setDeviceId(rs.getString("device_id"));
+					mobileAppSelfOnboardingDTO.setIsVipPet(rs.getBoolean("IS_VIP_PET"));
 
 					mobileAppSelfOnboardingDTOList.add(mobileAppSelfOnboardingDTO);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
-					filter.getFilterType(), filter.getFilterValue());
+					filter.getFilterType(), filter.getFilterValue(), filter.getPetName(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getMobileAppSelfOnboarding", e);

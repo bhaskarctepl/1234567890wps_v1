@@ -13,12 +13,15 @@ import com.hillspet.wearables.dto.DeviceModel;
 import com.hillspet.wearables.dto.DeviceUnAssignReason;
 import com.hillspet.wearables.dto.FirmwareVersion;
 import com.hillspet.wearables.dto.PetStudyDevice;
+import com.hillspet.wearables.dto.Status;
 import com.hillspet.wearables.dto.filter.AssetFirmwareVersionsFilter;
+import com.hillspet.wearables.dto.filter.AssetParam;
 import com.hillspet.wearables.dto.filter.AssetUpdateFirmwareFilter;
 import com.hillspet.wearables.dto.filter.AssetsFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.request.AssetStudyMappingRequest;
 import com.hillspet.wearables.request.BulkAssetUploadRequest;
+import com.hillspet.wearables.request.BulkWhiteListingRequest;
 import com.hillspet.wearables.request.UnassignAssetRequest;
 import com.hillspet.wearables.response.DeviceResponse;
 
@@ -92,5 +95,16 @@ public interface AssetManagementDao {
 
 	public List<PetStudyDevice> getPetStudiesByAsset(int deviceId) throws ServiceExecutionException;
 
-	public void manageAssetStudyMapping(AssetStudyMappingRequest request, Integer userId) throws ServiceExecutionException;
+	public void manageAssetStudyMapping(AssetStudyMappingRequest request, Integer userId)
+			throws ServiceExecutionException;
+
+	public List<Asset> getSensorsListBySsId(String ssId) throws ServiceExecutionException;
+
+	public List<Asset> getSensorsList(AssetParam filter) throws ServiceExecutionException;
+
+	public Map<String, Integer> getSensorsListCount(AssetParam filter) throws ServiceExecutionException;
+
+	public List<Status> getAssetStatus() throws ServiceExecutionException;
+
+	public void bulkWhiteListing(BulkWhiteListingRequest request, Integer userId);
 }

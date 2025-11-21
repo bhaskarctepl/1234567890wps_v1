@@ -26,6 +26,14 @@ public class ImageScaleFilter extends BaseFilter {
 	@QueryParam("endDate")
 	private String endDate;
 
+	@QueryParam("petName")
+	@ApiParam(name = "petName", value = "Search pet by pet name", required = false)
+	private String petName;
+
+	@QueryParam("petParentName")
+	@ApiParam(name = "petParentName", value = "Search pet by Pet Parent Name", required = false)
+	private String petParentName;
+
 	public ImageScaleFilter() {
 
 	}
@@ -76,6 +84,22 @@ public class ImageScaleFilter extends BaseFilter {
 
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
+	}
+
+	public String getPetName() {
+		return petName;
+	}
+
+	public void setPetName(String petName) {
+		this.petName = petName;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
 	}
 
 }

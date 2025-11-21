@@ -26,6 +26,26 @@ public class PetFilter extends BaseFilter {
 	@ApiParam(name = "breedId", value = "Search pet by breedIds", required = false)
 	private String breedId;
 
+	@QueryParam("petName")
+	@ApiParam(name = "petName", value = "Search pet by pet name", required = false)
+	private String petName;
+
+	@QueryParam("petParentName")
+	@ApiParam(name = "petParentName", value = "Search pet by Pet Parent Name", required = false)
+	private String petParentName;
+
+	@QueryParam("studyName")
+	@ApiParam(name = "studyName", value = "Search pet by Study Name", required = false)
+	private String studyName;
+
+	@QueryParam("pushNotificationStatus")
+	@ApiParam(name = "pushNotificationStatus", type = "integer", value = "Search based on Notification drop down Enabled = 1 and Disabled = 0")
+	private String pushNotificationStatus;
+
+	@QueryParam("emailNotificationStatus")
+	@ApiParam(name = "emailNotificationStatus", type = "integer", value = "Search based on Notification drop down Enabled = 1 and Disabled = 0")
+	private String emailNotificationStatus;
+
 	public String getStudyId() {
 		return studyId;
 	}
@@ -64,6 +84,46 @@ public class PetFilter extends BaseFilter {
 
 	public void setBreedId(String breedId) {
 		this.breedId = breedId;
+	}
+
+	public String getPetName() {
+		return petName;
+	}
+
+	public void setPetName(String petName) {
+		this.petName = petName;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
+	}
+
+	public String getPushNotificationStatus() {
+		return pushNotificationStatus;
+	}
+
+	public void setPushNotificationStatus(String pushNotificationStatus) {
+		this.pushNotificationStatus = pushNotificationStatus;
+	}
+
+	public String getEmailNotificationStatus() {
+		return emailNotificationStatus;
+	}
+
+	public void setEmailNotificationStatus(String emailNotificationStatus) {
+		this.emailNotificationStatus = emailNotificationStatus;
 	}
 
 }

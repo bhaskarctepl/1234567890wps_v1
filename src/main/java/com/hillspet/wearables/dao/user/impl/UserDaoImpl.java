@@ -57,6 +57,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 		inputParams.put("p_full_name", user.getFullName());
 		inputParams.put("p_email", user.getEmail());
 		inputParams.put("p_secondary_email", user.getSecondaryEmail());
+		inputParams.put("p_isd_code", user.getIsdCodeId());
 		inputParams.put("p_phone_number", user.getPhoneNumber());
 		inputParams.put("p_future_studies", user.getFutureStudies());
 		inputParams.put("p_inactive_studies", user.getInactiveStudies());
@@ -66,7 +67,9 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 		inputParams.put("p_created_by", user.getCreatedBy());
 		inputParams.put("p_created_by", user.getCreatedBy());
 		try {
+			LOGGER.debug("addUser inputParams are {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.USER_INSERT, inputParams);
+			LOGGER.debug("addUser outParams are {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
@@ -96,6 +99,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 
 	@Override
 	public User updateUser(User user) {
+		LOGGER.info("In UserDaoImpl - updateUser method");
 		Map<String, Object> inputParams = new HashMap<>();
 		inputParams.put("p_user_id", user.getUserId());
 		inputParams.put("p_user_name", user.getUserName());
@@ -104,15 +108,18 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 		inputParams.put("p_full_name", user.getFullName());
 		inputParams.put("p_email", user.getEmail());
 		inputParams.put("p_secondary_email", user.getSecondaryEmail());
+		inputParams.put("p_isd_code", user.getIsdCodeId());
 		inputParams.put("p_phone_number", user.getPhoneNumber());
 		inputParams.put("p_future_studies", user.getFutureStudies());
 		inputParams.put("p_inactive_studies", user.getInactiveStudies());
 		inputParams.put("p_is_active", user.getIsActive());
 		inputParams.put("p_role_id", user.getRoleIds());
 		inputParams.put("p_study_permissions", user.getStudyPermissions());
-		inputParams.put("p_modified_by", user.getModifiedBy());
+		inputParams.put("p_modified_by", user.getModifiedBy());		
 		try {
+			LOGGER.debug("updateUser inputParams are {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.USER_UPDATE, inputParams);
+			LOGGER.debug("updateUser outParams are {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isNotEmpty(errorMsg) || statusFlag < NumberUtils.INTEGER_ONE) {
@@ -147,7 +154,9 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 		inputParams.put("p_need_change_pwd", needChangePassword);
 		inputParams.put("p_reqeust_from", WearablesUtils.getRequestFrom(platform));
 		try {
+			LOGGER.debug("updateUserPassword inputParams are {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.USER_UPDATE_PASSWORD, inputParams);
+			LOGGER.debug("updateUserPassword outParams are {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isNotEmpty(errorMsg) || statusFlag < NumberUtils.INTEGER_ONE) {
@@ -172,7 +181,9 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 		inputParams.put("p_user_id", userId);
 		inputParams.put("p_modified_by", modifiedBy);
 		try {
+			LOGGER.debug("deleteUser inputParams are {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.USER_DELETE, inputParams);
+			LOGGER.debug("deleteUser outParams are {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isNotEmpty(errorMsg) || (int) statusFlag < NumberUtils.INTEGER_ONE) {
@@ -195,11 +206,10 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 	public Optional<User> findByUsername(String userName) {
 		final User user = new User();
 		List<Menu> rolePermissions = new ArrayList<>();
-		LOGGER.debug("findByUsername called");
-		try {
+		LOGGER.debug("findByUsername called: userName: {}", userName);
+		try {			
 			Map<String, Object> inputParams = new HashMap<String, Object>();
 			inputParams.put("p_user_name", userName);
-
 			Map<String, Object> simpleJdbcCallResult = callStoredProcedure(
 					SQLConstants.LOGIN_GET_USER_DETAILS_BY_USER_NAME, inputParams);
 			Iterator<Entry<String, Object>> itr = simpleJdbcCallResult.entrySet().iterator();
@@ -215,8 +225,10 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 						user.setUserName((String) u.get("USER_NAME"));
 						user.setPassword((String) u.get("USER_PASSWORD"));
 						user.setFullName((String) u.get("FULL_NAME"));
-						user.setEmail((String) u.get("EMAIL"));
-						user.setPhoneNumber((String) u.get("PHONE_NUMBER"));
+						user.setEmail((String) u.get("EMAIL"));						
+						user.setIsdCodeId((Integer) u.get("ISD_CODE_ID"));
+						user.setIsdCode((String) u.get("ISD_CODE"));
+						user.setPhoneNumber((String) u.get("PHONE_NUMBER"));						
 						user.setIsActive(
 								(Integer) u.get("IS_ACTIVE") > NumberUtils.INTEGER_ZERO ? Boolean.TRUE : Boolean.FALSE);
 						user.setNeedChangePwd(
@@ -231,7 +243,8 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 
 							String roles = (String) u.get("roles");
 							List<Role> roleList = new ArrayList<>();
-							for (String roleStr : roles.split(StringLiterals.SEPERATOR.getCode())) { // Added by Rajesh
+							// Added by Rajesh
+							for (String roleStr : roles.split(StringLiterals.SEPERATOR.getCode())) {
 								Role role = new Role();
 								role.setRoleId(Integer.valueOf(roleStr.split("###")[0]));
 								role.setRoleName(roleStr.split("###")[1]);
@@ -248,13 +261,17 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 				if (key.equals(SQLConstants.RESULT_SET_2)) {
 					List<Map<String, Object>> list = (List<Map<String, Object>>) entry.getValue();
 					list.forEach(menuPermission -> {
-						Menu menu = new Menu((Integer) menuPermission.get("MENU_ID"),
-								(String) menuPermission.get("MENU_NAME"),
-								(Integer) menuPermission.get("PARENT_MENU_ID"),
-								(String) menuPermission.get("PARENT_MENU_NAME"),
-								(Integer) menuPermission.get("MENU_ACTION_ID"),
-								(String) menuPermission.get("MENU_ACTION_NAME"));
-						rolePermissions.add(menu);
+						if ((Integer) menuPermission.get("MENU_ID") == 76) {
+							user.setHasIssueTrackerAccess(true);
+						} else {
+							Menu menu = new Menu((Integer) menuPermission.get("MENU_ID"),
+									(String) menuPermission.get("MENU_NAME"),
+									(Integer) menuPermission.get("PARENT_MENU_ID"),
+									(String) menuPermission.get("PARENT_MENU_NAME"),
+									(Integer) menuPermission.get("MENU_ACTION_ID"),
+									(String) menuPermission.get("MENU_ACTION_NAME"));
+							rolePermissions.add(menu);
+						}
 					});
 				}
 			}
@@ -278,7 +295,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 		final User user = new User();
 		List<AssociatedStudy> associatedStudies = new ArrayList<>();
 		List<AuditLog> auditLogs = new ArrayList<>();
-		LOGGER.debug("getUserById called");
+		LOGGER.debug("getUserById called, userId : {} ", userId);
 		try {
 			// in params
 			Map<String, Object> inputParams = new HashMap<String, Object>();
@@ -303,6 +320,8 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 						user.setLastName((String) u.get("LAST_NAME"));
 						user.setEmail((String) u.get("EMAIL"));
 						user.setSecondaryEmail((String) u.get("SECONDARY_EMAIL"));
+						user.setIsdCodeId((Integer) u.get("ISD_CODE_ID"));
+						user.setIsdCode((String) u.get("ISD_CODE"));
 						user.setPhoneNumber((String) u.get("PHONE_NUMBER"));
 						user.setFutureStudies((Integer) u.get("ASSOCIATE_FUTURE_STUDY"));
 						user.setInactiveStudies((Integer) u.get("ASSOCIATE_PAST_STUDY"));
@@ -387,6 +406,8 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 					user.setUserName(rs.getString("USER_NAME"));
 					user.setFullName(rs.getString("FULL_NAME"));
 					user.setEmail(rs.getString("EMAIL"));
+					user.setIsdCodeId(rs.getInt("ISD_CODE_ID"));
+					user.setIsdCode(rs.getString("ISD_CODE"));
 					user.setPhoneNumber(rs.getString("PHONE_NUMBER"));
 					user.setIsActive(rs.getBoolean("IS_ACTIVE"));
 					if (rs.getString("ROLE_ID") != null) {
@@ -432,7 +453,9 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 		inputParams.put("p_full_name", user.getFullName());
 		inputParams.put("p_modified_by", user.getModifiedBy());
 		try {
+			LOGGER.debug("updateUserProfile inputParams are {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.USER_PROFILE_UPDATE, inputParams);
+			LOGGER.debug("updateUserProfile outParams are {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
 			int statusFlag = (int) outParams.get("out_flag");
 			if (StringUtils.isNotEmpty(errorMsg) || statusFlag < NumberUtils.INTEGER_ONE) {

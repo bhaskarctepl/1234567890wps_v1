@@ -20,6 +20,7 @@ import com.hillspet.wearables.dto.AssetByStudyWidgetFilter;
 import com.hillspet.wearables.dto.CustomerSupportByCategory;
 import com.hillspet.wearables.dto.CustomerSupportIssuesByStudy;
 import com.hillspet.wearables.dto.TotalAssetsByStausWidgetFilter;
+import com.hillspet.wearables.dto.filter.AssetReportFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.dto.filter.IssueByStudyWidgetFilter;
 import com.hillspet.wearables.dto.filter.IssueWidgetFilter;
@@ -55,15 +56,15 @@ import com.hillspet.wearables.response.TotalAssetsReportResponse;
  */
 public interface ReportService {
 
-	DeviceDetailsReportResponse getDeviceDetailsReport(BaseFilter filter) throws ServiceExecutionException;
+	DeviceDetailsReportResponse getDeviceDetailsReport(AssetReportFilter filter) throws ServiceExecutionException;
 
-	DeviceHistoryReportResponse getDeviceHistoryReport(BaseFilter filter) throws ServiceExecutionException;
+	DeviceHistoryReportResponse getDeviceHistoryReport(AssetReportFilter filter) throws ServiceExecutionException;
 
 	DeviceInventoryReportResponse getDeviceInventoryReport(BaseFilter filter) throws ServiceExecutionException;
 
-	DeviceMalfunctionReportResponse getDeviceMalfunctionReport(BaseFilter filter) throws ServiceExecutionException;
+	DeviceMalfunctionReportResponse getDeviceMalfunctionReport(AssetReportFilter filter) throws ServiceExecutionException;
 
-	DeviceTrackingReportResponse getDeviceTrackingReport(BaseFilter filter) throws ServiceExecutionException;
+	DeviceTrackingReportResponse getDeviceTrackingReport(AssetReportFilter filter) throws ServiceExecutionException;
 
 	StudyBasedReportResponse getStudyBasedReport(BaseFilter filter, int userId) throws ServiceExecutionException;
 

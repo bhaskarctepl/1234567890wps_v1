@@ -25,7 +25,7 @@ import org.springframework.http.MediaType;
 
 import com.hillspet.wearables.common.constants.Constants;
 import com.hillspet.wearables.common.response.Message;
-import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.MobileAppSelfOnboardFilter;
 import com.hillspet.wearables.objects.common.response.CommonResponse;
 import com.hillspet.wearables.response.MobileAppSelfOnboardingResponse;
 
@@ -54,7 +54,7 @@ public interface MobileAppSelfOnboardingResource {
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
-	public Response getMobileAppSelfOnboarding(@BeanParam BaseFilter filter);
+	public Response getMobileAppSelfOnboarding(@BeanParam MobileAppSelfOnboardFilter filter);
 	
 	@POST
 	@Path("/assignStudyToPet/{petId}/{studyId}")

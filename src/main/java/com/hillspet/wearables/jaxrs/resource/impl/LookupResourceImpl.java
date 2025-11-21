@@ -14,12 +14,14 @@ import com.hillspet.wearables.common.response.SuccessResponse;
 import com.hillspet.wearables.dto.AgentAction;
 import com.hillspet.wearables.dto.Algorithm;
 import com.hillspet.wearables.dto.AssignedUser;
+import com.hillspet.wearables.dto.BehaviorType;
 import com.hillspet.wearables.dto.BfiScorer;
 import com.hillspet.wearables.dto.CategoryTimer;
 import com.hillspet.wearables.dto.ContactMethod;
 import com.hillspet.wearables.dto.Country;
 import com.hillspet.wearables.dto.CustomerContactMethod;
 import com.hillspet.wearables.dto.CustomerContactReason;
+import com.hillspet.wearables.dto.DataQuality;
 import com.hillspet.wearables.dto.DefectiveSensorAction;
 import com.hillspet.wearables.dto.DeviceLocation;
 import com.hillspet.wearables.dto.DeviceStatus;
@@ -28,6 +30,7 @@ import com.hillspet.wearables.dto.ExtractFileCategory;
 import com.hillspet.wearables.dto.Frequency;
 import com.hillspet.wearables.dto.ImageScoringType;
 import com.hillspet.wearables.dto.InventoryStatus;
+import com.hillspet.wearables.dto.IsdCode;
 import com.hillspet.wearables.dto.Issue;
 import com.hillspet.wearables.dto.MaterialCategory;
 import com.hillspet.wearables.dto.MaterialType;
@@ -37,6 +40,7 @@ import com.hillspet.wearables.dto.MenuAction;
 import com.hillspet.wearables.dto.MobileAppConfig;
 import com.hillspet.wearables.dto.MobileAppFBPhoneModel;
 import com.hillspet.wearables.dto.MobileAppFeedbackPage;
+import com.hillspet.wearables.dto.NotificationConfig;
 import com.hillspet.wearables.dto.Occurance;
 import com.hillspet.wearables.dto.PetBreed;
 import com.hillspet.wearables.dto.PetName;
@@ -45,6 +49,7 @@ import com.hillspet.wearables.dto.PetParent;
 import com.hillspet.wearables.dto.PetParentNameTimer;
 import com.hillspet.wearables.dto.PetSpecies;
 import com.hillspet.wearables.dto.PetStatus;
+import com.hillspet.wearables.dto.PetStudyAction;
 import com.hillspet.wearables.dto.Phase;
 import com.hillspet.wearables.dto.PhaseDays;
 import com.hillspet.wearables.dto.PointTracker;
@@ -61,6 +66,7 @@ import com.hillspet.wearables.dto.QuestionType;
 import com.hillspet.wearables.dto.QuestionValidityPeriod;
 import com.hillspet.wearables.dto.QuestionnaireCategory;
 import com.hillspet.wearables.dto.QuestionnaireType;
+import com.hillspet.wearables.dto.QuestionnariesByStudy;
 import com.hillspet.wearables.dto.Role;
 import com.hillspet.wearables.dto.RoleType;
 import com.hillspet.wearables.dto.RootCause;
@@ -77,16 +83,20 @@ import com.hillspet.wearables.dto.TicketCategory;
 import com.hillspet.wearables.dto.TicketPriority;
 import com.hillspet.wearables.dto.TicketStatus;
 import com.hillspet.wearables.dto.TicketType;
+import com.hillspet.wearables.dto.WifiSsIdResponse;
+import com.hillspet.wearables.dto.filter.PointTrackFilter;
 import com.hillspet.wearables.jaxrs.resource.LookupResource;
 import com.hillspet.wearables.response.AgentActionResponse;
 import com.hillspet.wearables.response.AlgorithmResponse;
 import com.hillspet.wearables.response.AssignedUserResponse;
+import com.hillspet.wearables.response.BehaviorTypeResponse;
 import com.hillspet.wearables.response.BfiScorerListResponse;
 import com.hillspet.wearables.response.CategoryTimerResponse;
 import com.hillspet.wearables.response.ContactMethodResponse;
 import com.hillspet.wearables.response.CountryListResponse;
 import com.hillspet.wearables.response.CustomerContactMethodResponse;
 import com.hillspet.wearables.response.CustomerContactReasonResponse;
+import com.hillspet.wearables.response.DataQualityResponse;
 import com.hillspet.wearables.response.DefectiveSensorActionResponse;
 import com.hillspet.wearables.response.DeviceLocationResponse;
 import com.hillspet.wearables.response.DeviceStatusResponse;
@@ -96,6 +106,7 @@ import com.hillspet.wearables.response.ExtractFileCategoryResponse;
 import com.hillspet.wearables.response.FrequencyResponse;
 import com.hillspet.wearables.response.ImageScoringTypeResponse;
 import com.hillspet.wearables.response.InventoryStatusResponse;
+import com.hillspet.wearables.response.IsdCodesResponse;
 import com.hillspet.wearables.response.IssueResponse;
 import com.hillspet.wearables.response.MaterialCategoryResponse;
 import com.hillspet.wearables.response.MaterialTypeResponse;
@@ -105,6 +116,7 @@ import com.hillspet.wearables.response.MenuResponse;
 import com.hillspet.wearables.response.MobileAppConfigResponse;
 import com.hillspet.wearables.response.MobileAppFBPhoneModelResponse;
 import com.hillspet.wearables.response.MobileAppFeedbackPageResponse;
+import com.hillspet.wearables.response.NotificationConfigResponse;
 import com.hillspet.wearables.response.OccuranceResponse;
 import com.hillspet.wearables.response.PetBreedResponse;
 import com.hillspet.wearables.response.PetFeedingTimeResponse;
@@ -114,6 +126,7 @@ import com.hillspet.wearables.response.PetParentNameResponse;
 import com.hillspet.wearables.response.PetParentNameTimerResponse;
 import com.hillspet.wearables.response.PetSpeciesResponse;
 import com.hillspet.wearables.response.PetStatusResponse;
+import com.hillspet.wearables.response.PetStudyActionsResponse;
 import com.hillspet.wearables.response.PhaseDaysResponse;
 import com.hillspet.wearables.response.PointTrackerActivityResponse;
 import com.hillspet.wearables.response.PointTrackerMetricResponse;
@@ -129,6 +142,7 @@ import com.hillspet.wearables.response.QuestionValidityPeriodResponse;
 import com.hillspet.wearables.response.QuestionnaireCategoryListResponse;
 import com.hillspet.wearables.response.QuestionnaireListResponse;
 import com.hillspet.wearables.response.QuestionnaireTypeResponse;
+import com.hillspet.wearables.response.QuestionnariesByStudyResponse;
 import com.hillspet.wearables.response.RoleTypeResponse;
 import com.hillspet.wearables.response.RolesResponse;
 import com.hillspet.wearables.response.RootCauseResponse;
@@ -147,6 +161,7 @@ import com.hillspet.wearables.response.TicketPriorityResponse;
 import com.hillspet.wearables.response.TicketStatusResponse;
 import com.hillspet.wearables.response.TicketTypeResponse;
 import com.hillspet.wearables.response.TrackerRejectReasonResponse;
+import com.hillspet.wearables.response.WifiResponse;
 import com.hillspet.wearables.service.lookup.LookupService;
 
 /**
@@ -520,6 +535,17 @@ public class LookupResourceImpl implements LookupResource {
 		return responseBuilder.buildResponse(successResponse);
 	}
 
+	@Override
+	public Response getQuestionnairesList(PointTrackFilter filter) {
+
+		List<QuestionnariesByStudy> QuestionnariesByStudy = lookupService.getQuestionnairesList(filter);
+		QuestionnariesByStudyResponse response = new QuestionnariesByStudyResponse();
+		response.setQuestionnariesByStudy(QuestionnariesByStudy);
+		SuccessResponse<QuestionnariesByStudyResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
 	/* ------------ Questionnaire Lookup Services End ---------------- */
 
 	/* ------------ PointTracker Lookup Services Start ---------------- */
@@ -532,6 +558,16 @@ public class LookupResourceImpl implements LookupResource {
 		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
+	
+	@Override
+	public Response getUniquePetBehaviors() {
+		List<PointTrackerMetric> pointTrackerMetrics = lookupService.getUniquePetBehaviors();
+		PointTrackerMetricResponse response = new PointTrackerMetricResponse();
+		response.setPointTrackerMetrics(pointTrackerMetrics);
+		SuccessResponse<PointTrackerMetricResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
 
 	@Override
 	public Response getPetBehaviors(int speciesId, int behaviorTypeId) {
@@ -539,6 +575,16 @@ public class LookupResourceImpl implements LookupResource {
 		PointTrackerMetricResponse response = new PointTrackerMetricResponse();
 		response.setPointTrackerMetrics(pointTrackerMetrics);
 		SuccessResponse<PointTrackerMetricResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getPetBehaviorTypes() {
+		List<BehaviorType> behaviorTypes = lookupService.getPetBehaviorTypes();
+		BehaviorTypeResponse response = new BehaviorTypeResponse();
+		response.setBehaviorTypes(behaviorTypes);
+		SuccessResponse<BehaviorTypeResponse> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
@@ -777,7 +823,8 @@ public class LookupResourceImpl implements LookupResource {
 
 	@Override
 	public Response getPetEatingEnthusiasmScales(String speciesId) {
-		EatingEnthusiasmScaleResponse eatingEnthusiasmScaleResponse = lookupService.getPetEatingEnthusiasmScales(speciesId);
+		EatingEnthusiasmScaleResponse eatingEnthusiasmScaleResponse = lookupService
+				.getPetEatingEnthusiasmScales(speciesId);
 		SuccessResponse<EatingEnthusiasmScaleResponse> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(eatingEnthusiasmScaleResponse);
 		return responseBuilder.buildResponse(successResponse);
@@ -902,6 +949,17 @@ public class LookupResourceImpl implements LookupResource {
 	}
 
 	@Override
+	public Response getAlertTypes() {
+		LOGGER.info("In LookupResourceImpl, getbfiScorerList method");
+		List<DataQuality> stdyAlertsList = lookupService.getAlertTypes();
+		DataQualityResponse response = new DataQualityResponse();
+		response.setAlerts(stdyAlertsList);
+		SuccessResponse<DataQualityResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
 	public Response getStudyPhases() {
 		LOGGER.info("In LookupResourceImpl, getStudyPhases method");
 		List<Phase> studyPhases = lookupService.getStudyPhases();
@@ -987,4 +1045,89 @@ public class LookupResourceImpl implements LookupResource {
 		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
 	}
+
+	@Override
+	public Response getStudiesWithAlerts() {
+		LOGGER.info("In LookupResourceImpl, getbfiScorerList method");
+		List<DataQuality> stdyAlertsList = lookupService.getStudiesWithAlerts();
+		DataQualityResponse response = new DataQualityResponse();
+		response.setAlerts(stdyAlertsList);
+		SuccessResponse<DataQualityResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getDevicesWithAlerts() {
+		LOGGER.info("In LookupResourceImpl, getbfiScorerList method");
+		List<DataQuality> stdyAlertsList = lookupService.getDevicesWithAlerts();
+		DataQualityResponse response = new DataQualityResponse();
+		response.setAlerts(stdyAlertsList);
+		SuccessResponse<DataQualityResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getAlertActions() {
+		LOGGER.info("In LookupResourceImpl, getbfiScorerList method");
+		List<DataQuality> stdyAlertsList = lookupService.getAlertActions();
+		DataQualityResponse response = new DataQualityResponse();
+		response.setAlerts(stdyAlertsList);
+		SuccessResponse<DataQualityResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getFrequencies(String frequencyType) {
+		List<Frequency> frequencies = lookupService.getFrequencies(frequencyType);
+		FrequencyResponse response = new FrequencyResponse();
+		response.setFrequencies(frequencies);
+		SuccessResponse<FrequencyResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getIsdCodess() {
+		List<IsdCode> isdCodes = lookupService.getIsdCodes();
+		IsdCodesResponse response = new IsdCodesResponse();
+		response.setIsdCodes(isdCodes);
+		SuccessResponse<IsdCodesResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getNotificationConfig(String studyId) {
+		List<NotificationConfig> notificationConfigs = lookupService.getNotificationConfig(studyId);
+		NotificationConfigResponse response = new NotificationConfigResponse();
+		response.setNotificationConfigs(notificationConfigs);
+		SuccessResponse<NotificationConfigResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getPetStudyActions() {
+		List<PetStudyAction> PetStudyActions = lookupService.getPetStudyActions();
+		PetStudyActionsResponse response = new PetStudyActionsResponse();
+		response.setPetStudyActions(PetStudyActions);
+		SuccessResponse<PetStudyActionsResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+	}
+
+	@Override
+	public Response getWifiSsIdList() {
+		List<WifiSsIdResponse> WifiSsIdResponse = lookupService.getWifiSsIdList();
+		WifiResponse response = new WifiResponse();
+		response.setWifiSsIdResponse(WifiSsIdResponse);
+		SuccessResponse<WifiResponse> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(response);
+		return responseBuilder.buildResponse(successResponse);
+
+	}
+
 }

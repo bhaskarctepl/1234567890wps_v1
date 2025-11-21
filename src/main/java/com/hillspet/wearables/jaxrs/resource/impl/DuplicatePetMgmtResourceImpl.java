@@ -16,7 +16,6 @@ import com.hillspet.wearables.common.response.SuccessResponse;
 import com.hillspet.wearables.dto.CustomUserDetails;
 import com.hillspet.wearables.dto.PetDTO;
 import com.hillspet.wearables.dto.PetDataStreamDTO;
-import com.hillspet.wearables.dto.PetDuplicateConfigDTO;
 import com.hillspet.wearables.dto.filter.DuplicatePetsFilter;
 import com.hillspet.wearables.dto.filter.PetDataStreamFilter;
 import com.hillspet.wearables.jaxrs.resource.DuplicatePetMgmtResource;

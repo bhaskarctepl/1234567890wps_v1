@@ -26,7 +26,10 @@ public class PetParentRequest {
 	@ApiModelProperty(value = "email", required = true, example = "John@gmail.com")
 	private String email;
 
-	@ApiModelProperty(value = "phoneNumber", required = true, example = "+1 (846) 546-5468")
+	@ApiModelProperty(value = "isdCodeId", required = true, example = "1")
+	private Integer isdCodeId;
+
+	@ApiModelProperty(value = "phoneNumber", required = true, example = "(846) 546-5468")
 	private String phoneNumber;
 
 	@ApiModelProperty(value = "petsAssociated", required = true)
@@ -35,11 +38,11 @@ public class PetParentRequest {
 	@ApiModelProperty(value = "status", required = true, example = "1")
 	private Integer status;
 
-	@ApiModelProperty(value = "petParentFirstName", required = true)
-	private String petParentFirstName;
+	@ApiModelProperty(value = "firstName", required = true)
+	private String firstName;
 
-	@ApiModelProperty(value = "petParentLastName", required = true)
-	private String petParentLastName;
+	@ApiModelProperty(value = "lastName", required = true)
+	private String lastName;
 
 	@ApiModelProperty(value = "secondaryEmailId", required = false)
 	private String secondaryEmail;
@@ -68,6 +71,9 @@ public class PetParentRequest {
 	@ApiModelProperty(value = "preferredWeightUnitId", required = true, example = "1")
 	private Integer preferredWeightUnitId;
 
+	@ApiModelProperty(value = "isVipPetParent", required = true, example = "TRUE")
+	private Boolean isVipPetParent;
+
 	public Integer getPetParentId() {
 		return petParentId;
 	}
@@ -90,6 +96,14 @@ public class PetParentRequest {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Integer getIsdCodeId() {
+		return isdCodeId;
+	}
+
+	public void setIsdCodeId(Integer isdCodeId) {
+		this.isdCodeId = isdCodeId;
 	}
 
 	public String getPhoneNumber() {
@@ -116,20 +130,20 @@ public class PetParentRequest {
 		this.status = status;
 	}
 
-	public String getPetParentFirstName() {
-		return petParentFirstName;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setPetParentFirstName(String petParentFirstName) {
-		this.petParentFirstName = petParentFirstName;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
-	public String getPetParentLastName() {
-		return petParentLastName;
+	public String getLastName() {
+		return lastName;
 	}
 
-	public void setPetParentLastName(String petParentLastName) {
-		this.petParentLastName = petParentLastName;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public String getSecondaryEmail() {
@@ -202,6 +216,14 @@ public class PetParentRequest {
 
 	public void setPreferredWeightUnitId(Integer preferredWeightUnitId) {
 		this.preferredWeightUnitId = preferredWeightUnitId;
+	}
+
+	public Boolean getIsVipPetParent() {
+		return isVipPetParent;
+	}
+
+	public void setIsVipPetParent(Boolean isVipPetParent) {
+		this.isVipPetParent = isVipPetParent;
 	}
 
 }

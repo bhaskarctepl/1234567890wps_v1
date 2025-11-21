@@ -15,6 +15,11 @@ public class DeviceMalfunctionReport extends BaseDTO {
 	private String note;
 	private String unAssignDate;
 
+	private String isWhiteListed;
+	private String boxNumber;
+	private String macAddress;
+	private String wifiSSId;
+
 	public String getStudyName() {
 		return studyName;
 	}
@@ -53,6 +58,38 @@ public class DeviceMalfunctionReport extends BaseDTO {
 
 	public void setUnAssignDate(String unAssignDate) {
 		this.unAssignDate = unAssignDate;
+	}
+
+	public String getIsWhiteListed() {
+		return isWhiteListed;
+	}
+
+	public void setIsWhiteListed(String isWhiteListed) {
+		this.isWhiteListed = isWhiteListed;
+	}
+
+	public String getBoxNumber() {
+		return boxNumber;
+	}
+
+	public void setBoxNumber(String boxNumber) {
+		this.boxNumber = boxNumber;
+	}
+
+	public String getMacAddress() {
+		return macAddress;
+	}
+
+	public void setMacAddress(String macAddress) {
+		this.macAddress = macAddress;
+	}
+
+	public String getWifiSSId() {
+		return wifiSSId;
+	}
+
+	public void setWifiSSId(String wifiSSId) {
+		this.wifiSSId = wifiSSId;
 	}
 
 }

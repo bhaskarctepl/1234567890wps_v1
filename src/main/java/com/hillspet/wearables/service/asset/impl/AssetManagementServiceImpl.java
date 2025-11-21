@@ -40,6 +40,8 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.hillspet.wearables.common.constants.WearablesErrorCode;
+import com.hillspet.wearables.common.dto.WearablesError;
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 import com.hillspet.wearables.dao.asset.AssetManagementDao;
 import com.hillspet.wearables.dao.lookup.LookupDao;
@@ -54,15 +56,20 @@ import com.hillspet.wearables.dto.DeviceModel;
 import com.hillspet.wearables.dto.DeviceUnAssignReason;
 import com.hillspet.wearables.dto.FirmwareVersion;
 import com.hillspet.wearables.dto.PetStudyDevice;
+import com.hillspet.wearables.dto.Status;
 import com.hillspet.wearables.dto.StudyListDTO;
+import com.hillspet.wearables.dto.WifiSsIdResponse;
 import com.hillspet.wearables.dto.filter.AssetFirmwareVersionsFilter;
+import com.hillspet.wearables.dto.filter.AssetParam;
 import com.hillspet.wearables.dto.filter.AssetUpdateFirmwareFilter;
 import com.hillspet.wearables.dto.filter.AssetsFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.request.AssetStudyMappingRequest;
 import com.hillspet.wearables.request.BulkAssetUploadRequest;
+import com.hillspet.wearables.request.BulkWhiteListingRequest;
 import com.hillspet.wearables.request.UnassignAssetRequest;
 import com.hillspet.wearables.response.AssetResponse;
+import com.hillspet.wearables.response.AssetResponseList;
 import com.hillspet.wearables.response.BulkAssetUploadResponse;
 import com.hillspet.wearables.response.DeviceInfoListResponse;
 import com.hillspet.wearables.response.DeviceResponse;
@@ -278,8 +285,10 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 			// if validation fails then write back the message to user.
 			if (!headerValidation) {
 				// invalid file.
-				throw new ServiceExecutionException("Invalid File");
-				// return addDeviceList;
+				throw new ServiceExecutionException(
+						"convertBulkExcelToDeviceList service validation failed cannot proceed further",
+						javax.ws.rs.core.Response.Status.BAD_REQUEST.getStatusCode(),
+						Arrays.asList(new WearablesError(WearablesErrorCode.INVALID_FILE)));
 			}
 
 			while (rows.hasNext()) {
@@ -319,7 +328,7 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 								value = "";
 
 							} else if (!validateAssetNumber(value.trim())
-									&& (assetModelVal.indexOf("AGL") != -1 || assetModelVal.indexOf("CMAS") != -1)) { 
+									&& (assetModelVal.indexOf("AGL") != -1 || assetModelVal.indexOf("CMAS") != -1)) {
 								errorsList.add("Asset number is invalid");
 							}
 						}
@@ -377,7 +386,6 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 					case 5:
 						deviceInfo.setMfgFirmware(value);
 						break;
-
 					case 6:
 						deviceInfo.setMfgMacAddr(value);
 						break;
@@ -397,6 +405,19 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 								deviceInfo.setExceptionMsg("Study Name is Invalid");
 							}
 						}
+						break;
+					case 10:
+						deviceInfo.setWifiSSID(value);
+						break;
+					case 11:
+						LOGGER.info("Validating the Maxlength of Box Number");
+						if (StringUtils.isNotBlank(value)) {
+							if (value.trim().length() > 50) {
+								errorsList.add("Invalid box number (" + value + "), allows maximum 50 characters");
+								value = "";
+							}
+						}
+						deviceInfo.setBoxNumber(value);
 						break;
 					default:
 						break;
@@ -424,10 +445,11 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 	}
 
 	private boolean validateHeaders(List<String> givenHeaders) {
+		LOGGER.info("validateHeaders start");
 		if (!givenHeaders.isEmpty()) {
 			String[] validHeaders = new String[] { "Asset Number", "Asset Type", "Asset Model", "Asset Location",
 					"Manufacturer Serial Number", "Manufacturer Firmware", "Bluetooth MAC Address", "Wifi MAC Address",
-					"Tracking Number", "Study Name" };
+					"Tracking Number", "Study Name", "Wi-Fi SSID", "Box Number" };
 
 			for (int i = 0; i < givenHeaders.size(); i++) {
 				if (!Arrays.asList(validHeaders).contains(givenHeaders.get(i))) {
@@ -436,6 +458,7 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 			}
 
 		}
+		LOGGER.info("validateHeaders end ");
 		return true;
 	}
 
@@ -546,11 +569,10 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 		workbook = new XSSFWorkbook();
 
 		try {
-
 			Sheet sheet = workbook.createSheet("Asset Information");
 			String[] validHeaders = new String[] { "Asset Number", "Asset Type", "Asset Model", "Asset Location",
 					"Manufacturer Serial Number", "Manufacturer Firmware", "Bluetooth MAC Address", "Wifi MAC Address",
-					"Tracking Number", "Study Name" };
+					"Tracking Number", "Study Name", "Wi-Fi SSID", "Box Number" };
 
 			DeviceResponse deviceResponse = assetManagementDao.getDeviceTypesAndModels();
 			List<String> modelList = new ArrayList<>();
@@ -563,6 +585,7 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 			List<DeviceLocation> assetLocation = lookupDao.getDeviceLocationsBulkUpload();
 			List<FirmwareVersion> firmWareList = assetManagementDao.getAllFirmwareVersionsList();
 			List<StudyListDTO> studyList = studyDao.getStudyList(8989, "Yes", "No");
+			List<WifiSsIdResponse> ssID = lookupDao.getWifiSsIdList();
 
 			String[] modelArray = null;
 			String[] assetTypeArray = null;
@@ -706,6 +729,36 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 					headerCellStyle2.setFont(messageFont2);
 					cell.setCellStyle(headerCellStyle2);
 				}
+
+				if (validHeaders[col].equals("Wi-Fi SSID")) {
+					CellStyle headerCellStyle2 = workbook.createCellStyle();
+					headerCellStyle2.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
+					headerCellStyle2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+					headerCellStyle2.setBorderTop(BorderStyle.MEDIUM);
+					headerCellStyle2.setBorderRight(BorderStyle.MEDIUM);
+					headerCellStyle2.setBorderBottom(BorderStyle.MEDIUM);
+					headerCellStyle2.setBorderLeft(BorderStyle.MEDIUM);
+					headerCellStyle2.setWrapText(true);
+					Font messageFont2 = workbook.createFont();
+					messageFont2.setColor(IndexedColors.BLACK.getIndex());
+					headerCellStyle2.setFont(messageFont2);
+					cell.setCellStyle(headerCellStyle2);
+				}
+
+				if (validHeaders[col].equals("Box Number")) {
+					CellStyle headerCellStyle2 = workbook.createCellStyle();
+					headerCellStyle2.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
+					headerCellStyle2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+					headerCellStyle2.setBorderTop(BorderStyle.MEDIUM);
+					headerCellStyle2.setBorderRight(BorderStyle.MEDIUM);
+					headerCellStyle2.setBorderBottom(BorderStyle.MEDIUM);
+					headerCellStyle2.setBorderLeft(BorderStyle.MEDIUM);
+					headerCellStyle2.setWrapText(true);
+					Font messageFont2 = workbook.createFont();
+					messageFont2.setColor(IndexedColors.BLACK.getIndex());
+					headerCellStyle2.setFont(messageFont2);
+					cell.setCellStyle(headerCellStyle2);
+				}
 			}
 
 			// Row for Message header
@@ -799,6 +852,34 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 					messageCellStyle1.setFont(messageFont1);
 					cell.setCellStyle(messageCellStyle1);
 					break;
+				case "Wi-Fi SSID":
+					message = "Length: Max. 200 characters \n" + "Required: No";
+
+					CellStyle messageCellStyle11 = workbook.createCellStyle();
+					messageCellStyle11.setBorderTop(BorderStyle.MEDIUM);
+					messageCellStyle11.setBorderRight(BorderStyle.MEDIUM);
+					messageCellStyle11.setBorderBottom(BorderStyle.MEDIUM);
+					messageCellStyle11.setBorderLeft(BorderStyle.MEDIUM);
+					messageCellStyle11.setWrapText(true);
+					Font messageFont11 = workbook.createFont();
+					messageFont11.setColor(IndexedColors.BLACK.getIndex());
+					messageCellStyle11.setFont(messageFont11);
+					cell.setCellStyle(messageCellStyle11);
+					break;
+				case "Box Number":
+					message = "Length: Max. 50 characters \n" + "Required: No";
+
+					CellStyle messageCellStyle12 = workbook.createCellStyle();
+					messageCellStyle12.setBorderTop(BorderStyle.MEDIUM);
+					messageCellStyle12.setBorderRight(BorderStyle.MEDIUM);
+					messageCellStyle12.setBorderBottom(BorderStyle.MEDIUM);
+					messageCellStyle12.setBorderLeft(BorderStyle.MEDIUM);
+					messageCellStyle12.setWrapText(true);
+					Font messageFont12 = workbook.createFont();
+					messageFont12.setColor(IndexedColors.BLACK.getIndex());
+					messageCellStyle12.setFont(messageFont12);
+					cell.setCellStyle(messageCellStyle12);
+					break;
 				}
 				cell.setCellValue(message);
 
@@ -815,6 +896,9 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 			Sheet sheet2 = workbook.createSheet("ListSheet");
 			Sheet sheet3 = workbook.createSheet("ListSheet2");
 			Sheet sheet4 = workbook.createSheet("ListSheet3");
+			Sheet sheet5 = workbook.createSheet("ListSheet4");
+			Sheet sheet6 = workbook.createSheet("ListSheet6");
+
 			// for (int cn = 2; cn < 500; cn++) {
 
 			Row row = sheet.createRow(2);
@@ -825,6 +909,8 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 			row.createCell(4).setCellValue("");
 			row.createCell(5).setCellValue("");
 			row.createCell(9).setCellValue("");
+			row.createCell(10).setCellValue("");
+
 			validationHelper = new XSSFDataValidationHelper((XSSFSheet) sheet);
 
 			if (row.getCell(1).toString() == "") {
@@ -873,9 +959,30 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 			}
 
 			if (row.getCell(3).toString() == "") {
+
+				for (int i = 0; i < assetLocations.length - 1; i++) {
+					sheet6.createRow(i).createCell(0).setCellValue(assetLocations[i] + "");
+				}
+
+				sheet6.setSelected(false);
+
+				Name namedCell = workbook.createName();
+				namedCell.setNameName("SourceList6");
+				String reference = "ListSheet6!$A$2:$A$500";
+				namedCell.setRefersToFormula(reference);
+
+				sheet.setActiveCell(new CellAddress("D3"));
+
 				CellRangeAddressList cellRange = new CellRangeAddressList(2, 500, 3, 3);
-				constraint = validationHelper.createExplicitListConstraint(assetLocations);
+				try {
+					constraint = validationHelper.createFormulaListConstraint("SourceList6");
+				} catch (Exception e) {
+					e.printStackTrace();
+					LOGGER.debug("modelArray error.", e);
+				}
+
 				dataValidation = validationHelper.createValidation(constraint, cellRange);
+
 				dataValidation.setSuppressDropDownArrow(true);
 
 				sheet.addValidationData(dataValidation);
@@ -939,9 +1046,39 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 				sheet.addValidationData(dataValidation);
 			}
 
+			if (row.getCell(10).toString() == "") {
+
+				for (int i = 0; i < ssID.size(); i++) {
+					sheet5.createRow(i).createCell(0).setCellValue(ssID.get(i).getSsId() + "");
+				}
+				sheet5.setSelected(false);
+
+				Name namedCell = workbook.createName();
+				namedCell.setNameName("SourceList4");
+				String reference = "ListSheet4!$A$2:$A$500";
+				namedCell.setRefersToFormula(reference);
+
+				sheet.setActiveCell(new CellAddress("K3"));
+
+				CellRangeAddressList cellRange = new CellRangeAddressList(2, 500, 10, 10);
+				try {
+					constraint = validationHelper.createFormulaListConstraint("SourceList4");
+				} catch (Exception e) {
+					e.printStackTrace();
+					LOGGER.debug("SSID error.", e);
+				}
+
+				dataValidation = validationHelper.createValidation(constraint, cellRange);
+				dataValidation.setSuppressDropDownArrow(true);
+				sheet.addValidationData(dataValidation);
+			}
+
 			workbook.setSheetHidden(1, true);
 			workbook.setSheetHidden(2, true);
 			workbook.setSheetHidden(3, true);
+			workbook.setSheetHidden(4, true);
+			workbook.setSheetHidden(5, true);
+
 			// }
 			LOGGER.debug("generateBulkUploadExcel ended.");
 		} catch (Exception e) {
@@ -1018,4 +1155,46 @@ public class AssetManagementServiceImpl implements AssetManagementService {
 
 		return studyDto == null ? null : studyDto.getStudyId();
 	}
+
+	@Override
+	public List<Asset> getSensorsListBySsId(String ssId) throws ServiceExecutionException {
+		LOGGER.debug("getSensorsListBySsId called");
+		List<Asset> assetList = assetManagementDao.getSensorsListBySsId(ssId);
+		LOGGER.debug("getSensorsListBySsId ");
+		return assetList;
+	}
+
+	@Override
+	public AssetResponseList getSensorsList(AssetParam filter) throws ServiceExecutionException {
+		LOGGER.debug("getSensorsList called");
+		Map<String, Integer> mapper = assetManagementDao.getSensorsListCount(filter);
+		int total = mapper.get("count");
+		int totalCount = mapper.get("totalCount");
+
+		List<Asset> assetsList = total > 0 ? assetManagementDao.getSensorsList(filter) : new ArrayList<>();
+		AssetResponseList response = new AssetResponseList();
+		response.setAsset(assetsList);
+		response.setTotalElements(totalCount);
+		response.setSearchElments(total);
+
+		LOGGER.debug("getAssetsList is {}", assetsList);
+		LOGGER.debug("getAssetsList completed successfully");
+		return response;
+	}
+
+	@Override
+	public List<com.hillspet.wearables.dto.Status> getAssetStatus() throws ServiceExecutionException {
+		LOGGER.debug("getAssetStatus called");
+		List<Status> status = assetManagementDao.getAssetStatus();
+		LOGGER.debug("getAssetStatus ");
+		return status;
+	}
+
+	@Override
+	public void bulkWhiteListing(BulkWhiteListingRequest request, Integer userId) throws ServiceExecutionException {
+		LOGGER.debug("bulkWhiteListing called");
+		assetManagementDao.bulkWhiteListing(request, userId);
+		LOGGER.debug("bulkWhiteListing completed successfully");
+	}
+
 }

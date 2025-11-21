@@ -43,7 +43,7 @@ public class BaseFilter {
 	private String filterValue;
 
 	@QueryParam("statusId")
-	@ApiParam(name = "statusId", type = "integer", value = "Search based on status Id drop down")
+	@ApiParam(name = "statusId", type = "String", value = "Search based on status Id drop down")
 	private String statusId;
 
 	private Boolean isSuper;

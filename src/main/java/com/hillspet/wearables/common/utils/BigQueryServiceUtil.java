@@ -21,8 +21,6 @@ import com.google.cloud.bigquery.JobId;
 import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 public class BigQueryServiceUtil {
 	private static final Logger LOGGER = LogManager.getLogger(BigQueryServiceUtil.class);

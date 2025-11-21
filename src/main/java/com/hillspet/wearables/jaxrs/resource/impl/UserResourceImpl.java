@@ -5,7 +5,6 @@ import java.net.URLEncoder;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Principal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.validation.Valid;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,9 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
-import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Service;
 
 import com.hillspet.wearables.common.builders.JaxrsJsonResponseBuilder;
@@ -75,13 +70,11 @@ public class UserResourceImpl implements UserResource {
 	@Autowired
 	private FormatValidationService formatValidationService;
 
-	@Autowired
-	private TokenStore tokenStore;
-
 	@Override
-	public Response user(SecurityContext securityContext) {
-		SuccessResponse<Principal> successResponse = new SuccessResponse<>();
-		successResponse.setServiceResponse(securityContext.getUserPrincipal());
+	public Response user() {
+		CustomUserDetails userDetails = authentication.getAuthUserDetails();
+		SuccessResponse<CustomUserDetails> successResponse = new SuccessResponse<>();
+		successResponse.setServiceResponse(userDetails);
 		return responseBuilder.buildResponse(successResponse);
 	}
 
@@ -208,42 +201,6 @@ public class UserResourceImpl implements UserResource {
 		SuccessResponse<UsersResponse> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(response);
 		return responseBuilder.buildResponse(successResponse);
-	}
-
-	public Response logoutUser(String authorization, String userId, String platform) {
-		try {
-			if (authorization != null && authorization.contains("Bearer")) {
-				String tokenValue = authorization.replace("Bearer", "").trim();
-				OAuth2AccessToken accessToken = tokenStore.readAccessToken(tokenValue);
-				try {
-					if (accessToken != null && !accessToken.isExpired() && StringUtils.isNotEmpty(userId)
-							&& !userId.equalsIgnoreCase("null")) {
-						int uId = Integer.parseInt(userId);
-						AuditLog auditLog = new AuditLog();
-						auditLog.setActionName("Logged-Out");
-						auditLog.setModuleName("User");
-						auditLog.setMenuId(24);
-						auditLog.setTableName("B_USER");
-						auditLog.setEntityId(uId);
-						auditLog.setAuditMessage("Logged out");
-						auditLog.setUserId(uId);
-						auditLog.setCreatedBy(uId);
-						auditLogService.addAuditLog(auditLog, platform);
-					}
-				} catch (Exception e) {
-					LOGGER.error("Exception, while user logout,  insert audit log", e);
-				}
-				if (accessToken != null) {
-					tokenStore.removeAccessToken(accessToken);
-
-					OAuth2RefreshToken refreshToken = accessToken.getRefreshToken();
-					tokenStore.removeRefreshToken(refreshToken);
-				}
-			}
-		} catch (Exception e) {
-			LOGGER.error("Invalid access token, while user logout", e);
-		}
-		return responseBuilder.buildResponse(new SuccessResponse<>());
 	}
 
 	@Override
@@ -389,6 +346,19 @@ public class UserResourceImpl implements UserResource {
 	public Response validateUser() {
 		CustomUserDetails userDtls = authentication.getAuthUserDetails();
 		userDtls.setRolePermissions(null);
+		
+		int userId = userDtls.getUserId();
+		AuditLog auditLog = new AuditLog();
+		auditLog.setActionName("Logged-In");
+		auditLog.setModuleName("Issue Tracker");
+		auditLog.setMenuId(76);
+		auditLog.setTableName("B_USER");
+		auditLog.setEntityId(userId);
+		auditLog.setAuditMessage("User has been accessed Issue Tracker");
+		auditLog.setUserId(userId);
+		auditLog.setCreatedBy(userId);
+		auditLogService.addAuditLog(auditLog, "WP");
+				
 		SuccessResponse<CustomUserDetails> successResponse = new SuccessResponse<>();
 		successResponse.setServiceResponse(userDtls);
 		return responseBuilder.buildResponse(successResponse);

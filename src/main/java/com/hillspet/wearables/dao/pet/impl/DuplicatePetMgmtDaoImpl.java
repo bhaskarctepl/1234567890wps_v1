@@ -3,12 +3,9 @@ package com.hillspet.wearables.dao.pet.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -22,8 +19,6 @@ import org.springframework.stereotype.Repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillspet.wearables.common.constants.Constants;
 import com.hillspet.wearables.common.constants.SQLConstants;
-import com.hillspet.wearables.common.constants.WearablesErrorCode;
-import com.hillspet.wearables.common.dto.WearablesError;
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 import com.hillspet.wearables.common.utils.GCPClientUtil;
 import com.hillspet.wearables.dao.BaseDaoImpl;
@@ -54,7 +49,7 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 		try {
 			totalCount = selectForObject(SQLConstants.PET_GET_PRIMARY_PETS_LIST_COUNT, String.class,
 					filter.getSearchText(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPrimaryPetsListCount", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -93,7 +88,7 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
 					filter.getSearchText().trim(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPrimaryPetsList", e);
@@ -109,7 +104,7 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 		try {
 			totalCount = selectForObject(SQLConstants.PET_GET_PRIMARY_PETS_COUNT, String.class, filter.getSearchText(),
 					filter.getPetName(), filter.getGender(), filter.getDateOfBirth(), filter.getBreedId(),
-					filter.getUserId(), filter.getRoleTypeId());
+					filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName(), filter.getStudyName());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPrimaryPetsCount", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -130,7 +125,7 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 					petListDTO.setSlNumber(rs.getInt("slNo"));
 					petListDTO.setPetId(rs.getInt("PET_ID"));
 					petListDTO.setPetName(rs.getString("PET_NAME"));
-					
+
 					petListDTO.setPetParentName(rs.getString("PET_PARENT_NAME"));
 
 					petListDTO.setPetPhoto(rs.getString("PHOTO_NAME"));
@@ -145,12 +140,13 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 					petListDTO.setDateOfBirth(
 							rs.getDate("BIRTHDAY") == null ? null : rs.getDate("BIRTHDAY").toLocalDate());
 					petListDTO.setBreedName(rs.getString("BREED_NAME"));
+					petListDTO.setStudyName(rs.getString("STUDY_NAME"));
 
 					petList.add(petListDTO);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
 					filter.getSearchText().trim(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName(), filter.getStudyName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPrimaryPets", e);
@@ -166,7 +162,8 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 		try {
 			totalCount = selectForObject(SQLConstants.PET_GET_DUPLICATE_PETS_COUNT, String.class,
 					filter.getSearchText(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getPrimaryPetId(),filter.getUserId(), filter.getRoleTypeId());
+					filter.getBreedId(), filter.getPrimaryPetId(), filter.getUserId(), filter.getRoleTypeId(),
+					filter.getPetParentName(), filter.getStudyName());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDuplicatePetsCount", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -187,7 +184,7 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 					petListDTO.setSlNumber(rs.getInt("slNo"));
 					petListDTO.setPetId(rs.getInt("PET_ID"));
 					petListDTO.setPetName(rs.getString("PET_NAME"));
-					
+
 					petListDTO.setPetParentName(rs.getString("PET_PARENT_NAME"));
 
 					petListDTO.setPetPhoto(rs.getString("PHOTO_NAME"));
@@ -202,7 +199,7 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 					petListDTO.setDateOfBirth(
 							rs.getDate("BIRTHDAY") == null ? null : rs.getDate("BIRTHDAY").toLocalDate());
 					petListDTO.setBreedName(rs.getString("BREED_NAME"));
-					
+
 					petListDTO.setStudyName(rs.getString("STUDY_NAME"));
 					petListDTO.setPetParentEmail(rs.getString("EMAIL"));
 
@@ -210,7 +207,8 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
 					filter.getSearchText().trim(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getPrimaryPetId(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getBreedId(), filter.getPrimaryPetId(), filter.getUserId(), filter.getRoleTypeId(),
+					filter.getPetParentName(), filter.getStudyName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDuplicatePets", e);
@@ -231,32 +229,32 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 					PetDataStreamDTO petListDTO = new PetDataStreamDTO();
 					petListDTO.setPetId(rs.getInt("PET_ID"));
 					petListDTO.setPetName(rs.getString("PET_NAME"));
-					
+
 					petListDTO.setStudyId(rs.getInt("STUDY_ID"));
 					petListDTO.setStudyName(rs.getString("STUDY_NAME"));
-					petListDTO.setAssetNumber(rs.getString("DEVICE_NUMBER")); 
+					petListDTO.setAssetNumber(rs.getString("DEVICE_NUMBER"));
 					petListDTO.setStreamId(rs.getString("DATA_STREAM_ID"));
-					
-					petListDTO.setStartDate(rs.getDate("START_DATE") == null ? null : rs.getDate("START_DATE").toLocalDate());
-					
+
+					petListDTO.setStartDate(
+							rs.getDate("START_DATE") == null ? null : rs.getDate("START_DATE").toLocalDate());
+
 					String allEndDates = rs.getString("ALL_END_DATES");
-					if(allEndDates.contains("$$$")) {
+					if (allEndDates.contains("$$$")) {
 						petListDTO.setEndDate(null);
-					}else{
-						petListDTO.setEndDate(rs.getDate("END_DATE") == null ? null : rs.getDate("END_DATE").toLocalDate());
+					} else {
+						petListDTO.setEndDate(
+								rs.getDate("END_DATE") == null ? null : rs.getDate("END_DATE").toLocalDate());
 					}
-					
-					petListDTO.setAssignDate(rs.getDate("ASSIGN_DATE") == null ? null : rs.getDate("ASSIGN_DATE").toLocalDate());
-					
+
+					petListDTO.setAssignDate(
+							rs.getDate("ASSIGN_DATE") == null ? null : rs.getDate("ASSIGN_DATE").toLocalDate());
+
 					petListDTO.setPetType(rs.getString("PET_TYPE"));
-					//petListDTO.setPetStudyDeviceId(rs.getInt("PET_STUDY_DEVICE_ID"));
-					
+					// petListDTO.setPetStudyDeviceId(rs.getInt("PET_STUDY_DEVICE_ID"));
+
 					petList.add(petListDTO);
 				}
-			}, 
-			   filter.getPrimaryPetId()
-			  ,filter.getDuplicatePetIds()
-			  );
+			}, filter.getPrimaryPetId(), filter.getDuplicatePetIds());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDuplicatePets", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -268,8 +266,9 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 	public DataStreamGroupRequest saveDataStream(DataStreamGroupRequest request) throws ServiceExecutionException {
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
-			
-			inputParams.put("p_duplicate_pet_list", new ObjectMapper().writeValueAsString(request.getDuplicatePetsList()));
+
+			inputParams.put("p_duplicate_pet_list",
+					new ObjectMapper().writeValueAsString(request.getDuplicatePetsList()));
 			inputParams.put("p_created_by", request.getUserId());
 
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.PET_DUPLICATE_STREAM_INSERT, inputParams);
@@ -281,7 +280,7 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 				// getting the inserted flag value
 				Integer dataStreamId = (int) outParams.get("last_insert_id");
 				LOGGER.info("Data Stream added successfully", dataStreamId);
-			}else {
+			} else {
 				LOGGER.error("saveDataStream Data Stream errorMsg ", errorMsg);
 				throw new ServiceExecutionException(errorMsg);
 			}
@@ -297,9 +296,9 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 		String totalCount = "";
 		LOGGER.debug("getDuplicatePetConfigListCount called");
 		try {
-			totalCount = selectForObject(SQLConstants.PET_GET_DUPLICATE_PETS_CONFIG_COUNT, String.class, filter.getSearchText(),
-					filter.getPetName(), filter.getGender(), filter.getDateOfBirth(), filter.getBreedId(),
-					filter.getUserId(), filter.getRoleTypeId());
+			totalCount = selectForObject(SQLConstants.PET_GET_DUPLICATE_PETS_CONFIG_COUNT, String.class,
+					filter.getSearchText(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
+					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDuplicatePetListCount", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -309,7 +308,8 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 	}
 
 	@Override
-	public List<DuplicatePetConfigDTO> getDuplicatePetConfigList(DuplicatePetsFilter filter) throws ServiceExecutionException {
+	public List<DuplicatePetConfigDTO> getDuplicatePetConfigList(DuplicatePetsFilter filter)
+			throws ServiceExecutionException {
 		List<DuplicatePetConfigDTO> petList = new ArrayList<>();
 		LOGGER.debug("getDuplicatePetConfigList called");
 
@@ -322,16 +322,17 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 					petListDTO.setPetName(rs.getString("PET_NAME"));
 					petListDTO.setDataStreamId(rs.getString("PRIMARY_STREAM_ID"));
 					petListDTO.setDuplicatePets(rs.getString("DUPLICATE_PETS"));
-					
-					
+					petListDTO.setPetParentNames(rs.getString("PET_PARENT_NAMES"));
+					petListDTO.setIsPetVip(rs.getBoolean("IS_VIP_PET"));
+					petListDTO.setGender(rs.getString("GENDER"));
+					petListDTO.setDateOfBirth(
+							rs.getDate("BIRTHDAY") == null ? null : rs.getDate("BIRTHDAY").toLocalDate());
+					petListDTO.setBreedName(rs.getString("BREED_NAME"));
 					petList.add(petListDTO);
 				}
-			}, 
-					filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
-					filter.getSearchText().trim(),
-					filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId()
-			  );
+			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
+					filter.getSearchText().trim(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
+					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDuplicatePetConfigList", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -349,57 +350,63 @@ public class DuplicatePetMgmtDaoImpl extends BaseDaoImpl implements DuplicatePet
 				@Override
 				public void processRow(ResultSet rs) throws SQLException {
 					PetDuplicateConfigDTO petListDTO = new PetDuplicateConfigDTO();
-					
+
 					petListDTO.setStudyName(rs.getString("STUDY_NAME"));
 					petListDTO.setAssetNumber(rs.getString("ASSET_NUMBER"));
 					petListDTO.setPetId(rs.getInt("PET_ID"));
 					petListDTO.setPetName(rs.getString("PET_NAME"));
-					petListDTO.setStartDate(rs.getDate("START_DATE") != null ? rs.getDate("START_DATE").toLocalDate() :  null);
-					
+					petListDTO.setStartDate(
+							rs.getDate("START_DATE") != null ? rs.getDate("START_DATE").toLocalDate() : null);
+
 					String allEndDates = rs.getString("ALL_END_DATES");
-					if(allEndDates.contains("$$$")) {
+					if (allEndDates.contains("$$$")) {
 						petListDTO.setEndDate(null);
-					}else{
-						petListDTO.setEndDate(rs.getDate("END_DATE") == null ? null : rs.getDate("END_DATE").toLocalDate());
+					} else {
+						petListDTO.setEndDate(
+								rs.getDate("END_DATE") == null ? null : rs.getDate("END_DATE").toLocalDate());
 					}
-					
-					
-					petListDTO.setExtractStartDate(rs.getDate("EXTRACT_START_DATE") != null ? rs.getDate("EXTRACT_START_DATE").toLocalDate() :  null);
-					petListDTO.setExtractEndDate(rs.getDate("EXTRACT_END_DATE") != null ? rs.getDate("EXTRACT_END_DATE").toLocalDate() :  null);
-					
-					
+
+					petListDTO.setExtractStartDate(
+							rs.getDate("EXTRACT_START_DATE") != null ? rs.getDate("EXTRACT_START_DATE").toLocalDate()
+									: null);
+					petListDTO.setExtractEndDate(
+							rs.getDate("EXTRACT_END_DATE") != null ? rs.getDate("EXTRACT_END_DATE").toLocalDate()
+									: null);
+
 					petListDTO.setStitchGroupId(rs.getString("PET_STITCH_GROUP_ID"));
 					petListDTO.setStreamId(rs.getString("STREAM_ID"));
 					petListDTO.setPetType(rs.getString("PET_TYPE"));
 					petListDTO.setConfigId(rs.getInt("DUP_PET_CONFIG_ID"));
-					
+
 					/*
-					petListDTO.setPrimaryPetId(rs.getInt("PRIMARY_PET_ID"));
-					petListDTO.setPrimaryPetName(rs.getString("PET_NAME"));
-					petListDTO.setPrimaryStreamId(rs.getString("PRIMARY_STREAM_ID"));
-					petListDTO.setPrimaryPetStartDate(rs.getDate("PR_PET_START_DATE") != null ? rs.getDate("PR_PET_START_DATE").toLocalDate() :  null);
-					petListDTO.setPrimaryPetEndDate(rs.getDate("PR_PET_END_DATE") != null ? rs.getDate("PR_PET_END_DATE").toLocalDate() :  null);
-					
-					petListDTO.setDuplicatePetId(rs.getInt("DUPLICATE_PET_ID"));
-					petListDTO.setDuplicatePetStreamId(rs.getString("DUPLICATE_STREAM_ID"));
-					petListDTO.setIsContinuation(rs.getInt("IS_CONTINUATION"));
-					
-					
-					petListDTO.setDuplicatePetName(rs.getString("DUPLICATE_PET_NAME"));
-					petListDTO.setDuplicatePetStartDate(rs.getDate("DUP_PET_START_DATE") != null ? rs.getDate("DUP_PET_START_DATE").toLocalDate() :  null);
-					petListDTO.setDuplicatePetEndDate(rs.getDate("DUP_PET_END_DATE") != null ? rs.getDate("DUP_PET_END_DATE").toLocalDate() :  null);
-					*/
-					
+					 * petListDTO.setPrimaryPetId(rs.getInt("PRIMARY_PET_ID"));
+					 * petListDTO.setPrimaryPetName(rs.getString("PET_NAME"));
+					 * petListDTO.setPrimaryStreamId(rs.getString("PRIMARY_STREAM_ID"));
+					 * petListDTO.setPrimaryPetStartDate(rs.getDate("PR_PET_START_DATE") != null ?
+					 * rs.getDate("PR_PET_START_DATE").toLocalDate() : null);
+					 * petListDTO.setPrimaryPetEndDate(rs.getDate("PR_PET_END_DATE") != null ?
+					 * rs.getDate("PR_PET_END_DATE").toLocalDate() : null);
+					 * 
+					 * petListDTO.setDuplicatePetId(rs.getInt("DUPLICATE_PET_ID"));
+					 * petListDTO.setDuplicatePetStreamId(rs.getString("DUPLICATE_STREAM_ID"));
+					 * petListDTO.setIsContinuation(rs.getInt("IS_CONTINUATION"));
+					 * 
+					 * 
+					 * petListDTO.setDuplicatePetName(rs.getString("DUPLICATE_PET_NAME"));
+					 * petListDTO.setDuplicatePetStartDate(rs.getDate("DUP_PET_START_DATE") != null
+					 * ? rs.getDate("DUP_PET_START_DATE").toLocalDate() : null);
+					 * petListDTO.setDuplicatePetEndDate(rs.getDate("DUP_PET_END_DATE") != null ?
+					 * rs.getDate("DUP_PET_END_DATE").toLocalDate() : null);
+					 */
+
 					petListDTO.setPetStudyId(rs.getInt("PET_STUDY_ID"));
 					petListDTO.setExcludeFromDataExtract(rs.getInt("EXCLUDE_IN_DATA_EXTRACT"));
-					
+
 					petListDTO.setDupExcludeFromDataExtract(rs.getInt("DUP_EXCLUDE_IN_DATA_EXTRACT"));
-					 
+
 					petList.add(petListDTO);
 				}
-			}, 
-				petId
-			  );
+			}, petId);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getDuplicatePetConfigList", e);
 			throw new ServiceExecutionException(e.getMessage());

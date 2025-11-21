@@ -22,6 +22,14 @@ public class MobileAppFeedbackFilter extends BaseFilter {
 	@QueryParam("pageName")
 	private String pageName;
 
+	@QueryParam("petName")
+	@ApiParam(name = "petName", value = "Search pet by pet name", required = false)
+	private String petName;
+
+	@QueryParam("petParentName")
+	@ApiParam(name = "petParentName", value = "Search pet by Pet Parent Name", required = false)
+	private String petParentName;
+
 	public MobileAppFeedbackFilter() {
 
 	}
@@ -62,6 +70,22 @@ public class MobileAppFeedbackFilter extends BaseFilter {
 
 	public void setPageName(String pageName) {
 		this.pageName = pageName;
+	}
+
+	public String getPetName() {
+		return petName;
+	}
+
+	public void setPetName(String petName) {
+		this.petName = petName;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
 	}
 
 }

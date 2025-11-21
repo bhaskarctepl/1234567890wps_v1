@@ -43,6 +43,21 @@ public class PetListDTO extends BaseDTO {
 
 	private Integer deviceId;
 
+	private Boolean isVipPet;
+
+	private Integer isPushNotificationEnabled;
+	private Integer isEmailNotificationEnabled;
+
+	private Integer isVip;
+
+	public Integer getIsVip() {
+		return isVip;
+	}
+
+	public void setIsVip(Integer isVip) {
+		this.isVip = isVip;
+	}
+
 	public Integer getPetId() {
 		return petId;
 	}
@@ -217,6 +232,30 @@ public class PetListDTO extends BaseDTO {
 
 	public void setDeviceId(Integer deviceId) {
 		this.deviceId = deviceId;
+	}
+
+	public Boolean getIsVipPet() {
+		return isVipPet;
+	}
+
+	public void setIsVipPet(Boolean isVipPet) {
+		this.isVipPet = isVipPet;
+	}
+
+	public Integer getIsPushNotificationEnabled() {
+		return isPushNotificationEnabled;
+	}
+
+	public void setIsPushNotificationEnabled(Integer isPushNotificationEnabled) {
+		this.isPushNotificationEnabled = isPushNotificationEnabled;
+	}
+
+	public Integer getIsEmailNotificationEnabled() {
+		return isEmailNotificationEnabled;
+	}
+
+	public void setIsEmailNotificationEnabled(Integer isEmailNotificationEnabled) {
+		this.isEmailNotificationEnabled = isEmailNotificationEnabled;
 	}
 
 }

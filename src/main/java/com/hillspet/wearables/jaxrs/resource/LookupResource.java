@@ -1,5 +1,6 @@
 package com.hillspet.wearables.jaxrs.resource;
 
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -13,10 +14,12 @@ import org.springframework.http.MediaType;
 
 import com.hillspet.wearables.common.constants.Constants;
 import com.hillspet.wearables.common.response.Message;
+import com.hillspet.wearables.dto.filter.PointTrackFilter;
 import com.hillspet.wearables.jaxrs.resource.impl.PushNotificationListResponse;
 import com.hillspet.wearables.response.AgentActionResponse;
 import com.hillspet.wearables.response.AlgorithmResponse;
 import com.hillspet.wearables.response.AssignedUserResponse;
+import com.hillspet.wearables.response.BehaviorTypeResponse;
 import com.hillspet.wearables.response.BfiScorerListResponse;
 import com.hillspet.wearables.response.CategoryTimerResponse;
 import com.hillspet.wearables.response.ContactMethodResponse;
@@ -32,6 +35,7 @@ import com.hillspet.wearables.response.ExtractFileCategoryResponse;
 import com.hillspet.wearables.response.FrequencyResponse;
 import com.hillspet.wearables.response.ImageScoringTypeResponse;
 import com.hillspet.wearables.response.InventoryStatusResponse;
+import com.hillspet.wearables.response.IsdCodesResponse;
 import com.hillspet.wearables.response.IssueResponse;
 import com.hillspet.wearables.response.MaterialCategoryResponse;
 import com.hillspet.wearables.response.MaterialTypeResponse;
@@ -41,6 +45,7 @@ import com.hillspet.wearables.response.MenuResponse;
 import com.hillspet.wearables.response.MobileAppConfigResponse;
 import com.hillspet.wearables.response.MobileAppFBPhoneModelResponse;
 import com.hillspet.wearables.response.MobileAppFeedbackPageResponse;
+import com.hillspet.wearables.response.NotificationConfigResponse;
 import com.hillspet.wearables.response.OccuranceResponse;
 import com.hillspet.wearables.response.PetBreedResponse;
 import com.hillspet.wearables.response.PetFeedingTimeResponse;
@@ -49,6 +54,7 @@ import com.hillspet.wearables.response.PetNameTimerResponse;
 import com.hillspet.wearables.response.PetParentNameResponse;
 import com.hillspet.wearables.response.PetParentNameTimerResponse;
 import com.hillspet.wearables.response.PetStatusResponse;
+import com.hillspet.wearables.response.PetStudyActionsResponse;
 import com.hillspet.wearables.response.PhaseDaysResponse;
 import com.hillspet.wearables.response.PointTrackerActivityResponse;
 import com.hillspet.wearables.response.PointTrackerMetricResponse;
@@ -81,6 +87,7 @@ import com.hillspet.wearables.response.TicketPriorityResponse;
 import com.hillspet.wearables.response.TicketStatusResponse;
 import com.hillspet.wearables.response.TicketTypeResponse;
 import com.hillspet.wearables.response.TrackerRejectReasonResponse;
+import com.hillspet.wearables.response.WifiResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -494,6 +501,17 @@ public interface LookupResource {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response getPetQuestionnaires(@PathParam("petId") int petId);
 
+	@GET
+	@Path("/getQuestionnairesList")
+	@ApiOperation(value = "Gets study level Questionnaires", notes = "study level Questionnaires")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = QuestionnaireListResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getQuestionnairesList(@BeanParam PointTrackFilter filter);
+
 	/* ------------ Questionnaire Lookup Services End ---------------- */
 
 	/* ------------ PointTracker Lookup Services Start ---------------- */
@@ -520,6 +538,28 @@ public interface LookupResource {
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response getDeviceLocations();
+
+	@GET
+	@Path("/getPetBehaviorTypes")
+	@ApiOperation(value = "Get Pet Behavior Types List", notes = "Get Pet Behavior Types")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = BehaviorTypeResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getPetBehaviorTypes();
+	
+	@GET
+	@Path("/getUniquePetBehaviors")
+	@ApiOperation(value = "Get Unique Pet Behavior List", notes = "Get Unique Pet Behaviors")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = PointTrackerMetricResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getUniquePetBehaviors();
 
 	@GET
 	@Path("/getPetBehaviors/{speciesId}")
@@ -988,16 +1028,118 @@ public interface LookupResource {
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response getDiets();
-	
+
 	@GET
 	@Path("/getPetsByStudy/{studyId}")
 	@ApiOperation(value = "Get Pet Name By Study Lookup", notes = "Gets the By Study")
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = PetNameTimerResponse.class),
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = PetNameResponse.class),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
 	public Response getPetsByStudy(@PathParam("studyId") int studyId);
 
+	/*
+	 * ------------ Pet BFI Image Score end ----------------
+	 */
+
+	@GET
+	@Path("/getAlertTypes")
+	@ApiOperation(value = "Get Alert Types", notes = "Gets Alert Type List")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = BfiScorerListResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getAlertTypes();
+
+	@GET
+	@Path("/getStudiesWithAlerts")
+	@ApiOperation(value = "Get Study Alerts Lookup", notes = "Gets Study Alerts List")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = BfiScorerListResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getStudiesWithAlerts();
+
+	@GET
+	@Path("/getDevicesWithAlerts")
+	@ApiOperation(value = "Get Study Alerts Lookup", notes = "Gets Study Alerts List")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = BfiScorerListResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getDevicesWithAlerts();
+
+	@GET
+	@Path("/getAlertActions")
+	@ApiOperation(value = "Get Study Alerts Lookup", notes = "Gets Study Alerts List")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = BfiScorerListResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getAlertActions();
+
+	@GET
+	@Path("/getFrequencies")
+	@ApiOperation(value = "Get Frequency List Lookup", notes = "Gets the Frequency List")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = FrequencyResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getFrequencies(@QueryParam("frequencyType") String frequencyType);
+
+	@GET
+	@Path("/getIsdCodess")
+	@ApiOperation(value = "Get ISD Codes List Lookup", notes = "Gets the ISD Codes List")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = IsdCodesResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getIsdCodess();
+
+	@GET
+	@Path("/getNotificationConfig")
+	@ApiOperation(value = "Get Notification Config List Lookup", notes = "Gets the Notification Config List")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = NotificationConfigResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getNotificationConfig(@QueryParam("studyId") String studyId);
+
+	@GET
+	@Path("/getPetStudyActions")
+	@ApiOperation(value = "Get Pet actions on a study", notes = "Get Pet actions on a study")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = PetStudyActionsResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getPetStudyActions();
+
+	@GET
+	@Path("/getWifiSsId")
+	@ApiOperation(value = "Get WI-FI SSID LIST", notes = "Get WI-FI SSID LIST")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = "Successful Response", response = WifiResponse.class),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Bad Request", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
+	public Response getWifiSsIdList();
 }

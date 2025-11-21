@@ -61,7 +61,7 @@ public final class Constants {
 	public static final String REGEX_PIPE_DELIMETER = "\\|";
 	public static final String REGEX_HTML = "\\<.*?\\>";
 
-	public static final String REGEX_EMAIL = "^[A-Za-z0-9+_.-]+@(.+)$";
+	public static final String REGEX_EMAIL = "[A-Za-z0-9._-]+@[A-Za-z0-9-]+(\\.[a-z]{2,}){1,3}$";
 	public static final String REGEX_PASSWORD = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$&^])[A-Za-z\\d!@#$&^]{8,}$";
 	public static final String REGEX_MOBILE = "^[0-9]{10}$";
 	public static final String REGEX_PINCODE = "^[0-9]{5}$";
@@ -125,12 +125,21 @@ public final class Constants {
 	
 	public static final String UPDATE_PASSWORD_MAIL_BODY = "<p>Hi {0},</p><p>This is a confirmation that you changed your password for your {1} account.</p><p>If you made this change, you are all set. If you did not make this change, please let us know.</p><p>Thanks, <br/>  {2}</p>";
 
-	public static final String CREATE_USER_MAIL_SUBJECT = "Wearables Clinical Portal | New Account Created";
+	public static final String CREATE_USER_MAIL_SUBJECT = "Welcome to the Wearables Clinical Portal!";
+	public static final String EXPORT_QUESTIONNAIRE_MAIL_SUBJECT = "Your Questionnaire Export is Ready for Download";
 	// public static final String CREATE_USER_MAIL_BODY = "<p>Dear {0}, </p><p> Your
 	// account is created with User Id {1} for the {2} with below password. </p><p
 	// style=\"font-size:10 px;font-weight:600;background-color:#3e3
 	// e3e;\">{3}</p><p>Thanks, <br/> {4}</p>";
-	public static final String CREATE_USER_MAIL_BODY = "<p>Hi {0}!</p>Welcome to the {2}.<br>A new account has been created for you with the below credentials:<br>· Username&nbsp;: {1}<br>· Password&nbsp;&nbsp;: {3}<br><br> Thanks,<br>{4} Support";
+	public static final String CREATE_USER_MAIL_BODY = "<p>Dear {0},</p>We are delighted to inform you that you have been successfully added to the {1}!<br>You can now access the {2} using your Colgate-Palmolive Okta account.<br><br> Thank you,<br>{3} Support";
+	public static final String EXPORT_QUESTIONNAIRE_MAIL_BODY = "<p>Hi {0},</p><p>Your requested questionnaire export is now ready. You can download the file from the Exports Requested tab on the Questionnaire Exports page.<br/> To access your export, simply follow these steps:</p><ol><li>Log in to the Portal Application.</li>\r\n" + 
+			"<li>Navigate to the Questionnaire Menu > Questionnaire Response > Questionnaire Exports page.</li>\r\n" + 
+			"<li>Go to the Exports Requested tab.</li>\r\n" + 
+			"<li>Download your file.</li>\r\n" + 
+			"</ol></p>\r\n" + 
+			"If you encounter any issues or need further assistance, please reach out to Portal Admin.\r\n" + 
+			"</p>\r\n<br/>" + 
+			"Best regards,<br>Wearables Clinical Portal";
 
 	public static final String UPDATED_USER_MAIL_SUBJECT = "Wearables Clinical Portal | Your account details have been updated";
 	public static final String UPDATED_USER_MAIL_BODY = "<p>Hi {0},</p>This is to confirm that the following information has been updated :</p> <br> {2} <br><p>Kindly contact your administrator if the above mentioned changes are incorrect. </p><p> Thanks,</p>{4}";
@@ -257,4 +266,10 @@ public final class Constants {
 	
 	public static final String REQUEST_FROM_WEARABLES = "WP";
 	public static final String REQUEST_FROM_ANALYTICAL = "AP";
+	
+	public static final String GCP_QUESTIONNAIRE_EXPORT_PATH = "Questionnaire/exports";
+	public static final String GCP_QUESTIONNAIRE_EXPORT_FILE_NAME = "QuestionnaireExport";
+	public static final String VERTICAL = "VERTICAL";
+	public static final String HORIZONTAL = "HORIZONTAL";
+	
 }

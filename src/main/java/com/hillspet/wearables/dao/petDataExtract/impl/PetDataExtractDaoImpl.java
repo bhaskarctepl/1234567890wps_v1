@@ -62,17 +62,17 @@ public class PetDataExtractDaoImpl extends BaseDaoImpl implements PetDataExtract
 					petDataExtractStreamDTO.setAssetNumber(rs.getString("DEVICE_NUMBER"));
 					petDataExtractStreamDTO.setStartDate(
 							rs.getDate("START_DATE") == null ? null : rs.getDate("START_DATE").toLocalDate());
-					
+
 					String allEndDates = rs.getString("ALL_END_DATES");
-					if(allEndDates.contains("$$$")) {
+					if (allEndDates.contains("$$$")) {
 						petDataExtractStreamDTO.setEndDate(null);
-					}else{
-						petDataExtractStreamDTO
-						.setEndDate(rs.getDate("END_DATE") == null ? null : rs.getDate("END_DATE").toLocalDate());
+					} else {
+						petDataExtractStreamDTO.setEndDate(
+								rs.getDate("END_DATE") == null ? null : rs.getDate("END_DATE").toLocalDate());
 					}
-					
+
 					petDataExtractStreamDTO.setPetType(rs.getString("PET_TYPE"));
-					
+
 					petDataExtractStreamDTOList.add(petDataExtractStreamDTO);
 				}
 			}, petId);
@@ -97,8 +97,6 @@ public class PetDataExtractDaoImpl extends BaseDaoImpl implements PetDataExtract
 			inputParams.put("p_created_by", petDataExtractStreamsRequest.getUserId());
 
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.PET_DATA_EXTRACT_INSERT, inputParams);
-			String errorMsg = (String) outParams.get("out_error_msg");
-			int statusFlag = (int) outParams.get("out_flag");
 			BeanUtils.copyProperties(petDataExtractStreamsRequest, petDataExtractStreamDTO);
 		} catch (SQLException | JsonProcessingException e) {
 			LOGGER.error("error while executing addPetExtractStreams ", e);
@@ -114,7 +112,7 @@ public class PetDataExtractDaoImpl extends BaseDaoImpl implements PetDataExtract
 		try {
 			totalCount = selectForObject(SQLConstants.FN_PET_GET_DETAILS_FOR_DATA_EXTRACT, String.class,
 					filter.getSearchText(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetsCount", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -151,7 +149,7 @@ public class PetDataExtractDaoImpl extends BaseDaoImpl implements PetDataExtract
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
 					filter.getSearchText().trim(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPets", e);
@@ -172,13 +170,14 @@ public class PetDataExtractDaoImpl extends BaseDaoImpl implements PetDataExtract
 					PetDataExtractConfigListDTO petDataExtractConfigListDTO = new PetDataExtractConfigListDTO();
 					petDataExtractConfigListDTO.setPetId(rs.getInt("PET_ID"));
 					petDataExtractConfigListDTO.setPetName(rs.getString("PET_NAME"));
+					petDataExtractConfigListDTO.setPetParentName(rs.getString("PET_PARENT_NAME"));
 					petDataExtractConfigListDTO.setCreatedBy(rs.getString("REQUESTED_BY"));
 					petDataExtractConfigListDTO.setCreatedDate(rs.getDate("CREATED_DATE").toLocalDate());
 					petDataExtractConfigList.add(petDataExtractConfigListDTO);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(),
 					filter.getSearchText().trim(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetDataExtractConfigList", e);
@@ -194,7 +193,7 @@ public class PetDataExtractDaoImpl extends BaseDaoImpl implements PetDataExtract
 		try {
 			totalCount = selectForObject(SQLConstants.FN_PET_GET_DATA_EXTRACT_CONFIG_LIST, String.class,
 					filter.getSearchText(), filter.getPetName(), filter.getGender(), filter.getDateOfBirth(),
-					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId());
+					filter.getBreedId(), filter.getUserId(), filter.getRoleTypeId(), filter.getPetParentName());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetsCount", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -216,24 +215,25 @@ public class PetDataExtractDaoImpl extends BaseDaoImpl implements PetDataExtract
 					dto.setStudyName(rs.getString("STUDY_NAME"));
 					dto.setStudyId(rs.getInt("STUDY_ID"));
 					dto.setDeviceSeqNum(rs.getInt("STRM_DEVICE_SEQ_NUM"));
-					
+
 					dto.setStartDate(rs.getDate("START_DATE") == null ? null : rs.getDate("START_DATE").toLocalDate());
 					String allEndDates = rs.getString("ALL_END_DATES");
-					if(allEndDates.contains("$$$")) {
+					if (allEndDates.contains("$$$")) {
 						dto.setEndDate(null);
-					}else{
+					} else {
 						dto.setEndDate(rs.getDate("END_DATE") == null ? null : rs.getDate("END_DATE").toLocalDate());
 					}
-					
-					
-					dto.setExtractStartDate(rs.getDate("EXTRACT_START_DATE") == null ? null : rs.getDate("EXTRACT_START_DATE").toLocalDate());
-					dto.setExtractEndDate(rs.getDate("EXTRACT_END_DATE") == null ? null : rs.getDate("EXTRACT_END_DATE").toLocalDate());
-					
+
+					dto.setExtractStartDate(rs.getDate("EXTRACT_START_DATE") == null ? null
+							: rs.getDate("EXTRACT_START_DATE").toLocalDate());
+					dto.setExtractEndDate(rs.getDate("EXTRACT_END_DATE") == null ? null
+							: rs.getDate("EXTRACT_END_DATE").toLocalDate());
+
 					dto.setPetName(rs.getString("PET_NAME"));
 					dto.setRequestedBy(rs.getString("REQUESTED_BY"));
 					dto.setRequestId(rs.getInt("REQUEST_ID"));
-					dto.setPetStudyId(rs.getInt("PET_STUDY_ID")); 
-					
+					dto.setPetStudyId(rs.getInt("PET_STUDY_ID"));
+
 					dto.setPetType(rs.getString("PET_TYPE"));
 					dto.setExcludeFromDataExtract(rs.getInt("EXCLUDE_IN_DATA_EXTRACT"));
 

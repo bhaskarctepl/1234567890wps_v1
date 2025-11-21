@@ -18,7 +18,7 @@ import org.springframework.http.MediaType;
 import com.hillspet.wearables.common.constants.Constants;
 import com.hillspet.wearables.common.response.Message;
 import com.hillspet.wearables.dto.filter.AddressFilter;
-import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.PetParentFilter;
 import com.hillspet.wearables.objects.common.response.CommonResponse;
 import com.hillspet.wearables.request.PetParentRequest;
 import com.hillspet.wearables.request.PetParentValidateEmailRequest;
@@ -29,6 +29,8 @@ import com.hillspet.wearables.response.PetParentResponse;
 import com.hillspet.wearables.response.TimeZoneResponse;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -38,6 +40,14 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "RESTful service that performs pet parent related operations", tags = { "Pet Parent Management" })
 @Produces({ MediaType.APPLICATION_JSON_VALUE, Constants.MEDIA_TYPE_APPLICATION_JSON_INITIAL_VERSION1 })
 @Consumes({ MediaType.APPLICATION_JSON_VALUE, Constants.MEDIA_TYPE_APPLICATION_JSON_INITIAL_VERSION1 })
+@ApiImplicitParams({
+    @ApiImplicitParam(name = "Authorization", value = "",
+        required = true, dataType = "string", paramType = "header", defaultValue = "") 
+    ,@ApiImplicitParam(name = "Accept", 
+        required = true, dataType = "string", paramType = "header", defaultValue = MediaType.APPLICATION_JSON_VALUE)
+    ,@ApiImplicitParam(name = "Content-Type", 
+    	required = true, dataType = "string", paramType = "header", defaultValue = MediaType.APPLICATION_JSON_VALUE)
+})
 public interface PetParentResource {
 
 	@POST
@@ -94,7 +104,7 @@ public interface PetParentResource {
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = "Not Found", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden", response = Message.class),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Runtime Error or Internal Server Error", response = Message.class) })
-	public Response getPetParentList(@BeanParam BaseFilter filter);
+	public Response getPetParentList(@BeanParam PetParentFilter filter);
 
 	@GET
 	@Path("/getPetParents")

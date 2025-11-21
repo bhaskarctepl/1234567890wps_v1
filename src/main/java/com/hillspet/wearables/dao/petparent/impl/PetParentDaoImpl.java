@@ -38,7 +38,7 @@ import com.hillspet.wearables.dto.Address;
 import com.hillspet.wearables.dto.PetParentDTO;
 import com.hillspet.wearables.dto.PetParentListDTO;
 import com.hillspet.wearables.dto.PetsAssociatedDTO;
-import com.hillspet.wearables.dto.filter.BaseFilter;
+import com.hillspet.wearables.dto.filter.PetParentFilter;
 import com.hillspet.wearables.request.PetParentRequest;
 import com.hillspet.wearables.request.PetParentValidateEmailRequest;
 import com.hillspet.wearables.response.PetParentAddressResponse;
@@ -62,9 +62,10 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 		PetParentDTO petParentDTO = new PetParentDTO();
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
-			inputParams.put("p_pet_parent_first_name", petParentRequest.getPetParentFirstName());
-			inputParams.put("p_pet_parent_last_name", petParentRequest.getPetParentLastName());
+			inputParams.put("p_pet_parent_first_name", petParentRequest.getFirstName());
+			inputParams.put("p_pet_parent_last_name", petParentRequest.getLastName());
 			inputParams.put("p_email", petParentRequest.getEmail());
+			inputParams.put("p_isd_code", petParentRequest.getIsdCodeId());
 			inputParams.put("p_phone_number", petParentRequest.getPhoneNumber());
 			inputParams.put("p_pets_associated",
 					StringUtils.join(petParentRequest.getPetsAssociated(), StringLiterals.COMMA.getCode()));
@@ -81,6 +82,10 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 			inputParams.put("p_is_ship_addr_same", petParentRequest.getIsShipAddrSameAsResdntlAddr());
 			inputParams.put("p_preferred_food_unit_id", petParentRequest.getPreferredFoodUnitId());
 			inputParams.put("p_preferred_weight_unit_id", petParentRequest.getPreferredWeightUnitId());
+			inputParams.put("p_preferred_weight_unit_id", petParentRequest.getPreferredWeightUnitId());
+
+			inputParams.put("p_is_vip_pet_parent",
+					(petParentRequest.getIsVipPetParent() ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_ZERO));
 
 			LOGGER.info("addPetParent inputParams are {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.PET_PARENT_INSERT, inputParams);
@@ -123,9 +128,10 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
 			inputParams.put("p_pet_parent_id", petParentRequest.getPetParentId());
-			inputParams.put("p_pet_parent_first_name", petParentRequest.getPetParentFirstName());
-			inputParams.put("p_pet_parent_last_name", petParentRequest.getPetParentLastName());
+			inputParams.put("p_pet_parent_first_name", petParentRequest.getFirstName());
+			inputParams.put("p_pet_parent_last_name", petParentRequest.getLastName());
 			inputParams.put("p_email", petParentRequest.getEmail());
+			inputParams.put("p_isd_code", petParentRequest.getIsdCodeId());
 			inputParams.put("p_phone_number", petParentRequest.getPhoneNumber());
 			inputParams.put("p_pets_associated",
 					StringUtils.join(petParentRequest.getPetsAssociated(), StringLiterals.COMMA.getCode()));
@@ -142,6 +148,8 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 			inputParams.put("p_is_ship_addr_same", petParentRequest.getIsShipAddrSameAsResdntlAddr());
 			inputParams.put("p_preferred_food_unit_id", petParentRequest.getPreferredFoodUnitId());
 			inputParams.put("p_preferred_weight_unit_id", petParentRequest.getPreferredWeightUnitId());
+			inputParams.put("p_is_vip_pet_parent",
+					(petParentRequest.getIsVipPetParent() ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_ZERO));
 
 			LOGGER.info("updatePetParent inputParams are {}", inputParams);
 			Map<String, Object> outParams = callStoredProcedure(SQLConstants.PET_PARENT_UPDATE, inputParams);
@@ -205,6 +213,8 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 						petParentDto.setFirstName((String) parent.get("FIRST_NAME"));
 						petParentDto.setLastName((String) parent.get("LAST_NAME"));
 						petParentDto.setEmail((String) parent.get("EMAIL"));
+						petParentDto.setIsdCodeId((Integer) parent.get("ISD_CODE_ID"));
+						petParentDto.setIsdCode((String) parent.get("ISD_CODE"));
 						petParentDto.setPhoneNumber((String) parent.get("PHONE_NUMBER"));
 						petParentDto.setSecondaryEmail((String) parent.get("SECONDARY_EMAIL"));
 						petParentDto.setIsShipAddrSameAsResdntlAddr((Integer) parent.get("IS_SHIPPING_ADDR_SAME"));
@@ -218,6 +228,7 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 
 						Boolean status = (Boolean) parent.get("PET_PARENT_STATUS");
 						petParentDto.setStatus(status ? 1 : 0);
+						petParentDto.setIsVipPetParent((Boolean) parent.get("IS_VIP"));
 					});
 				}
 				if (key.equals(SQLConstants.RESULT_SET_2)) {
@@ -302,12 +313,12 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 	}
 
 	@Override
-	public String getPetParentListCount(BaseFilter filter) throws ServiceExecutionException {
+	public String getPetParentListCount(PetParentFilter filter) throws ServiceExecutionException {
 		String totalCount;
 		LOGGER.debug("getPetParentListCount called");
 		try {
 			totalCount = selectForObject(SQLConstants.PET_PARENT_GET_LIST_COUNT, String.class, filter.getSearchText(),
-					filter.getStatusId(), filter.getUserId());
+					filter.getStatusId(), filter.getUserId(), filter.getPetName(), filter.getPetParentName());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetParentListCount", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -316,7 +327,7 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 	}
 
 	@Override
-	public List<PetParentListDTO> getPetParentList(BaseFilter filter) throws ServiceExecutionException {
+	public List<PetParentListDTO> getPetParentList(PetParentFilter filter) throws ServiceExecutionException {
 		List<PetParentListDTO> petParentList = new ArrayList<>();
 		LOGGER.debug("getPetParentList called");
 		try {
@@ -327,19 +338,20 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 					petParentListDTO.setSlNumber(rs.getInt("slNo"));
 					petParentListDTO.setPetParentId(rs.getInt("PET_PARENT_ID"));
 					petParentListDTO.setPetParentName(rs.getString("FULL_NAME"));
-					petParentListDTO.setPetParentFirstName(rs.getString("FIRST_NAME"));
-					petParentListDTO
-							.setPetParentLastName(rs.getString("LAST_NAME") != null ? rs.getString("LAST_NAME") : "");
+					petParentListDTO.setFirstName(rs.getString("FIRST_NAME"));
+					petParentListDTO.setLastName(rs.getString("LAST_NAME") != null ? rs.getString("LAST_NAME") : "");
 					petParentListDTO.setEmail(rs.getString("EMAIL"));
+					petParentListDTO.setSecondaryEmail(rs.getString("SECONDARY_EMAIL"));
 					petParentListDTO.setStudyNames(rs.getString("STUDY_NAMES"));
 					petParentListDTO.setPetNames(rs.getString("PET_NAMES"));
 					petParentListDTO.setCreatedDate(rs.getTimestamp("CREATED_DATE").toLocalDateTime());
 					petParentListDTO.setIsActive(rs.getBoolean("IS_ACTIVE"));
 					petParentListDTO.setOnStudyPetExist(rs.getBoolean("PET_PARENT_ON_STUDY_PET_EXIST"));
+					petParentListDTO.setIsVipPetParent(rs.getBoolean("IS_VIP"));
 					petParentList.add(petParentListDTO);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
-					filter.getStatusId(), filter.getUserId());
+					filter.getStatusId(), filter.getUserId(), filter.getPetName(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPetParentList", e);
@@ -361,9 +373,11 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 					petParentListDTO.setPetParentId(rs.getInt("PET_PARENT_ID"));
 					petParentListDTO.setPetParentName(rs.getString("FULL_NAME"));
 					petParentListDTO.setEmail(rs.getString("EMAIL"));
+					petParentListDTO.setIsdCodeId(rs.getInt("ISD_CODE_ID"));
+					petParentListDTO.setIsdCode(rs.getString("ISD_CODE"));
 					petParentListDTO.setPhoneNumber(rs.getString("PHONE_NUMBER"));
-					petParentListDTO.setPetParentFirstName(rs.getString("FIRST_NAME"));
-					petParentListDTO.setPetParentLastName(rs.getString("LAST_NAME"));
+					petParentListDTO.setFirstName(rs.getString("FIRST_NAME"));
+					petParentListDTO.setLastName(rs.getString("LAST_NAME"));
 					petParentListDTO.setSecondaryEmail(rs.getString("SECONDARY_EMAIL"));
 					petParentListDTO.setPreferredFoodUnitId(rs.getInt("PREF_FOOD_REC_UNIT_ID"));
 					petParentListDTO.setPreferredWeightUnitId(rs.getInt("PREF_WEIGHT_UNIT_ID"));
@@ -371,6 +385,7 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 					petParentListDTO.setIsShipAddrSameAsResdntlAddr(rs.getInt("IS_SHIPPING_ADDR_SAME"));
 					petParentListDTO.setResidentialAddressString(rs.getString("RESIDENTIAL_ADDRESS"));
 					petParentListDTO.setShippingAddressString(rs.getString("SHIPPING_ADDRESS"));
+					petParentListDTO.setIsVipPetParent(rs.getBoolean("IS_VIP"));
 
 					/*
 					 * try { String restAddrStr = (rs.getString("RESIDENTIAL_ADDRESS") == null) ?
@@ -439,13 +454,14 @@ public class PetParentDaoImpl extends BaseDaoImpl implements PetParentDao {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public PetParentAddressResponse getPetParentAddressHistoryById(int petParentId) throws ServiceExecutionException {
 		PetParentAddressResponse response = new PetParentAddressResponse();
 		List<Address> residentialAddressList = new ArrayList<Address>();
 		List<Address> shippingAddressList = new ArrayList<Address>();
 		LOGGER.debug("getPetParentAddressHistoryById called");
-		int userId = authentication.getAuthUserDetails().getUserId();
+		authentication.getAuthUserDetails().getUserId();
 		try {
 
 			Map<String, Object> inputParams = new HashMap<String, Object>();

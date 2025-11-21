@@ -43,6 +43,66 @@ public class QuestionnaireAssociated {
 	@ApiModelProperty(value = "isActive", required = false)
 	private int isActive;
 
+	@ApiModelProperty(value = "notificationStartDay", required = false)
+	private Integer notificationStartDay;
+
+	@ApiModelProperty(value = "notificationFrequency", required = false)
+	private Integer notificationFrequency;
+
+	@ApiModelProperty(value = "notificationTime", required = false)
+	private String notificationTime;
+
+	@ApiModelProperty(value = "isNotificationsReq", required = false)
+	private Integer isNotificationsReq;
+
+	private Integer isNotificationEnable;
+
+	@ApiModelProperty(value = "statusId", required = false)
+	private Integer statusId;
+
+	@ApiModelProperty(value = "status", required = false)
+	private String status;
+
+	public Integer getIsNotificationEnable() {
+		return isNotificationEnable;
+	}
+
+	public void setIsNotificationEnable(Integer isNotificationEnable) {
+		this.isNotificationEnable = isNotificationEnable;
+	}
+
+	public Integer getNotificationStartDay() {
+		return notificationStartDay;
+	}
+
+	public void setNotificationStartDay(Integer notificationStartDay) {
+		this.notificationStartDay = notificationStartDay;
+	}
+
+	public Integer getNotificationFrequency() {
+		return notificationFrequency;
+	}
+
+	public void setNotificationFrequency(Integer notificationFrequency) {
+		this.notificationFrequency = notificationFrequency;
+	}
+
+	public String getNotificationTime() {
+		return notificationTime;
+	}
+
+	public void setNotificationTime(String notificationTime) {
+		this.notificationTime = notificationTime;
+	}
+
+	public Integer getIsNotificationsReq() {
+		return isNotificationsReq;
+	}
+
+	public void setIsNotificationsReq(Integer isNotificationsReq) {
+		this.isNotificationsReq = isNotificationsReq;
+	}
+
 	public Integer getStudyQuestionnaireConfigId() {
 		return studyQuestionnaireConfigId;
 	}
@@ -145,6 +205,22 @@ public class QuestionnaireAssociated {
 
 	public void setIsActive(int isActive) {
 		this.isActive = isActive;
+	}
+
+	public Integer getStatusId() {
+		return statusId;
+	}
+
+	public void setStatusId(Integer statusId) {
+		this.statusId = statusId;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

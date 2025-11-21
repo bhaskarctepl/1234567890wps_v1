@@ -183,4 +183,10 @@ public interface PetDao {
 	void saveManualEnterForRecommendation(ManualRecommendationRequest manualRecommendationRequest);
 
 	public HashMap<String, String> getPetThresholdDetails(int afId, int userId);
+	
+	void updatePetNotification(PetNotificationRequest petNotificationRequest) throws ServiceExecutionException;
+	
+	String getActivePetsCount(PetFilter filter) throws ServiceExecutionException;
+
+	List<PetListDTO> getActivePetList(PetFilter filter) throws ServiceExecutionException;
 }

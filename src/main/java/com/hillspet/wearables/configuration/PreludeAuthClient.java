@@ -19,8 +19,8 @@ public class PreludeAuthClient {
 	private static final Logger LOGGER = LogManager.getLogger(PreludeAuthClient.class);
 	private final RestTemplate restTemplate;
 	
-	private String preludeUserName = System.getenv("PRELUDE_USER_NAME");
-	private String preludePass = System.getenv("PRELUDE_PASSWORD");
+	private String preludeUserName = "PRELUDE_USER_NAME"; //System.getenv("PRELUDE_USER_NAME"); 
+	private String preludePass = "PRELUDE_PASSWORD"; //System.getenv("PRELUDE_PASSWORD"); 
 
 	private final String authTokenURL = String.format("/api?username=%s&password=%s&get=auth", preludeUserName, preludePass);
 			

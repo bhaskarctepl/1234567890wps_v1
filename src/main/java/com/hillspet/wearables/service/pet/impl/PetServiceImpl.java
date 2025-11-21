@@ -74,6 +74,7 @@ import com.hillspet.wearables.request.AssociateNewStudyRequest;
 import com.hillspet.wearables.request.BehaviorHistoryRequest;
 import com.hillspet.wearables.request.BulkExtPetIdsUploadRequest;
 import com.hillspet.wearables.request.ManualRecommendationRequest;
+import com.hillspet.wearables.request.PetNotificationRequest;
 import com.hillspet.wearables.request.PetRequest;
 import com.hillspet.wearables.request.UpdatePetIBWRequest;
 import com.hillspet.wearables.request.ValidateDuplicatePetRequest;
@@ -232,6 +233,7 @@ public class PetServiceImpl implements PetService {
 		return response;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public PetParentListResponse getPetParents(PetFilter filter) throws ServiceExecutionException {
 		LOGGER.debug("getPetParents called");
@@ -267,6 +269,7 @@ public class PetServiceImpl implements PetService {
 		return streamDevices;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public PetNotesResponse getPetNotes(PetFilter filter) throws ServiceExecutionException {
 		LOGGER.debug("getPetNotes called");
@@ -1005,6 +1008,42 @@ public class PetServiceImpl implements PetService {
 		LOGGER.debug("Started getPetThresholdDetails");
 		HashMap<String, String> response = petDao.getPetThresholdDetails(afId, userId);
 		LOGGER.debug("Completed getPetThresholdDetails");
+		return response;
+	}
+	
+	@Override
+	public void updatePetNotification(PetNotificationRequest petNotificationRequest)
+			throws ServiceExecutionException {
+		LOGGER.debug("updatePetNotification called");
+		petDao.updatePetNotification(petNotificationRequest);
+		LOGGER.debug("updatePetNotification completed successfully");
+	}
+
+	@Override
+	public PetsResponse getActivePetList(PetFilter filter) throws ServiceExecutionException {
+		LOGGER.debug("getActivePetList called");
+		int searchedElements = 0;
+		String counts = petDao.getActivePetsCount(filter);
+		int total = 0;
+		try {
+			JsonNode jsonCountObj = mapper.readTree(counts);
+			total = jsonCountObj.get("totalCount").asInt();
+			searchedElements = jsonCountObj.get("searchedElementsCount").asInt();
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getPetsCount", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+
+		List<PetListDTO> petList = total > 0 ? petDao.getActivePetList(filter) : new ArrayList<>();
+
+		PetsResponse response = new PetsResponse();
+		response.setPetsList(petList);
+		response.setNoOfElements(petList.size());
+		response.setTotalRecords(total);
+		response.setSearchElments(searchedElements);
+
+		LOGGER.debug("getActivePetList pet count is {}", petList);
+		LOGGER.debug("getActivePetList completed successfully");
 		return response;
 	}
 }

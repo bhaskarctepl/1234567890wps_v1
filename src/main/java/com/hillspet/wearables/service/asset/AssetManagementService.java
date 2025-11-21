@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
+import com.hillspet.wearables.dto.Asset;
 import com.hillspet.wearables.dto.AssetHistory;
 import com.hillspet.wearables.dto.AssetType;
 import com.hillspet.wearables.dto.BulkAssetUploadDeviceInfo;
@@ -15,14 +16,18 @@ import com.hillspet.wearables.dto.DeviceModel;
 import com.hillspet.wearables.dto.DeviceUnAssignReason;
 import com.hillspet.wearables.dto.FirmwareVersion;
 import com.hillspet.wearables.dto.PetStudyDevice;
+import com.hillspet.wearables.dto.Status;
 import com.hillspet.wearables.dto.filter.AssetFirmwareVersionsFilter;
+import com.hillspet.wearables.dto.filter.AssetParam;
 import com.hillspet.wearables.dto.filter.AssetUpdateFirmwareFilter;
 import com.hillspet.wearables.dto.filter.AssetsFilter;
 import com.hillspet.wearables.dto.filter.BaseFilter;
 import com.hillspet.wearables.request.AssetStudyMappingRequest;
 import com.hillspet.wearables.request.BulkAssetUploadRequest;
+import com.hillspet.wearables.request.BulkWhiteListingRequest;
 import com.hillspet.wearables.request.UnassignAssetRequest;
 import com.hillspet.wearables.response.AssetResponse;
+import com.hillspet.wearables.response.AssetResponseList;
 import com.hillspet.wearables.response.BulkAssetUploadResponse;
 import com.hillspet.wearables.response.DeviceInfoListResponse;
 import com.hillspet.wearables.response.DeviceResponse;
@@ -91,5 +96,13 @@ public interface AssetManagementService {
 	public List<PetStudyDevice> getPetStudiesByAsset(int deviceId) throws ServiceExecutionException;
 
 	public void manageAssetStudyMapping(AssetStudyMappingRequest request, Integer userId) throws ServiceExecutionException;
+	
+	public List<Asset> getSensorsListBySsId(String ssId) throws ServiceExecutionException;
+	
+	public AssetResponseList getSensorsList(AssetParam filter) throws ServiceExecutionException;
+	
+	public List<Status> getAssetStatus() throws ServiceExecutionException;
+
+	public void bulkWhiteListing(BulkWhiteListingRequest request, Integer userId);
 
 }

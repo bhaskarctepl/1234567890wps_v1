@@ -70,6 +70,7 @@ import com.hillspet.wearables.dto.FeedingSchedule;
 import com.hillspet.wearables.dto.FeedingScheduleConfig;
 import com.hillspet.wearables.dto.FoodIntakeDetails;
 import com.hillspet.wearables.dto.ImageScoringResponse;
+import com.hillspet.wearables.dto.NotificationConfigDTO;
 import com.hillspet.wearables.dto.PetBreed;
 import com.hillspet.wearables.dto.PetListDTO;
 import com.hillspet.wearables.dto.PhaseWisePetListDTO;
@@ -103,6 +104,7 @@ import com.hillspet.wearables.dto.filter.FeedingScheduleResponseFilter;
 import com.hillspet.wearables.dto.filter.ImageScaleFilter;
 import com.hillspet.wearables.dto.filter.IntakeFilter;
 import com.hillspet.wearables.dto.filter.PhaseWisePetListFilter;
+import com.hillspet.wearables.dto.filter.QuestionnaireConfigFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.dto.filter.StudyDiaryFilter;
 import com.hillspet.wearables.dto.filter.StudyDietFilter;
@@ -126,6 +128,7 @@ import com.hillspet.wearables.request.StudyActivityFactorRequest;
 import com.hillspet.wearables.request.StudyDietRequest;
 import com.hillspet.wearables.request.StudyMobileAppConfigRequest;
 import com.hillspet.wearables.request.StudyNotesRequest;
+import com.hillspet.wearables.request.StudyNotificationConfigRequest;
 import com.hillspet.wearables.request.StudyNotificationRequest;
 import com.hillspet.wearables.request.StudyPlanRequest;
 import com.hillspet.wearables.request.StudyPreludeConfigRequest;
@@ -136,10 +139,12 @@ import com.hillspet.wearables.response.StudyActivityFactorResponse;
 import com.hillspet.wearables.response.StudyMobileAppConfigResponse;
 import com.hillspet.wearables.response.StudyNotesListResponse;
 import com.hillspet.wearables.response.StudyNotesResponse;
+import com.hillspet.wearables.response.StudyNotificationConfigResponse;
 import com.hillspet.wearables.response.StudyPreludeConfigResponse;
 
 import reactor.core.publisher.Mono;
 
+@SuppressWarnings("deprecation")
 @Repository
 public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 
@@ -326,8 +331,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 									new WearablesError(WearablesErrorCode.STUDY_UPDATE_MANDATORY_CHECK_FAIL, message)));
 				} else if (statusFlag == -8) {
 					throw new ServiceExecutionException("updateStudy service validation failed cannot proceed further",
-							Status.BAD_REQUEST.getStatusCode(), Arrays.asList(new WearablesError(
-									WearablesErrorCode.STUDY_FEEDING_SCHEDULE_VALIDATION_FAILED, message)));
+							Status.BAD_REQUEST.getStatusCode(), Arrays.asList(
+									new WearablesError(WearablesErrorCode.STUDY_FEEDING_SCHEDULE_VALIDATION_FAILED)));
 				} else {
 					LOGGER.error("error while executing updateStudy ============= {}", errorMsg);
 					throw new ServiceExecutionException(errorMsg);
@@ -370,7 +375,6 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	@SuppressWarnings("deprecation")
 	public DeferredResult<String> postDataToEndpointAysnc(String endpoint, String studyId, String env)
 			throws ExecutionException, InterruptedException, TimeoutException {
 		LOGGER.info("STARTED postDataToEndpointAysnc");
@@ -493,6 +497,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 						study.setStudyLocationId((Integer) studyData.get("STUDY_LOCATION_ID"));
 						study.setStudyLocationName((String) studyData.get("STUDY_LOCATION"));
 						study.setExternalLink((String) studyData.get("URL"));
+						study.setIsVipPetsPresent((Boolean) studyData.get("IS_VIP_PETS_PRESENT"));
+
 					});
 				}
 				if (key.equals(SQLConstants.RESULT_SET_2)) {
@@ -557,10 +563,10 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 				LOGGER.info("Diets successfully mapped with study {}", studyId);
 			} else {
 				if (statusFlag == -2) {
-					throw new ServiceExecutionException(
-							"addStudyDiet service validation failed cannot proceed further",
-							Status.BAD_REQUEST.getStatusCode(), Arrays.asList(
-									new WearablesError(WearablesErrorCode.STUDY_DIET_ALREADY_MAPPED_CANNOT_DELETE,errorMsg)));
+					throw new ServiceExecutionException("addStudyDiet service validation failed cannot proceed further",
+							Status.BAD_REQUEST.getStatusCode(),
+							Arrays.asList(new WearablesError(WearablesErrorCode.STUDY_DIET_ALREADY_MAPPED_CANNOT_DELETE,
+									errorMsg)));
 				} else {
 					throw new ServiceExecutionException(errorMsg);
 				}
@@ -622,7 +628,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		inputParams.put("p_modified_by", modifiedBy);
 		try {
 			LOGGER.info("deleteStudyDiet inputParams are {}", inputParams);
-			Map<String, Object> outParams = callStoredProcedure(SQLConstants.STUDY_DIET_VALIDATE_FOR_DELETE, inputParams);
+			Map<String, Object> outParams = callStoredProcedure(SQLConstants.STUDY_DIET_VALIDATE_FOR_DELETE,
+					inputParams);
 			LOGGER.info("deleteStudyDiet outParams are {}", outParams);
 
 			String errorMsg = (String) outParams.get("out_error_msg");
@@ -631,8 +638,9 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 				if (statusFlag == -2) {
 					throw new ServiceExecutionException(
 							"deleteStudyDiet service validation failed cannot proceed further",
-							Status.BAD_REQUEST.getStatusCode(), Arrays.asList(
-									new WearablesError(WearablesErrorCode.STUDY_DIET_ALREADY_MAPPED_CANNOT_DELETE, errorMsg)));
+							Status.BAD_REQUEST.getStatusCode(),
+							Arrays.asList(new WearablesError(WearablesErrorCode.STUDY_DIET_ALREADY_MAPPED_CANNOT_DELETE,
+									errorMsg)));
 				} else {
 					throw new ServiceExecutionException(errorMsg);
 				}
@@ -644,7 +652,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 	}
 
 	@Override
-	public void addStudyPlan(StudyPlanRequest studyPlanRequest, int studyId, Integer userId)
+	public List<PlanSubscribed> addStudyPlan(StudyPlanRequest studyPlanRequest, int studyId, Integer userId)
 			throws ServiceExecutionException {
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
@@ -668,6 +676,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 			LOGGER.error("error while executing addStudyPlan ", e);
 			throw new ServiceExecutionException(e.getMessage());
 		}
+		return getStudyPlans(studyId);
 	}
 
 	@Override
@@ -693,8 +702,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 	}
 
 	@Override
-	public void addStudyMobileAppConfig(StudyMobileAppConfigRequest studyMobileAppConfigRequest, int studyId,
-			Integer userId) throws ServiceExecutionException {
+	public StudyMobileAppConfigResponse addStudyMobileAppConfig(StudyMobileAppConfigRequest studyMobileAppConfigRequest,
+			int studyId, Integer userId) throws ServiceExecutionException {
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
 			inputParams.put("p_study_id", studyId);
@@ -722,6 +731,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 			LOGGER.error("error while executing addStudyMobileAppConfig ", e);
 			throw new ServiceExecutionException(e.getMessage());
 		}
+		return getStudyMobielAppConfigs(studyId);
 	}
 
 	@Override
@@ -813,8 +823,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 	}
 
 	@Override
-	public void addStudyPreludeConfig(StudyPreludeConfigRequest studyPreludeConfigRequest, int studyId, Integer userId)
-			throws ServiceExecutionException {
+	public StudyPreludeConfigResponse addStudyPreludeConfig(StudyPreludeConfigRequest studyPreludeConfigRequest,
+			int studyId, Integer userId) throws ServiceExecutionException {
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
 			inputParams.put("p_study_id", studyId);
@@ -839,6 +849,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 			LOGGER.error("error while executing addStudyPreludeConfig ", e);
 			throw new ServiceExecutionException(e.getMessage());
 		}
+		return getStudyPreludeConfig(studyId);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -893,8 +904,9 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 	}
 
 	@Override
-	public void addStudyActivityFactorConfig(StudyActivityFactorRequest studyActivityFactorRequest, int studyId,
-			Integer userId) throws ServiceExecutionException {
+	public StudyActivityFactorResponse addStudyActivityFactorConfig(
+			StudyActivityFactorRequest studyActivityFactorRequest, int studyId, Integer userId)
+			throws ServiceExecutionException {
 		try {
 			Map<String, Object> inputParams = new HashMap<>();
 			inputParams.put("p_study_id", studyId);
@@ -917,6 +929,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 			LOGGER.error("error while executing addStudyActivityFactorConfig ", e);
 			throw new ServiceExecutionException(e.getMessage());
 		}
+		return getStudyActivityFactorConfig(studyId);
 	}
 
 	@Override
@@ -1074,6 +1087,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					studyListDTO.setCreatedDate(rs.getTimestamp("CREATED_DATE").toLocalDateTime());
 					studyListDTO.setStudyStatusId(rs.getInt("STUDY_STATUS_ID"));
 					studyListDTO.setStudyStatus(rs.getString("STUDY_STATUS"));
+					studyListDTO.setIsVipPetsPresent(rs.getBoolean("IS_VIP_PETS_PRESENT"));
 					studyList.add(studyListDTO);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
@@ -2346,6 +2360,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		return feedingScheduleConfig;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getFeedingScheduleListCount(Integer studyId, Integer phaseId,
 			FeedingScheduleFilter filter) throws ServiceExecutionException {
@@ -2354,7 +2369,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		HashMap<String, Integer> map = new HashMap<>();
 		try {
 			counts = selectForObject(SQLConstants.STUDY_FEEDING_SCHEDULE_GET_LIST_COUNT, String.class, studyId, phaseId,
-					filter.getFromPhaseDay(), filter.getToPhaseDay(), filter.getSearchText());
+					filter.getFromPhaseDay(), filter.getToPhaseDay(), filter.getSearchText(), filter.getPetName(),
+					filter.getDietName(), filter.getDietNumber());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getFeedingScheduleListCount", e);
@@ -2392,7 +2408,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					feedingScheduleList.add(feedingDTO);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), studyId, phaseId,
-					filter.getFromPhaseDay(), filter.getToPhaseDay(), filter.getSearchText());
+					filter.getFromPhaseDay(), filter.getToPhaseDay(), filter.getSearchText(), filter.getPetName(),
+					filter.getDietName(), filter.getDietNumber());
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getFeedingScheduleList", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -2553,18 +2570,20 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 							"addPhaseWisePet service validation failed cannot proceed further",
 							Status.BAD_REQUEST.getStatusCode(), Arrays.asList(new WearablesError(
 									WearablesErrorCode.STUDY_MAX_PETS_IN_TREATMENT_GROUP_VALIDATION_FAILED)));
-				} else if(statusFlag == -3){
+				} else if (statusFlag == -3) {
 					String[] error = errorMsg.split("##");
-					throw new ServiceExecutionException("addPhaseWisePet service validation failed cannot proceed further",
+					throw new ServiceExecutionException(
+							"addPhaseWisePet service validation failed cannot proceed further",
 							Status.BAD_REQUEST.getStatusCode(),
-							Arrays.asList(new WearablesError(WearablesErrorCode.STUDY_EXTEND_PHASE_SCHEDULE_ALREADY_EXISTS,
-									error[0], error[1], error[2])));
-				}else if(statusFlag == -4){ //If pet is removed from study and trying to add it 
-					throw new ServiceExecutionException("addPhaseWisePet service validation failed cannot proceed further",
-							Status.BAD_REQUEST.getStatusCode(),
-							Arrays.asList(new WearablesError(WearablesErrorCode.STUDY_PET_CANNOT_ADD_IN_CURRENT_OR_PREVIOUS_PHASES,
-									errorMsg)));
-				}else {
+							Arrays.asList(
+									new WearablesError(WearablesErrorCode.STUDY_EXTEND_PHASE_SCHEDULE_ALREADY_EXISTS,
+											error[0], error[1], error[2])));
+				} else if (statusFlag == -4) { // If pet is removed from study and trying to add it
+					throw new ServiceExecutionException(
+							"addPhaseWisePet service validation failed cannot proceed further",
+							Status.BAD_REQUEST.getStatusCode(), Arrays.asList(new WearablesError(
+									WearablesErrorCode.STUDY_PET_CANNOT_ADD_IN_CURRENT_OR_PREVIOUS_PHASES, errorMsg)));
+				} else {
 					throw new ServiceExecutionException(errorMsg);
 				}
 			}
@@ -2635,7 +2654,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		try {
 			counts = selectForObject(SQLConstants.GET_STUDY_PHASE_PET_LIST_COUNT, String.class, filter.getStudyId(),
 					filter.getPhaseId(), filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(),
-					filter.getUserId(), filter.getRoleTypeId());
+					filter.getUserId(), filter.getRoleTypeId(), filter.getPetName(), filter.getPetParentName(),
+					filter.getPetStudyActionId());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPhaseWisePetListCount", e);
@@ -2687,11 +2707,17 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					phaseWisePetListDTO.setAfEligibilityDate(
 							rs.getDate("AF_ELIGIBILITY_DATE") != null ? rs.getDate("AF_ELIGIBILITY_DATE").toLocalDate()
 									: null);
+
+					phaseWisePetListDTO.setPetStudyActionId(rs.getInt("ACTION_ID"));
+					phaseWisePetListDTO.setPetStudyActionName(rs.getString("ACTION_NAME"));
+					phaseWisePetListDTO.setPetStudyColourCode(rs.getString("COLOR_CODE"));
+					phaseWisePetListDTO.setIsVipPet(rs.getBoolean("IS_VIP_PET"));
 					petList.add(phaseWisePetListDTO);
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getStudyId(),
 					filter.getPhaseId(), filter.getSearchText(), filter.getFilterType(), filter.getFilterValue(),
-					filter.getUserId(), filter.getRoleTypeId());
+					filter.getUserId(), filter.getRoleTypeId(), filter.getPetName(), filter.getPetParentName(),
+					filter.getPetStudyActionId());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getPhaseWisePetList", e);
@@ -2795,6 +2821,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getStudyDiaryListCount(int studyId, StudyDiaryFilter filter)
 			throws ServiceExecutionException {
 		LOGGER.debug("getStudyDiaryListCount called");
@@ -3026,8 +3053,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 			if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
 				// getting the inserted flag value
 				int studyStatusId = (int) outParams.get("out_study_status_id");
-				String newStudyConfigIds = (String) outParams.get("out_new_study_img_config_ids");
-				String deleteStudyConfigIds = (String) outParams.get("out_delete_study_img_config_ids");
+				String newStudyConfigIds = (String) outParams.get("out_new_study_push_notification_ids");
+				String deleteStudyConfigIds = (String) outParams.get("out_delete_study_push_notification_ids");
 				LOGGER.info("pushNotificationConfig statusFlag is {}", statusFlag);
 				LOGGER.info("pushNotificationConfig newStudyConfigIds are {}", newStudyConfigIds);
 				LOGGER.info("pushNotificationConfig deleteStudyConfigIds is {}", deleteStudyConfigIds);
@@ -3230,6 +3257,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 				int studyStatusId = (int) outParams.get("out_study_status_id");
 				String newStudyConfigIds = (String) outParams.get("out_new_study_ques_config_ids");
 				String deleteStudyConfigIds = (String) outParams.get("out_delete_study_ques_config_ids");
+				String removedDate = (String) outParams.get("out_removed_date");
 				LOGGER.info("questionnaireConfig statusFlag is {}", statusFlag);
 				LOGGER.info("questionnaireConfig newStudyConfigIds are {}", newStudyConfigIds);
 				LOGGER.info("questionnaireConfig deleteStudyConfigIds is {}", deleteStudyConfigIds);
@@ -3237,13 +3265,21 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 				// invoke scheduler procedure
 				if (studyStatusId == 2 || studyStatusId == 3) {
 					invokeQuestionnaireScheduler(questionnaireConfigRequest.getStudyId(), newStudyConfigIds,
-							deleteStudyConfigIds, questionnaireConfigRequest.getUserId()).subscribe(response -> {
-								// Handle the asynchronous response
-								System.out.println("Asynchronous response: " + response);
-							});
+							deleteStudyConfigIds, questionnaireConfigRequest.getUserId(), removedDate)
+									.subscribe(response -> {
+										// Handle the asynchronous response
+										System.out.println("Asynchronous response: " + response);
+									});
 				}
 			} else {
-				throw new ServiceExecutionException(errorMsg);
+				if (statusFlag == -2) {
+					throw new ServiceExecutionException(
+							"study questionnaireConfig service validation failed cannot proceed further",
+							Status.BAD_REQUEST.getStatusCode(), Arrays.asList(new WearablesError(
+									WearablesErrorCode.STUDY_QUESTIONNAIRE_CONFIG_INVALID_DATE_RANGE)));
+				} else {
+					throw new ServiceExecutionException(errorMsg);
+				}
 			}
 		} catch (SQLException | JsonProcessingException e) {
 			LOGGER.error("error while executing questionnaireConfig ", e);
@@ -3251,8 +3287,49 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		}
 	}
 
+	@Override
+	public void deleteQuestionnaireConfig(int studyId, int phaseId, int questionnaireConfigId, Integer userId)
+			throws ServiceExecutionException {
+		try {
+			Map<String, Object> inputParams = new HashMap<>();
+			inputParams.put("p_study_id", studyId);
+			inputParams.put("p_phase_id", phaseId);
+			inputParams.put("p_questionnaire_config_id", questionnaireConfigId);
+			inputParams.put("p_modified_by", userId);
+
+			LOGGER.info("deleteQuestionnaireConfig inputParams are {}", inputParams);
+			Map<String, Object> outParams = callStoredProcedure(SQLConstants.STUDY_PHASE_DELETE_QUESTIONNAIRE_CONFIG,
+					inputParams);
+			LOGGER.info("deleteQuestionnaireConfig outParams are {}", outParams);
+
+			String errorMsg = (String) outParams.get("out_error_msg");
+			int statusFlag = (int) outParams.get("out_flag");
+			if (StringUtils.isEmpty(errorMsg) && statusFlag > NumberUtils.INTEGER_ZERO) {
+				// getting the inserted flag value
+				int studyStatusId = (int) outParams.get("out_study_status_id");
+				String deleteStudyConfigIds = (String) outParams.get("out_delete_study_ques_config_ids");
+				LOGGER.info("deleteQuestionnaireConfig statusFlag is {}", statusFlag);
+				LOGGER.info("deleteQuestionnaireConfig deleteStudyConfigIds is {}", deleteStudyConfigIds);
+
+				// invoke scheduler procedure
+				if (studyStatusId == 2 || studyStatusId == 3) {
+					invokeQuestionnaireScheduler(studyId, "", deleteStudyConfigIds, userId, null)
+							.subscribe(response -> {
+								// Handle the asynchronous response
+								System.out.println("deleteQuestionnaireConfig Asynchronous response: " + response);
+							});
+				}
+			} else {
+				throw new ServiceExecutionException(errorMsg);
+			}
+		} catch (SQLException e) {
+			LOGGER.error("error while executing deleteQuestionnaireConfig ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+	}
+
 	private Mono<String> invokeQuestionnaireScheduler(Integer studyId, String newStudyConfigIds,
-			String deleteStudyConfigIds, Integer userId) {
+			String deleteStudyConfigIds, Integer userId, String removedDate) {
 		try {
 			return Mono.fromCallable(() -> {
 				if (StringUtils.isNotEmpty(newStudyConfigIds)) {
@@ -3260,7 +3337,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					inputParams.put("p_study_id", studyId);
 					inputParams.put("p_pet_id", null);
 					inputParams.put("p_study_phase_id", null);
-					inputParams.put("p_from_date", null);
+					inputParams.put("p_from_date", StringUtils.isBlank(removedDate) ? removedDate : null);
 					inputParams.put("p_user_id", userId);
 
 					LOGGER.info("invokeQuestionnaireScheduler create inputParams are {}", inputParams);
@@ -3319,6 +3396,12 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 						questionnaireAssociated.setPhaseDays(Arrays.asList(rs.getString("PHASE_DAY").split(","))
 								.stream().map(e -> Integer.parseInt(e)).collect(Collectors.toList()));
 					}
+
+					questionnaireAssociated.setNotificationTime(rs.getString("NOTIFICATION_TIME"));
+					questionnaireAssociated.setNotificationFrequency(rs.getInt("NOTIFICATION_FREQUENCY"));
+					questionnaireAssociated.setNotificationStartDay(rs.getInt("NOTIFICATION_START_DAY"));
+					questionnaireAssociated.setIsNotificationsReq(rs.getInt("IS_NOTIFICATIONS_REQ"));
+					questionnaireAssociated.setIsNotificationEnable(rs.getInt("NOTIFICATIONS_ENABLED"));
 					questionnaireAssociateds.add(questionnaireAssociated);
 				}
 			}, studyId, phaseId);
@@ -3331,6 +3414,76 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	public Map<String, Integer> getQuestionnaireConfigListCount(QuestionnaireConfigFilter filter, Boolean isQuesIdReq)
+			throws ServiceExecutionException {
+		LOGGER.debug("getQuestionnaireConfigListCount called");
+		String counts;
+		HashMap<String, Integer> map = new HashMap<>();
+		try {
+			counts = selectForObject(SQLConstants.STUDY_PHASE_GET_QUESTIONNAIRE_CONFIG_LIST_COUNT, String.class,
+					filter.getSearchText(), filter.getStudyId(), filter.getPhaseId(), filter.getStartDate(),
+					filter.getEndDate(), filter.getStatusId(), filter.getQuestionnaireId(), isQuesIdReq);
+			LOGGER.debug("getQuestionnaireConfigListCount called Count" + counts);
+			map = mapper.readValue(counts, HashMap.class);
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getQuestionnaireConfigListCount", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return map;
+	}
+
+	@Override
+	public List<QuestionnaireAssociated> getQuestionnaireConfigList(QuestionnaireConfigFilter filter)
+			throws ServiceExecutionException {
+		List<QuestionnaireAssociated> questionnaireConfigList = new ArrayList<>();
+		LOGGER.debug("getQuestionnaireConfigList called");
+		try {
+			jdbcTemplate.query(SQLConstants.STUDY_PHASE_GET_QUESTIONNAIRE_CONFIG_LIST, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					QuestionnaireAssociated questionnaireAssociated = new QuestionnaireAssociated();
+					questionnaireAssociated.setStudyQuestionnaireConfigId(rs.getInt("STUDY_QUESTIONNAIRE_CONFIG_ID"));
+					questionnaireAssociated.setStudyId(rs.getInt("STUDY_ID"));
+					questionnaireAssociated.setPhaseId(rs.getInt("STUDY_PHASE_ID"));
+					questionnaireAssociated.setQuestionnaireId(rs.getInt("QUESTIONNAIRE_ID"));
+					questionnaireAssociated.setQuestionnaireName(rs.getString("QUESTIONNAIRE_NAME"));
+
+					questionnaireAssociated.setOccuranceId(rs.getInt("OCCURANCE_ID"));
+					questionnaireAssociated.setOccurance(rs.getString("OCCURANCE_NAME"));
+					questionnaireAssociated.setFrequencyId(rs.getInt("FREQUENCY_ID"));
+					questionnaireAssociated.setFrequency(rs.getString("FREQUENCY_NAME"));
+
+					questionnaireAssociated.setStartDate(rs.getString("FROM_DATE"));
+					questionnaireAssociated.setEndDate(rs.getString("TO_DATE"));
+					if (StringUtils.isNotEmpty(rs.getString("PHASE_DAY"))) {
+						questionnaireAssociated.setPhaseDays(Arrays.asList(rs.getString("PHASE_DAY").split(","))
+								.stream().map(e -> Integer.parseInt(e)).collect(Collectors.toList()));
+					}
+
+					questionnaireAssociated.setStatusId(rs.getInt("CONFIG_STATUS_ID"));
+					questionnaireAssociated.setStatus(rs.getString("CONFIG_STATUS"));
+
+					questionnaireAssociated.setNotificationTime(rs.getString("NOTIFICATION_TIME"));
+					questionnaireAssociated.setNotificationFrequency(rs.getInt("NOTIFICATION_FREQUENCY"));
+					questionnaireAssociated.setNotificationStartDay(rs.getInt("NOTIFICATION_START_DAY"));
+					questionnaireAssociated.setIsNotificationsReq(rs.getInt("IS_NOTIFICATIONS_REQ"));
+					questionnaireAssociated.setIsNotificationEnable(rs.getInt("NOTIFICATIONS_ENABLED"));
+
+					questionnaireConfigList.add(questionnaireAssociated);
+				}
+			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
+					filter.getStudyId(), filter.getPhaseId(), filter.getStartDate(), filter.getEndDate(),
+					filter.getStatusId(), filter.getQuestionnaireId());
+
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getQuestionnaireConfigList", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return questionnaireConfigList;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
 	public Map<String, Integer> getImageScoringResponseCount(ImageScaleFilter filter) throws ServiceExecutionException {
 		LOGGER.debug("getImageScoringResponseCount called");
 		String counts;
@@ -3338,7 +3491,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		try {
 			counts = selectForObject(SQLConstants.STUDY_PHASE_GET_IMAGE_SCORE_RESPONSE_COUNT, String.class,
 					filter.getSearchText(), filter.getStudyId(), filter.getPhaseId(), filter.getScoringTypeId(),
-					filter.getStartDate(), filter.getEndDate());
+					filter.getStartDate(), filter.getEndDate(), filter.getPetName(), filter.getPetParentName());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getImageScoringResponseCount", e);
@@ -3359,6 +3512,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					ImageScoringResponse imageScoringResponse = new ImageScoringResponse();
 					imageScoringResponse.setPetId(rs.getInt("PET_ID"));
 					imageScoringResponse.setPetName(rs.getString("PET_NAME"));
+					imageScoringResponse.setPetParentName(rs.getString("PET_PARENT_NAME"));
 					imageScoringResponse.setScoreType(rs.getString("SCORING_TYPE"));
 					imageScoringResponse.setScaleName(rs.getString("IMAGE_SCALE_NAME"));
 					imageScoringResponse.setImageLabel(rs.getString("IMAGE_LABEL"));
@@ -3429,7 +3583,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 				}
 			}, filter.getStartIndex(), filter.getLimit(), filter.getOrder(), filter.getSortBy(), filter.getSearchText(),
 					filter.getStudyId(), filter.getPhaseId(), filter.getScoringTypeId(), filter.getStartDate(),
-					filter.getEndDate());
+					filter.getEndDate(), filter.getPetName(), filter.getPetParentName());
 
 		} catch (Exception e) {
 			LOGGER.error("error while fetching getImageScoringResponse", e);
@@ -3446,7 +3600,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		try {
 			String counts = selectForObject(SQLConstants.STUDY_PHASE_QUESTIONNAIRE_RESPONSE_LIST_COUNT, String.class,
 					filter.getStudyId(), filter.getPhaseId(), filter.getQuestionnaireId(), filter.getStartDate(),
-					filter.getEndDate(), filter.getSearchText());
+					filter.getEndDate(), filter.getSearchText(), filter.getPetName(), filter.getPetParentName());
 			map = mapper.readValue(counts, HashMap.class);
 		} catch (Exception e) {
 			LOGGER.error("error while executing getQuestionnaireResponseByPetCount ", e);
@@ -3461,8 +3615,6 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		List<StudyPhaseQuestionnaireScheduleDTO> studyPhaseQuestionnaireScheduleDTOs = new ArrayList<>();
 		try {
 			String sql = SQLConstants.STUDY_PHASE_QUESTIONNAIRE_RESPONSE_LIST;
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-
 			jdbcTemplate.query(sql, new RowCallbackHandler() {
 				@Override
 				public void processRow(ResultSet rs) throws SQLException {
@@ -3544,9 +3696,9 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					}
 					studyPhaseQuestionnaireScheduleDTOs.add(studyPhaseQuestionnaireScheduleDTO);
 				}
-			}, filter.getStudyId(), filter.getPhaseId(), filter.getQuestionnaireId(), filter.getStartDate(),
-					filter.getEndDate(), filter.getSearchText(), filter.getStartIndex(), filter.getLimit(),
-					filter.getOrder(), filter.getSortBy());
+			}, filter.getOrder(), filter.getSortBy(), filter.getStudyId(), filter.getPhaseId(),
+					filter.getQuestionnaireId(), filter.getStartDate(), filter.getEndDate(), filter.getSearchText(),
+					filter.getStartIndex(), filter.getLimit(), filter.getPetName(), filter.getPetParentName());
 		} catch (Exception e) {
 			LOGGER.error("error while executing getQuestionnaireResponseByPet ", e);
 			throw new ServiceExecutionException(e.getMessage());
@@ -3636,6 +3788,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					petListDTO.setBreedName(rs.getString("BREED_NAME"));
 					petListDTO.setGender(rs.getString("GENDER"));
 					petListDTO.setIsActive(rs.getBoolean("IS_ACTIVE"));
+					petListDTO.setPetParentName(rs.getString("PET_PARENT_NAME"));
 					petList.add(petListDTO);
 				}
 			}, study_id);
@@ -3647,19 +3800,21 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		return petList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ThresholdByStudyReport> getThresholdByCountReport(
 			FlaggedRecommendationRequest flaggedRecommendationRequest) throws ServiceExecutionException {
 		LOGGER.debug("getThresholdByCountReport called");
-		List<ThresholdByStudyReport> thresholdByStudyReportList = new ArrayList<>();
 		Map<String, ThresholdByStudyReport> thresholdMap = new LinkedHashMap<>();
 		try {
 			Map<String, Object> inputParams = new HashMap<String, Object>();
 			inputParams.put("p_start_date", flaggedRecommendationRequest.getStartDate());
 			inputParams.put("p_end_date", flaggedRecommendationRequest.getEndDate());
 			inputParams.put("p_study_id", flaggedRecommendationRequest.getStudyId());
+			LOGGER.info("StudyDaoImpl getThresholdByCountReport inputParams {}", inputParams);
 			Map<String, Object> simpleJdbcCallResult = callStoredProcedure(SQLConstants.AF_GET_THRESHOLD_BY_ACTION,
 					inputParams);
+			LOGGER.info("StudyDaoImpl getThresholdByCountReport simpleJdbcCallResult {}", simpleJdbcCallResult);
 			for (Entry<String, Object> entry : simpleJdbcCallResult.entrySet()) {
 				String key = entry.getKey();
 				if (key.equals(SQLConstants.RESULT_SET_1)) {
@@ -3711,7 +3866,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					map.put("petName", rs.getString("name"));
 					response.getPets().add(map);
 				}
-				if (rs.getString("type").equals("THRESHOLD")) {
+				if (rs.getString("type").equals("THRESHOLD") || rs.getString("type").equals("DEVIATION")) {
 					map.put("id", rs.getString("id"));
 					map.put("name", rs.getString("name"));
 					response.getThreshold().add(map);
@@ -3723,6 +3878,7 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 		return response;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public HashMap<String, Integer> getRecommendationListForStudyCount(FlaggedRecommendationRequest request)
 			throws ServiceExecutionException {
@@ -3735,6 +3891,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					request.getStudyId(), request.getPetIds().equals("null") ? null : request.getPetIds(),
 					thresholdMap.get("thresholdId1"), thresholdMap.get("thresholdId2"),
 					thresholdMap.get("thresholdId3"), thresholdMap.get("thresholdId4"),
+					thresholdMap.get("deviationId1"), thresholdMap.get("deviationId2"),
+					thresholdMap.get("deviationId3"), thresholdMap.get("deviationId5"),
 					request.getActionIds().equals("null") ? null : request.getActionIds(), request.getStartDate(),
 					request.getEndDate());
 			map = mapper.readValue(counts, HashMap.class);
@@ -3771,24 +3929,25 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					recommendationDetails.setIsFlagged(rs.getShort("IS_FLAGGED"));
 					recommendationDetails.setRecommendationStatusId(
 							rs.getShort("RECOMMENDATION_STATUS_ID") > 0 ? rs.getShort("RECOMMENDATION_STATUS_ID") : 1);
-					recommendationDetails.setComments(
-							rs.getString("COMMENTS")!=null ?
-									rs.getString("COMMENTS")+(rs.getString("ERROR_MESSAGE")!=null?","+rs.getString("ERROR_MESSAGE"):"") :
-									rs.getString("ERROR_MESSAGE")
-					);
+					recommendationDetails.setComments(rs.getString("COMMENTS") != null
+							? rs.getString("COMMENTS")
+									+ (rs.getString("ERROR_MESSAGE") != null ? "," + rs.getString("ERROR_MESSAGE") : "")
+							: rs.getString("ERROR_MESSAGE"));
 					recommendationDetails.setFeedUnits(rs.getString("FEED_UNITS"));
 					recommendationDetails.setAfId(rs.getInt("ACTIVITY_AF_ID"));
 					recommendationDetails.setStudyId(rs.getInt("STUDY_ID"));
 					recommendationDetails.setIsLatestRecord(rs.getShort("IS_EDIT"));
 					recommendationDetails.setAfRecommendationException(rs.getShort("AF_RECOMMENDATION_EXCEPTION"));
-					//recommendationDetails.setPreviousValuesInCups(rs.getFloat("PREV_VALUES_CUPS"));
-					//recommendationDetails.setPreviousValuesInGrams(rs.getFloat("PREV_VALUES_GRAMS"));
+					recommendationDetails.setPreviousValuesInCups(rs.getFloat("PREV_VALUES_CUPS"));
+					recommendationDetails.setPreviousValuesInGrams(rs.getFloat("PREV_VALUES_GRAMS"));
 					recommendationList.add(recommendationDetails);
 				}
 			}, request.getStartIndex(), request.getLimit(), request.getStudyId(),
 					request.getPetIds().equals("null") ? null : request.getPetIds(), thresholdMap.get("thresholdId1"),
 					thresholdMap.get("thresholdId2"), thresholdMap.get("thresholdId3"),
-					thresholdMap.get("thresholdId4"),
+					thresholdMap.get("thresholdId4"), thresholdMap.get("deviationId1"),
+					thresholdMap.get("deviationId2"), thresholdMap.get("deviationId3"),
+					thresholdMap.get("deviationId5"),
 					request.getActionIds().equals("null") ? null : request.getActionIds(), request.getStartDate(),
 					request.getEndDate());
 		} catch (Exception e) {
@@ -3799,30 +3958,51 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 	}
 
 	public HashMap<String, Integer> getThreshold(FlaggedRecommendationRequest request) {
-		HashMap<String, Integer> map = new HashMap<>(4);
-		if (request.getThresholdIds().contains("1")) {
+		HashMap<String, Integer> map = new HashMap<>(8);
+		if (request.getThresholdIds().contains("6")) {
 			map.put("thresholdId1", 1);
 		} else {
 			map.put("thresholdId1", null);
 		}
-		if (request.getThresholdIds().contains("2")) {
+		if (request.getThresholdIds().contains("7")) {
 			map.put("thresholdId2", 1);
 		} else {
 			map.put("thresholdId2", null);
 		}
-		if (request.getThresholdIds().contains("3")) {
+		if (request.getThresholdIds().contains("8")) {
 			map.put("thresholdId3", 1);
 		} else {
 			map.put("thresholdId3", null);
 		}
-		if (request.getThresholdIds().contains("4")) {
+		if (request.getThresholdIds().contains("9")) {
 			map.put("thresholdId4", 1);
 		} else {
 			map.put("thresholdId4", null);
 		}
+		if (request.getThresholdIds().contains("1")) {
+			map.put("deviationId1", 1);
+		} else {
+			map.put("deviationId1", null);
+		}
+		if (request.getThresholdIds().contains("2")) {
+			map.put("deviationId2", 1);
+		} else {
+			map.put("deviationId2", null);
+		}
+		if (request.getThresholdIds().contains("3")) {
+			map.put("deviationId3", 1);
+		} else {
+			map.put("deviationId3", null);
+		}
+		if (request.getThresholdIds().contains("5")) {
+			map.put("deviationId5", 1);
+		} else {
+			map.put("deviationId6", null);
+		}
 		return map;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public HashMap<String, Integer> getFoodIntakeListCount(IntakeFilter filter) throws ServiceExecutionException {
 		LOGGER.debug("getFoodIntakeListCount called");
@@ -3857,8 +4037,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 					// FEEDBACK_TEXT
 					foodIntakeDetails.setIntakeDate(resultSet.getString("INTAKE_DATE")); //
 					foodIntakeDetails.setIntakeId(resultSet.getString("FOOD_INTAKE_ID")); //
-					foodIntakeDetails.setDietNumber(resultSet.getString("DIET_NAME")); //
-					foodIntakeDetails.setDietName(resultSet.getString("DIET_NUMBER")); //
+					foodIntakeDetails.setDietNumber(resultSet.getString("DIET_NUMBER")); //
+					foodIntakeDetails.setDietName(resultSet.getString("DIET_NAME")); //
 					foodIntakeDetails.setStudyRecommendedAmount(resultSet.getString("RECOMMENDED_AMOUNT")); //
 					foodIntakeDetails.setStudyOfferedAmount(resultSet.getString("OFFERED_AMOUNT")); //
 					foodIntakeDetails.setStudyConsumedAmount(resultSet.getString("CONSUMED_AMOUNT")); //
@@ -3898,7 +4078,8 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 			inputParams.put("p_status_id", request.getStatus());
 			inputParams.put("p_comments", request.getComments());
 			LOGGER.info("updateStatus inputParams are {}", inputParams);
-			Map<String, Object> outParams = callStoredProcedure(SQLConstants.AF_FLAGGED_RECOMMENDATIONS_UPDATE_STATUS, inputParams);
+			Map<String, Object> outParams = callStoredProcedure(SQLConstants.AF_FLAGGED_RECOMMENDATIONS_UPDATE_STATUS,
+					inputParams);
 			// System.out.println(outParams);
 			LOGGER.info("updateStatus outParams are {}", outParams);
 			String errorMsg = (String) outParams.get("out_error_msg");
@@ -4056,5 +4237,73 @@ public class StudyDaoImpl extends BaseDaoImpl implements StudyDao {
 			throw new ServiceExecutionException(e.getMessage());
 		}
 		return breeds;
+	}
+
+	@Override
+	public void addStudyNotificationConfig(StudyNotificationConfigRequest studyNotificationConfigRequest, int studyId,
+			Integer userId) throws ServiceExecutionException {
+		try {
+			Map<String, Object> inputParams = new HashMap<>();
+			inputParams.put("p_study_id", studyId);
+			inputParams.put("p_user_id", userId);
+
+			String notificationsJson = null;
+			if (studyNotificationConfigRequest != null && studyNotificationConfigRequest.getNotifications() != null
+					&& !studyNotificationConfigRequest.getNotifications().isEmpty()) {
+				notificationsJson = new ObjectMapper()
+						.writeValueAsString(studyNotificationConfigRequest.getNotifications());
+			}
+			inputParams.put("p_notifications", notificationsJson);
+
+			LOGGER.info("addStudyNotificationConfig inputParams are {}", inputParams);
+
+			Map<String, Object> outParams = callStoredProcedure(SQLConstants.STUDY_NOTIFICATION_CONFIG_INSERT,
+					inputParams);
+			LOGGER.info("addStudyNotificationConfig outParams are {}", outParams);
+
+			String errorMsg = (String) outParams.get("out_error_msg");
+			int statusFlag = (int) outParams.get("out_flag");
+
+			if (StringUtils.isEmpty(errorMsg) && statusFlag > 0) {
+				LOGGER.info("addStudyNotificationConfig successfully mapped with study {}", studyId);
+			} else {
+				throw new ServiceExecutionException(errorMsg);
+			}
+		} catch (SQLException e) {
+			LOGGER.error("Error while executing addStudyNotificationConfig ", e);
+			throw new ServiceExecutionException(e.getMessage());
+		} catch (JsonProcessingException e) {
+			LOGGER.error("Error while converting notifications to JSON format ", e);
+			throw new ServiceExecutionException("Error in JSON processing for notifications");
+		}
+	}
+
+	@Override
+	public StudyNotificationConfigResponse getStudyNotificationConfigs(int studyId) throws ServiceExecutionException {
+		StudyNotificationConfigResponse response = new StudyNotificationConfigResponse();
+		List<NotificationConfigDTO> notificationConfigs = new ArrayList<>();
+
+		LOGGER.debug("getStudyNotificationConfigs called for studyId: {}", studyId);
+		try {
+			jdbcTemplate.query(SQLConstants.STUDY_NOTIFICATION_CONFIG_GET_LIST, new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					NotificationConfigDTO configDTO = new NotificationConfigDTO();
+
+					configDTO.setNotificationId(rs.getInt("NOTIFICATION_NAME_ID"));
+					configDTO.setNotificationTime(rs.getString("NOTIFICATION_TIME"));
+					configDTO.setIsNotificationEnabled(rs.getInt("IS_NOTIFICATIONS_ENABLED"));
+
+					notificationConfigs.add(configDTO);
+				}
+			}, studyId);
+
+			response.setNotifications(notificationConfigs);
+
+		} catch (Exception e) {
+			LOGGER.error("error while fetching getStudyNotificationConfigs", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		return response;
 	}
 }

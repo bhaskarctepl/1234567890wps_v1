@@ -34,6 +34,7 @@ import com.hillspet.wearables.dto.filter.FeedingScheduleResponseFilter;
 import com.hillspet.wearables.dto.filter.ImageScaleFilter;
 import com.hillspet.wearables.dto.filter.IntakeFilter;
 import com.hillspet.wearables.dto.filter.PhaseWisePetListFilter;
+import com.hillspet.wearables.dto.filter.QuestionnaireConfigFilter;
 import com.hillspet.wearables.dto.filter.QuestionnaireResponseFilter;
 import com.hillspet.wearables.dto.filter.StudyDiaryFilter;
 import com.hillspet.wearables.dto.filter.StudyDietFilter;
@@ -55,6 +56,7 @@ import com.hillspet.wearables.request.StudyActivityFactorRequest;
 import com.hillspet.wearables.request.StudyDietRequest;
 import com.hillspet.wearables.request.StudyMobileAppConfigRequest;
 import com.hillspet.wearables.request.StudyNotesRequest;
+import com.hillspet.wearables.request.StudyNotificationConfigRequest;
 import com.hillspet.wearables.request.StudyNotificationRequest;
 import com.hillspet.wearables.request.StudyPlanRequest;
 import com.hillspet.wearables.request.StudyPreludeConfigRequest;
@@ -64,6 +66,7 @@ import com.hillspet.wearables.response.FeedingSchedulesResponse;
 import com.hillspet.wearables.response.StudyActivityFactorResponse;
 import com.hillspet.wearables.response.StudyMobileAppConfigResponse;
 import com.hillspet.wearables.response.StudyNotesListResponse;
+import com.hillspet.wearables.response.StudyNotificationConfigResponse;
 import com.hillspet.wearables.response.StudyPreludeConfigResponse;
 
 public interface StudyDao {
@@ -84,12 +87,13 @@ public interface StudyDao {
 
 	void validateStudyDiet(int studyId, int studyDietId, int modifiedBy) throws ServiceExecutionException;
 
-	void addStudyPlan(StudyPlanRequest studyPlanRequest, int studyId, Integer userId) throws ServiceExecutionException;
+	List<PlanSubscribed> addStudyPlan(StudyPlanRequest studyPlanRequest, int studyId, Integer userId)
+			throws ServiceExecutionException;
 
 	List<PlanSubscribed> getStudyPlans(int studyId) throws ServiceExecutionException;
 
-	void addStudyMobileAppConfig(StudyMobileAppConfigRequest studyMobileAppConfigRequest, int studyId, Integer userId)
-			throws ServiceExecutionException;
+	StudyMobileAppConfigResponse addStudyMobileAppConfig(StudyMobileAppConfigRequest studyMobileAppConfigRequest,
+			int studyId, Integer userId) throws ServiceExecutionException;
 
 	StudyMobileAppConfigResponse getStudyMobielAppConfigs(int studyId) throws ServiceExecutionException;
 
@@ -98,13 +102,13 @@ public interface StudyDao {
 
 	StudyNotesListResponse getStudyNotes(int studyId, int phaseId) throws ServiceExecutionException;
 
-	void addStudyPreludeConfig(StudyPreludeConfigRequest studyPreludeConfigRequest, int studyId, Integer userId)
-			throws ServiceExecutionException;
+	StudyPreludeConfigResponse addStudyPreludeConfig(StudyPreludeConfigRequest studyPreludeConfigRequest, int studyId,
+			Integer userId) throws ServiceExecutionException;
 
 	StudyPreludeConfigResponse getStudyPreludeConfig(int studyId) throws ServiceExecutionException;
 
-	void addStudyActivityFactorConfig(StudyActivityFactorRequest studyActivityFactorRequest, int studyId,
-			Integer userId) throws ServiceExecutionException;
+	StudyActivityFactorResponse addStudyActivityFactorConfig(StudyActivityFactorRequest studyActivityFactorRequest,
+			int studyId, Integer userId) throws ServiceExecutionException;
 
 	StudyActivityFactorResponse getStudyActivityFactorConfig(int studyId) throws ServiceExecutionException;
 
@@ -245,6 +249,12 @@ public interface StudyDao {
 
 	List<QuestionnaireAssociated> getQuestionnaireConfig(int studyId, int phaseId) throws ServiceExecutionException;
 
+	Map<String, Integer> getQuestionnaireConfigListCount(QuestionnaireConfigFilter filter, Boolean isQuesIdReq)
+			throws ServiceExecutionException;
+
+	List<QuestionnaireAssociated> getQuestionnaireConfigList(QuestionnaireConfigFilter filter)
+			throws ServiceExecutionException;
+
 	Map<String, Integer> getImageScoringResponseCount(ImageScaleFilter filter) throws ServiceExecutionException;
 
 	List<ImageScoringResponse> getImageScoringResponse(ImageScaleFilter filter) throws ServiceExecutionException;
@@ -284,4 +294,12 @@ public interface StudyDao {
 	int createCrossOverStudy(AddCrossOverStudyRequest addCrossOverStudyRequest) throws ServiceExecutionException;
 
 	List<PetBreed> getPetBreeds(int studyId, int phaseId) throws ServiceExecutionException;
+
+	void addStudyNotificationConfig(StudyNotificationConfigRequest studyNotificationConfigRequest, int studyId,
+			Integer userId) throws ServiceExecutionException;
+
+	StudyNotificationConfigResponse getStudyNotificationConfigs(int studyId) throws ServiceExecutionException;
+
+	void deleteQuestionnaireConfig(int studyId, int phaseId, int questionnaireConfigId, Integer userId)
+			throws ServiceExecutionException;
 }

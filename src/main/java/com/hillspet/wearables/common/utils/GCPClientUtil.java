@@ -26,6 +26,7 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import com.hillspet.wearables.common.constants.Constants;
 import com.hillspet.wearables.common.exceptions.ServiceExecutionException;
 
 @Service
@@ -171,6 +172,10 @@ public class GCPClientUtil {
 		// "-" + fileName.replace(" ", "_");
 		// return new Date().getTime()+fileName.split(".")[1];
 		return new Date().getTime() + fileName.substring(fileName.lastIndexOf("."));
+	}
+	
+	public String generateQuestionnaireExportFileName() {
+		return Constants.GCP_QUESTIONNAIRE_EXPORT_FILE_NAME + "_" + new Date().getTime() + ".xlsx";
 	}
 
 	private String generateGCFileName(String fileName, String gcpFolderName) {
@@ -334,6 +339,24 @@ public class GCPClientUtil {
 			e.printStackTrace();
 		}
 		return storage;
+	}
+	
+	public void uploadQuestionnaireExport(byte[] excelBytes, String fileName ) {
+		LOGGER.info("GCP uploadQuestionnaireExport called.");
+		String gcFileName = generateGCFileName(fileName, Constants.GCP_QUESTIONNAIRE_EXPORT_PATH);
+		Bucket bucket = null;
+		try {
+			bucket = getBucket(bucketName);
+			
+			LOGGER.info("GCP uploadQuestionnaireExport bucketName " + bucketName);
+			LOGGER.info("GCP uploadQuestionnaireExport gcFileName " + gcFileName);
+			bucket.create(gcFileName, excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+			
+		} catch (Exception e) {
+			LOGGER.error("error while uploading google storage", e);
+			throw new ServiceExecutionException(e.getMessage());
+		}
+		
 	}
 
 }

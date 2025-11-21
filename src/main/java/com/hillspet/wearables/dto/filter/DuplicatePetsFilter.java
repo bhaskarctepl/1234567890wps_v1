@@ -26,7 +26,14 @@ public class DuplicatePetsFilter extends BaseFilter {
 	@QueryParam("primaryPetId")
 	@ApiModelProperty(name = "primaryPetId", value = "Exclude primary pet from duplicate pet", required = false)
 	private Integer primaryPetId;
-	
+
+	@QueryParam("petParentName")
+	@ApiParam(name = "petParentName", value = "Search pet by Pet Parent Name", required = false)
+	private String petParentName;
+
+	@QueryParam("studyName")
+	@ApiParam(name = "studyName", value = "Search pet by study name", required = false)
+	private String studyName;
 
 	public String getPetName() {
 		return petName;
@@ -35,8 +42,6 @@ public class DuplicatePetsFilter extends BaseFilter {
 	public void setPetName(String petName) {
 		this.petName = petName;
 	}
-
-	
 
 	public String getDateOfBirth() {
 		return dateOfBirth;
@@ -54,8 +59,6 @@ public class DuplicatePetsFilter extends BaseFilter {
 		this.gender = gender;
 	}
 
-	
-
 	public String getBreedId() {
 		return breedId;
 	}
@@ -70,6 +73,22 @@ public class DuplicatePetsFilter extends BaseFilter {
 
 	public void setPrimaryPetId(Integer primaryPetId) {
 		this.primaryPetId = primaryPetId;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
 	}
 
 }

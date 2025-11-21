@@ -33,7 +33,10 @@ public class UserRequest {
 	@ApiModelProperty(value = "SecondaryEmail", required = true, example = "john@ctepl.com")
 	private String secondaryEmail;
 
-	@ApiModelProperty(value = "phoneNumber", required = true, example = "+1 (846) 546-5468")
+	@ApiModelProperty(value = "isdCodeId", required = true, example = "1")
+	private Integer isdCodeId;
+
+	@ApiModelProperty(value = "phoneNumber", required = true, example = "(846) 546-5468")
 	private String phoneNumber;
 
 	private String fullName;
@@ -120,6 +123,14 @@ public class UserRequest {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	public Integer getIsdCodeId() {
+		return isdCodeId;
+	}
+
+	public void setIsdCodeId(Integer isdCodeId) {
+		this.isdCodeId = isdCodeId;
 	}
 
 	public String getPhoneNumber() {

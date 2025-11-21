@@ -34,10 +34,29 @@ public class PointTracker extends BaseDTO {
 	private String activityIds;
 	private List<PointTrackerAssociatedDTO> pointTrackerAssociatedObject;
 	private List<PointTrackerMetricAssociatedDTO> pointTrackerMetricAssociatedObject;
+	private List<PointTrackerQuestionnaire> pointTrackerQuestionnaire;
 	private Integer userId;
 	private Boolean isActive;
 	private Boolean isPublished;
+	private String studyConfigId;
+	private String phaseId;
 	
+	public String getPhaseId() {
+		return phaseId;
+	}
+
+	public void setPhaseId(String phaseId) {
+		this.phaseId = phaseId;
+	}
+
+	public String getStudyConfigId() {
+		return studyConfigId;
+	}
+
+	public void setStudyConfigId(String studyConfigId) {
+		this.studyConfigId = studyConfigId;
+	}
+
 	@ApiModelProperty(value = "pointTrackerSubscribed", required = true)
 	private List<PointTrackerActivityRequest> pointTrackerSubscribed;
 	
@@ -125,6 +144,14 @@ public class PointTracker extends BaseDTO {
 
 	public void setPointTrackerSubscribed(List<PointTrackerActivityRequest> pointTrackerSubscribed) {
 		this.pointTrackerSubscribed = pointTrackerSubscribed;
+	}
+	
+	public List<PointTrackerQuestionnaire> getPointTrackerQuestionnaire() {
+		return pointTrackerQuestionnaire;
+	}
+
+	public void setPointTrackerQuestionnaire(List<PointTrackerQuestionnaire> pointTrackerQuestionnaire) {
+		this.pointTrackerQuestionnaire = pointTrackerQuestionnaire;
 	}
 
 	public Integer getFlag() {

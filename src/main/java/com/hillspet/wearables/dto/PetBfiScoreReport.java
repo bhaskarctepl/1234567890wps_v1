@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+@SuppressWarnings("serial")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PetBfiScoreReport extends BaseDTO {
@@ -19,6 +20,7 @@ public class PetBfiScoreReport extends BaseDTO {
 	private String photoName;
 	private String gender;
 	private String petAge;
+	private Boolean isVipPetParent;
 
 	private LocalDateTime capturedOn;
 	private String score;
@@ -130,4 +132,11 @@ public class PetBfiScoreReport extends BaseDTO {
 		this.petBfiImages = petBfiImages;
 	}
 
+	public Boolean getIsVipPetParent() {
+		return isVipPetParent;
+	}
+
+	public void setIsVipPetParent(Boolean isVipPetParent) {
+		this.isVipPetParent = isVipPetParent;
+	}
 }

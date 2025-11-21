@@ -5,51 +5,76 @@ import io.swagger.annotations.ApiParam;
 import javax.ws.rs.QueryParam;
 
 public class QuestionnaireResponseByStudyFilter extends BaseFilter {
-    @ApiParam(name = "questionnaireId")
-    @QueryParam("questionnaireId")
-    private String questionnaireId;
+	@ApiParam(name = "questionnaireId")
+	@QueryParam("questionnaireId")
+	private String questionnaireId;
 
-    @ApiParam(name = "studyId")
-    @QueryParam("studyId")
-    private String studyId;
+	@ApiParam(name = "studyId")
+	@QueryParam("studyId")
+	private String studyId;
 
-    @ApiParam(name = "startDate", value = "Start Date is the first date component value of date range")
-    @QueryParam("startDate")
-    private String startDate;
+	@ApiParam(name = "startDate", value = "Start Date is the first date component value of date range")
+	@QueryParam("startDate")
+	private String startDate;
 
-    @ApiParam(name = "endDate", value = "End Date is the second date component value of date range")
-    @QueryParam("endDate")
-    private String endDate;
+	@ApiParam(name = "endDate", value = "End Date is the second date component value of date range")
+	@QueryParam("endDate")
+	private String endDate;
 
-    public String getQuestionnaireId() {
-        return questionnaireId;
-    }
+	@QueryParam("petName")
+	@ApiParam(name = "petName", value = "Search pet by pet name", required = false)
+	private String petName;
 
-    public void setQuestionnaireId(String questionnaireId) {
-        this.questionnaireId = questionnaireId;
-    }
+	@QueryParam("petParentName")
+	@ApiParam(name = "petParentName", value = "Search pet by Pet Parent Name", required = false)
+	private String petParentName;
 
-    public String getStudyId() {
-        return studyId;
-    }
+	public String getQuestionnaireId() {
+		return questionnaireId;
+	}
 
-    public void setStudyId(String studyId) {
-        this.studyId = studyId;
-    }
+	public void setQuestionnaireId(String questionnaireId) {
+		this.questionnaireId = questionnaireId;
+	}
 
-    public String getStartDate() {
-        return startDate;
-    }
+	public String getStudyId() {
+		return studyId;
+	}
 
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
+	public void setStudyId(String studyId) {
+		this.studyId = studyId;
+	}
 
-    public String getEndDate() {
-        return endDate;
-    }
+	public String getStartDate() {
+		return startDate;
+	}
 
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
-    }
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+
+	public String getPetName() {
+		return petName;
+	}
+
+	public void setPetName(String petName) {
+		this.petName = petName;
+	}
+
+	public String getPetParentName() {
+		return petParentName;
+	}
+
+	public void setPetParentName(String petParentName) {
+		this.petParentName = petParentName;
+	}
+
 }
